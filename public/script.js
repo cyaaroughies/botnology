@@ -1,5 +1,5 @@
  <script>
-
+(function(){
   const $ = (id)=>document.getElementById(id);
 
   const API = {
@@ -417,4 +417,5 @@
   boot().catch(()=>{});
 })();
 </script>
+
 
