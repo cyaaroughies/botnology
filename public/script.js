@@ -89,12 +89,6 @@
         const who = $("whoami");
         if(who) who.textContent = `${me.name} • ${me.student_id}`;
         return me;
-      }
-    }catch{}
-    if(badge) badge.textContent = getPlan().toUpperCase();
-    const who = $("whoami");
-    if(who) who.textContent = `Guest • ${getStudentId()}`;
-    return null;
   }
 
   async function doAuth(){
@@ -417,5 +411,6 @@
   boot().catch(()=>{});
 })();
 </script>
+
 
 
