@@ -1,295 +1,117 @@
- 
 import os
-import time
 import json
+import base64
 import hmac
 import hashlib
-from typing import Any, Dict, Optional, List
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
-import jwt
-import stripe
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field
-from openai import OpenAI
-
-APP_BASE_URL = os.getenv("APP_BASE_URL", "http://localhost:3000").rstrip("/")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
-
-STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
-STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
-
-JWT_SECRET = os.getenv("JWT_SECRET", "dev-jwt-secret-change-me")
-JWT_ISSUER = "botnology101"
-JWT_TTL_SECONDS = 60 * 60 * 24 * 30
-
-PRICE_MAP = {
-    ("associates", "monthly"): os.getenv("STRIPE_PRICE_ASSOCIATES_MONTHLY", ""),
-    ("associates", "annual"): os.getenv("STRIPE_PRICE_ASSOCIATES_ANNUAL", ""),
-    ("bachelors", "monthly"): os.getenv("STRIPE_PRICE_BACHELORS_MONTHLY", ""),
-    ("bachelors", "annual"): os.getenv("STRIPE_PRICE_BACHELORS_ANNUAL", ""),
-    ("masters", "monthly"): os.getenv("STRIPE_PRICE_MASTERS_MONTHLY", ""),
-    ("masters", "annual"): os.getenv("STRIPE_PRICE_MASTERS_ANNUAL", ""),
-}
-
-stripe.api_key = STRIPE_SECRET_KEY if STRIPE_SECRET_KEY else None
-client = OpenAI(api_key=OPENAI_API_KEY) if OPENAI_API_KEY else None
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
 
+# ---------- CORS (tighten later) ----------
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-def _now() -> int:
-    return int(time.time())
+# ---------- Paths ----------
+ROOT_DIR = Path(__file__).resolve().parents[1]  # repo root on Vercel: /var/task
+PUBLIC_DIR = ROOT_DIR / "public"
+if not PUBLIC_DIR.exists():
+    # fallback if you stored static files in root
+    PUBLIC_DIR = ROOT_DIR
 
+# ---------- Tiny token (stateless, serverless-safe) ----------
+APP_SECRET = (os.getenv("APP_SECRET") or "botnology-dev-secret").encode("utf-8")
+
+def _b64url(b: bytes) -> str:
+    return base64.urlsafe_b64encode(b).decode("utf-8").rstrip("=")
+
+def _b64url_dec(s: str) -> bytes:
+    pad = "=" * (-len(s) % 4)
+    return base64.urlsafe_b64decode((s + pad).encode("utf-8"))
 
 def sign_token(payload: Dict[str, Any]) -> str:
-    data = {
-        "iss": JWT_ISSUER,
-        "iat": _now(),
-        "exp": _now() + JWT_TTL_SECONDS,
-        **payload,
-    }
-    return jwt.encode(data, JWT_SECRET, algorithm="HS256")
+    raw = json.dumps(payload, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    sig = hmac.new(APP_SECRET, raw, hashlib.sha256).digest()
+    return f"{_b64url(raw)}.{_b64url(sig)}"
 
+def verify_token(token: str) -> Optional[Dict[str, Any]]:
+    try:
+        raw_b64, sig_b64 = token.split(".", 1)
+        raw = _b64url_dec(raw_b64)
+        sig = _b64url_dec(sig_b64)
+        exp = hmac.new(APP_SECRET, raw, hashlib.sha256).digest()
+        if not hmac.compare_digest(sig, exp):
+            return None
+        return json.loads(raw.decode("utf-8"))
+    except Exception:
+        return None
 
-def read_bearer(request: Request) -> Optional[str]:
-    auth = request.headers.get("authorization", "")
+def bearer_payload(req: Request) -> Optional[Dict[str, Any]]:
+    auth = req.headers.get("authorization", "")
     if not auth.lower().startswith("bearer "):
         return None
-    return auth.split(" ", 1)[1].strip() or None
+    token = auth.split(" ", 1)[1].strip()
+    return verify_token(token)
 
-
-def decode_token(token: str) -> Optional[Dict[str, Any]]:
-    try:
-        return jwt.decode(token, JWT_SECRET, algorithms=["HS256"], issuer=JWT_ISSUER)
-    except Exception:
-        return None
-
-
-def plan_tier(plan: str) -> int:
-    p = (plan or "").lower()
-    if p == "masters":
-        return 3
-    if p == "bachelors":
-        return 2
-    return 1
-
-
-def system_prompt(plan: str) -> str:
-    tier = plan_tier(plan)
-    base = (
-        "You are Dr. Botonic, a sophisticated, soft-spoken English-accented yeti professor and 24/7 college tutor. "
-        "Tone: calm, warm, intelligent, lightly witty. "
-        "Always aim for clarity, structure, and momentum. "
-        "Prefer concise bullets, then expand only if asked. "
-        "When solving problems: show steps cleanly and check the result. "
-        "When teaching: use a quick analogy + a short practice question. "
-        "Never mention policies or internal tools."
-    )
-
-    if tier == 1:
-        return base + " Keep answers efficient and practical. Offer 1 quick follow-up question."
-    if tier == 2:
-        return base + " Provide deeper explanation, a memory trick, and 2 practice questions with answers."
-    return base + (
-        " Provide elite tutoring: anticipate misconceptions, include a mini-quiz (3 Qs) with solutions, "
-        "and a short study plan for the next 20 minutes. Add a tasteful joke occasionally."
-    )
-
-
-class ChatIn(BaseModel):
-    message: str = Field(..., min_length=1, max_length=6000)
-    history: Optional[List[Dict[str, str]]] = None
-    subject: Optional[str] = None
-
-
-class AuthIn(BaseModel):
-    email: str = Field(..., min_length=5, max_length=200)
-    name: str = Field(default="Student", min_length=1, max_length=60)
-    student_id: str = Field(..., min_length=6, max_length=64)
-    plan: str = Field(default="associates")
-
-
-class CheckoutIn(BaseModel):
-    plan: str
-    cadence: str
-    student_id: str
-    email: Optional[str] = None
-
-
-@app.get("/api/health")
-async def health():
+# ---------- Health (MAKE THIS NEVER FAIL) ----------
+@app.get("/api/health", include_in_schema=False)
+def api_health():
+    # no imports that can crash here
+    has_openai = bool(os.getenv("OPENAI_API_KEY"))
+    has_stripe = bool(os.getenv("STRIPE_SECRET_KEY"))
     return {
         "status": "ok",
-        "time": _now(),
-        "openai": bool(OPENAI_API_KEY),
-        "stripe": bool(STRIPE_SECRET_KEY),
-        "base_url": APP_BASE_URL,
+        "openai": has_openai,
+        "stripe": has_stripe,
+        "static_dir": str(PUBLIC_DIR),
     }
 
+# ---------- Optional auth endpoints (so UI can show plan/name) ----------
+@app.post("/api/auth", include_in_schema=False)
+async def api_auth(req: Request):
+    body = await req.json()
+    email = (body.get("email") or "").strip()
+    name = (body.get("name") or "Student").strip()
+    student_id = (body.get("student_id") or "").strip() or "BN-UNKNOWN"
+    plan = (body.get("plan") or "associates").strip().lower()
 
-@app.post("/api/auth")
-async def auth(payload: AuthIn):
-    plan = (payload.plan or "associates").lower()
-    if plan not in ("associates", "bachelors", "masters"):
-        plan = "associates"
-    token = sign_token(
-        {
-            "email": payload.email.lower().strip(),
-            "name": payload.name.strip(),
-            "student_id": payload.student_id.strip(),
-            "plan": plan,
-        }
-    )
-    return {"token": token, "plan": plan}
+    if not email or "@" not in email:
+        raise HTTPException(status_code=400, detail="Valid email required")
 
+    payload = {"email": email, "name": name, "student_id": student_id, "plan": plan}
+    token = sign_token(payload)
+    return {"token": token, "plan": plan, "name": name, "student_id": student_id}
 
-@app.get("/api/me")
-async def me(request: Request):
-    tok = read_bearer(request)
-    if not tok:
+@app.get("/api/me", include_in_schema=False)
+def api_me(req: Request):
+    p = bearer_payload(req)
+    if not p:
         return {"logged_in": False}
-    data = decode_token(tok)
-    if not data:
-        return {"logged_in": False}
-    return {
-        "logged_in": True,
-        "email": data.get("email"),
-        "name": data.get("name"),
-        "student_id": data.get("student_id"),
-        "plan": data.get("plan", "associates"),
-    }
+    return {"logged_in": True, **p}
 
-
-@app.post("/api/chat")
-async def chat(request: Request, payload: ChatIn):
-    if client is None:
-        raise HTTPException(status_code=500, detail="OPENAI_API_KEY not set")
-
-    tok = read_bearer(request)
-    user = decode_token(tok) if tok else None
-    plan = (user.get("plan") if user else "associates") or "associates"
-
-    msgs: List[Dict[str, str]] = [{"role": "system", "content": system_prompt(plan)}]
-
-    if payload.subject:
-        msgs.append({"role": "system", "content": f"Primary subject: {payload.subject}."})
-
-    if payload.history:
-        for m in payload.history[-12:]:
-            r = (m.get("role") or "").strip()
-            c = (m.get("content") or "").strip()
-            if r in ("user", "assistant") and c:
-                msgs.append({"role": r, "content": c})
-
-    msgs.append({"role": "user", "content": payload.message.strip()})
-
-    tier = plan_tier(plan)
-    max_tokens = 500 if tier == 1 else 800 if tier == 2 else 1100
-    temperature = 0.55 if tier == 1 else 0.65 if tier == 2 else 0.75
-
-    resp = client.chat.completions.create(
-        model=OPENAI_MODEL,
-        messages=msgs,
-        temperature=temperature,
-        max_tokens=max_tokens,
-    )
-    text = resp.choices[0].message.content or ""
-    return {"reply": text, "plan": plan}
-
-
-@app.post("/api/stripe/create-checkout-session")
-async def create_checkout(payload: CheckoutIn):
-    if not STRIPE_SECRET_KEY:
-        raise HTTPException(status_code=500, detail="STRIPE_SECRET_KEY not set")
-
-    plan = (payload.plan or "").lower().strip()
-    cadence = (payload.cadence or "").lower().strip()
-    if plan not in ("associates", "bachelors", "masters"):
-        raise HTTPException(status_code=400, detail="Invalid plan")
-    if cadence not in ("monthly", "annual"):
-        raise HTTPException(status_code=400, detail="Invalid cadence")
-
-    price_id = PRICE_MAP.get((plan, cadence), "")
-    if not price_id:
-        raise HTTPException(status_code=500, detail="Missing Stripe price id env var for this plan/cadence")
-
-    success = f"{APP_BASE_URL}/dashboard.html?checkout=success&plan={plan}&cadence={cadence}"
-    cancel = f"{APP_BASE_URL}/pricing.html?checkout=cancel"
-
-    session = stripe.checkout.Session.create(
-        mode="subscription",
-        line_items=[{"price": price_id, "quantity": 1}],
-        success_url=success,
-        cancel_url=cancel,
-        client_reference_id=payload.student_id,
-        customer_email=payload.email,
-        metadata={"plan": plan, "cadence": cadence, "student_id": payload.student_id},
-    )
-    return {"url": session.url}
-
-
-@app.post("/api/stripe/webhook")
-async def stripe_webhook(request: Request):
-    if not STRIPE_WEBHOOK_SECRET:
-        return JSONResponse({"ok": True})
-
-    raw = await request.body()
-    sig = request.headers.get("stripe-signature", "")
-
-    try:
-        event = stripe.Webhook.construct_event(raw, sig, STRIPE_WEBHOOK_SECRET)
-    except Exception:
-        raise HTTPException(status_code=400, detail="Invalid webhook signature")
-
-    etype = event.get("type", "")
-    obj = event.get("data", {}).get("object", {})
-
-    return {"received": True, "type": etype, "id": event.get("id"), "object_id": obj.get("id")}
-# ---------- Serve homepage when Vercel routes "/" into the API ----------
-from pathlib import Path
-from fastapi.responses import FileResponse
-
+# ---------- Root safety net (fixes "/" showing {"detail":"Not Found"}) ----------
 @app.get("/", include_in_schema=False)
-def serve_home():
-    root = Path(__file__).resolve().parents[1]  # repo root
+def serve_root():
+    # If Vercel routes "/" to the function, serve index.html instead of JSON 404
     candidates = [
-        root / "public" / "index.html",
-        root / "index.html",
+        ROOT_DIR / "public" / "index.html",
+        ROOT_DIR / "index.html",
     ]
     for p in candidates:
         if p.exists():
             return FileResponse(str(p))
-    # If we get here, you literally don't have index.html where expected
-    return {"detail": "index.html missing (expected /public/index.html or /index.html)"}
+    return JSONResponse({"detail": "index.html missing"}, status_code=404)
 
-# --- Safety net: if "/" hits FastAPI, serve the static homepage ---
-from pathlib import Path
-from fastapi.responses import FileResponse
-
-@app.get("/", include_in_schema=False)
-def serve_root():
-    root = Path(__file__).resolve().parents[1]
-    for p in (
-        root / "public" / "index.html",
-        root / "index.html",
-        root / "public" / "pricing.html",
-        root / "pricing.html",
-    ):
-        if p.exists():
-            return FileResponse(str(p))
-    return {"detail": "Not Found"}
-
-# ----------------- STATIC SITE FALLBACK (fix "/" -> {"detail":"Not Found"}) -----------------
-from pathlib import Path
-from fastapi.staticfiles import StaticFiles
-
-ROOT_DIR = Path(__file__).resolve().parents[1]  # repo root
-STATIC_DIR = ROOT_DIR / "public"
-if not STATIC_DIR.exists():
-    STATIC_DIR = ROOT_DIR  # fallback if you store html/css/js in root
-
-# IMPORTANT: keep this LAST so your /api/* routes match first
-app.mount("/", StaticFiles(directory=str(STATIC_DIR), html=True), name="static")
-
+# ---------- Serve static (LAST; acts as catch-all for non-/api routes) ----------
+# IMPORTANT: keep this at the end so /api/* routes win first
+app.mount("/", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="static")
