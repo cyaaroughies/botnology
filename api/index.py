@@ -264,18 +264,6 @@ def serve_home():
     # If we get here, you literally don't have index.html where expected
     return {"detail": "index.html missing (expected /public/index.html or /index.html)"}
 
-# --- SAFETY NET: serve homepage if "/" hits the API ---
-from pathlib import Path
-from fastapi.responses import FileResponse
-
-@app.get("/", include_in_schema=False)
-def _home():
-    root = Path(__file__).resolve().parents[1]
-    for p in (root / "public" / "index.html", root / "index.html"):
-        if p.exists():
-            return FileResponse(str(p))
-    return {"detail": "index.html missing"}
-
 # --- Safety net: if "/" hits FastAPI, serve the static homepage ---
 from pathlib import Path
 from fastapi.responses import FileResponse
@@ -292,4 +280,16 @@ def serve_root():
         if p.exists():
             return FileResponse(str(p))
     return {"detail": "Not Found"}
+
+# ----------------- STATIC SITE FALLBACK (fix "/" -> {"detail":"Not Found"}) -----------------
+from pathlib import Path
+from fastapi.staticfiles import StaticFiles
+
+ROOT_DIR = Path(__file__).resolve().parents[1]  # repo root
+STATIC_DIR = ROOT_DIR / "public"
+if not STATIC_DIR.exists():
+    STATIC_DIR = ROOT_DIR  # fallback if you store html/css/js in root
+
+# IMPORTANT: keep this LAST so your /api/* routes match first
+app.mount("/", StaticFiles(directory=str(STATIC_DIR), html=True), name="static")
 
