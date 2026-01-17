@@ -276,3 +276,20 @@ def _home():
             return FileResponse(str(p))
     return {"detail": "index.html missing"}
 
+# --- Safety net: if "/" hits FastAPI, serve the static homepage ---
+from pathlib import Path
+from fastapi.responses import FileResponse
+
+@app.get("/", include_in_schema=False)
+def serve_root():
+    root = Path(__file__).resolve().parents[1]
+    for p in (
+        root / "public" / "index.html",
+        root / "index.html",
+        root / "public" / "pricing.html",
+        root / "pricing.html",
+    ):
+        if p.exists():
+            return FileResponse(str(p))
+    return {"detail": "Not Found"}
+
