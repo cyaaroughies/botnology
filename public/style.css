@@ -1,10 +1,22 @@
 ﻿body{margin:0;font-family:system-ui,Segoe UI,Arial;background:#0b1a12;color:#e8f3ee}
 .container{max-width:1100px;margin:0 auto;padding:20px}
-.btn{padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#e8f3ee;cursor:pointer}
-.btn:hover{background:rgba(255,255,255,.10)}
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px;border:1px solid rgba(255,255,255,.14);border-radius:16px;background:rgba(255,255,255,.04)}
 .brand{display:flex;align-items:center;gap:10px}
-.brand img{width:44px;height:44px;border-radius:999px;border:1px solid rgba(214,182,107,.45)}
+.brand img{width:44px;height:44px;border-radius:999px;border:1px solid rgba(214,182,107,.45);background:#0a1811}
+.btn{padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#e8f3ee;cursor:pointer;font-weight:650}
+.btn:hover{background:rgba(255,255,255,.10)}
+.btn.gold{border-color:rgba(214,182,107,.35);background:rgba(214,182,107,.12)}
+.btn.gold:hover{background:rgba(214,182,107,.18)}
 .hero{margin-top:16px;padding:16px;border-radius:16px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.03)}
 .h1{font-size:30px;margin:0 0 8px}
 .sub{opacity:.8}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.chat{margin-top:14px;border:1px solid rgba(255,255,255,.14);border-radius:16px;overflow:hidden;background:rgba(0,0,0,.18)}
+.chathead{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.10)}
+.messages{min-height:240px;max-height:420px;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.msg{padding:10px 11px;border-radius:14px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04);white-space:pre-wrap;line-height:1.45}
+.msg.user{align-self:flex-end;border-color:rgba(191,230,208,.22);background:rgba(191,230,208,.08)}
+.msg.assistant{align-self:flex-start;border-color:rgba(214,182,107,.22);background:rgba(214,182,107,.06)}
+.composer{display:flex;gap:10px;padding:12px;border-top:1px solid rgba(255,255,255,.10)}
+.input{flex:1;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#e8f3ee;padding:10px 11px;outline:none}
+.small{font-size:12px;opacity:.8}

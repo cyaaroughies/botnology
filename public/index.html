@@ -3,29 +3,41 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Botnology 101</title>
+  <title>Botnology Tutor</title>
   <link rel="stylesheet" href="/style.css"/>
   <script defer src="/script.js"></script>
 </head>
-<body data-page="home">
+<body>
   <div class="container">
     <div class="topbar">
       <div class="brand">
-        <img src="/dr-botonic.png" alt="Dr. Botonic"/>
-        <div class="title">
-          <b>BOTNOLOGY 101</b>
-          <span>Home</span>
+        <img src="/dr-botonic.svg" alt="Dr Botonic"/>
+        <div>
+          <div style="font-weight:800;letter-spacing:.4px">BOTNOLOGY 101</div>
+          <div class="small">Dr. Botonic | <span id="healthLine">API: checking...</span></div>
         </div>
       </div>
-      <div class="nav">
-        <button class="btn small" id="goPricing">Tuition Plans</button>
-        <button class="btn small" id="goDash">Dashboard</button>
+      <div class="row" style="margin:0">
+        <button class="btn" id="goPricing">Pricing</button>
+        <button class="btn" id="goDash">Dashboard</button>
       </div>
     </div>
 
-    <div class="hero" style="grid-template-columns:1fr">
-      <div class="h1">Homepage is LIVE</div>
-      <div class="sub">If you see this, "/" routing is fixed. Now go test pricing/dashboard.</div>
+    <div class="hero">
+      <div class="h1">Home</div>
+      <div class="sub">This build is "plumbing-first": pages load, buttons work, health works. Then we wire OpenAI + Stripe cleanly.</div>
+
+      <div class="chat">
+        <div class="chathead">
+          <div><b>Tutor Console</b></div>
+          <div class="small">Press Enter to send</div>
+        </div>
+        <div class="messages" id="messages"></div>
+        <div class="composer">
+          <input class="input" id="chatInput" placeholder="Ask something..." />
+          <button class="btn gold" id="sendBtn">Send</button>
+        </div>
+      </div>
     </div>
   </div>
 </body>
