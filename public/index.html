@@ -1,11 +1,13 @@
-<!DOCTYPE html>
+cd C:\botnology
+@'
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
+  <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Botnology 101 • Dr. Botonic</title>
-  <link rel="manifest" href="/manifest.json">
+  <title>Botnology 101</title>
   <link rel="stylesheet" href="/style.css"/>
+  <script defer src="/script.js"></script>
 </head>
 <body data-page="home">
   <div class="container">
@@ -13,151 +15,62 @@
       <div class="brand">
         <img src="/dr-botonic.png" alt="Dr. Botonic"/>
         <div class="title">
-          <b>Botnology 101</b>
-          <span>The smartest AI Tutor in the industry</span>
+          <b>BOTNOLOGY 101</b>
+          <span>Dr. Botonic • Premium AI Tutor</span>
         </div>
       </div>
       <div class="nav">
-        <button class="btn small" id="openAuth">Sign In</button>
-        <button class="btn small" id="goDash">Student Dashboard</button>
-        <button class="btn small gold" id="goPricing">Tuition Plans</button>
+        <button class="btn small" id="goPricing">Tuition Plans</button>
+        <button class="btn small" id="goDash">Dashboard</button>
+        <button class="btn gold small" id="openAuth">Sign In</button>
       </div>
     </div>
 
-    <div class="hero">
-      <div>
-        <div class="h-eyebrow">
-          <span class="dot" id="healthDot"></span>
-          <span id="healthLine">Checking system…</span>
-        </div>
-        <div class="h1">Meet Dr. Botonic.</div>
-        <div class="sub">
-          A Harvard-trained, soft-spoken, English-accented professor-yeti who tutors you 24/7.
-          Fast explanations. Clean structure. Practice questions that actually stick.
-          You bring the ambition — Dr. Botonic brings the blueprint.
-        </div>
-
-        <div class="hr"></div>
-
-        <div class="grid2">
-          <div class="kpi">
-            <b>Instant tutoring, any subject</b>
-            <span>Ask questions, get step-by-step answers, then lock in the concept with practice.</span>
-          </div>
-          <div class="kpi">
-            <b>Student workspace</b>
-            <span>Save notes, create folders, download files, build study packs — in your own dashboard.</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="card rightpanel">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-          <div>
-            <div style="font-weight:800;letter-spacing:.25px">Your Access</div>
-            <div class="smallmuted" id="whoami">Guest • BN-…</div>
-          </div>
-          <div class="badge" id="planBadge">ASSOCIATES</div>
-        </div>
-
-        <div class="hr"></div>
-
-        <div class="smallmuted">
-          Tip: Sign in to “stamp” your Student ID and keep your plan consistent across devices.
-          If you’re testing locally, that’s fine — it still works.
-        </div>
-
-        <div class="hr"></div>
-
-        <button class="btn gold" style="width:100%" id="goPricing">Choose a Tuition Plan</button>
-        <div style="height:10px"></div>
-        <button class="btn" style="width:100%" id="goDash">Open Student Dashboard</button>
-      </div>
+    <div class="hero" style="grid-template-columns:1fr">
+      <div class="h1">Welcome</div>
+      <div class="sub">If you can see this page, "/" routing is fixed.</div>
+      <div class="hr"></div>
+      <div class="h-eyebrow"><span class="dot" id="healthDot"></span><span id="healthLine">API: checking…</span></div>
     </div>
+  </div>
 
-    <div class="chatwrap">
-      <div class="chat">
-        <div class="chathead">
-          <div style="display:flex;align-items:center;gap:10px">
-            <div class="badge"><span class="dot"></span> Dr. Botonic Live</div>
-          </div>
-          <div class="smallmuted">Ask anything. Try: “Teach me cardiac output like I’m busy.”</div>
-        </div>
-
-        <div class="messages" id="messages"></div>
-
-        <div class="composer">
-          <input class="input" id="chatInput" placeholder="Ask Dr. Botonic…" autocomplete="off"/>
-          <button class="btn gold" id="sendBtn">Send</button>
-        </div>
-      </div>
-
-      <div class="card rightpanel">
-        <div style="font-weight:800;letter-spacing:.25px">Dr. Botonic Credentials</div>
-        <div class="smallmuted" style="margin-top:8px">
-          Age 72 • Harvard alumnus • Known for calm explanations, ruthless clarity, and the occasional gentle roast.
-        </div>
-
-        <div class="hr"></div>
-
-        <table class="table">
-          <thead>
-            <tr><th>Tier</th><th>What gets better</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>Associates</td><td>Fast answers + one follow-up to keep you moving.</td></tr>
-            <tr><td>Bachelors</td><td>Deeper teaching + memory tricks + practice sets.</td></tr>
-            <tr><td>Masters</td><td>Elite tutoring: misconceptions, mini-quizzes, study plan.</td></tr>
-          </tbody>
-        </table>
-
-        <div class="hr"></div>
-
-        <button class="btn" style="width:100%" id="openAuth">Sign In</button>
-      </div>
-    </div>
+  <div class="toast" id="toast">
+    <b id="toastTitle">Notice</b>
+    <p id="toastMsg">…</p>
   </div>
 
   <div class="modal" id="authModal">
     <div class="box">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-        <div style="font-weight:900;letter-spacing:.25px">Student Sign-In</div>
+        <b>Student Sign In</b>
         <button class="btn small" id="closeAuth">Close</button>
-      </div>
-      <div class="smallmuted" style="margin-top:8px">
-        This issues a secure token so the tutor can remember your plan. Your Student ID is auto-generated.
-      </div>
-
-      <div class="row">
-        <div class="field">
-          <label>Your name</label>
-          <input id="authName" placeholder="Jason"/>
-        </div>
-        <div class="field">
-          <label>Plan</label>
-          <select id="authPlan">
-            <option value="associates">Associates</option>
-            <option value="bachelors">Bachelors</option>
-            <option value="masters">Masters</option>
-          </select>
-        </div>
       </div>
 
       <div class="field">
-        <label>Email</label>
-        <input id="authEmail" placeholder="you@email.com"/>
+        <label for="authName">Name</label>
+        <input id="authName" type="text" placeholder="Student"/>
       </div>
 
-      <div style="height:12px"></div>
-      <button class="btn gold" style="width:100%" id="doAuth">Sign In</button>
+      <div class="field">
+        <label for="authEmail">Email</label>
+        <input id="authEmail" type="email" placeholder="you@email.com"/>
+      </div>
+
+      <div class="field">
+        <label for="authPlan">Plan</label>
+        <select id="authPlan">
+          <option value="associates">Associates</option>
+          <option value="bachelors">Bachelors</option>
+          <option value="masters">Masters</option>
+        </select>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:12px">
+        <button class="btn gold" id="doAuth">Sign In</button>
+        <button class="btn" id="goPricing">See Tuition Plans</button>
+      </div>
     </div>
   </div>
-
-  <div class="toast" id="toast">
-    <b id="toastTitle">Title</b>
-    <p id="toastMsg">Message</p>
-  </div>
-
-  <script src="/script.js"></script>
 </body>
 </html>
+'@ | Set-Content -Encoding utf8 .\public\index.html
