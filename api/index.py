@@ -247,3 +247,20 @@ async def stripe_webhook(request: Request):
     obj = event.get("data", {}).get("object", {})
 
     return {"received": True, "type": etype, "id": event.get("id"), "object_id": obj.get("id")}
+# ---------- Serve homepage when Vercel routes "/" into the API ----------
+from pathlib import Path
+from fastapi.responses import FileResponse
+
+@app.get("/", include_in_schema=False)
+def serve_home():
+    root = Path(__file__).resolve().parents[1]  # repo root
+    candidates = [
+        root / "public" / "index.html",
+        root / "index.html",
+    ]
+    for p in candidates:
+        if p.exists():
+            return FileResponse(str(p))
+    # If we get here, you literally don't have index.html where expected
+    return {"detail": "index.html missing (expected /public/index.html or /index.html)"}
+
