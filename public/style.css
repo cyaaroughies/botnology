@@ -1,14 +1,18 @@
-cd C:\botnology
-@'
-:root{
-  --bg0:#07110c;
+cd C:\botnology1, 1: cd C:\botnology
+@media (max-width: 600px) {
+p {
+  font-size: 12px;
+@media (max-width: 600px) {
+p {
+  font-size: 12px;
+
   --bg1:#0b1a12;
   --panel:rgba(255,255,255,.06);
   --stroke:rgba(255,255,255,.12);
   --text:#e8f3ee;
   --muted:rgba(232,243,238,.75);
-  --gold:#d6b66b;
-  --mint:#bfe6d0;
+  --gold:#d6b66b
+  --mint:#bfe6d0
   --shadow:0 18px 60px rgba(0,0,0,.45);
   --r:18px;
 }
@@ -204,4 +208,9 @@ a:hover{opacity:.9}
 .table th,.table td{padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.08);font-size:13px}
 .table th{color:rgba(214,182,107,.95);text-align:left;background:rgba(0,0,0,.15)}
 .table tr:last-child td{border-bottom:none}
-'@ | Set-Content -Encoding utf8 .\style.css
+SinsertRule(rule)/* Set font size on all <p> elements */font-size: 12x;
+p {
+  font-size: 12x;
+  color: rebeccapurple;
+}.
+insertRule(rule, index)
