@@ -1,8 +1,15 @@
-cd C:\botnology1, 1: cd C:\botnology
-@media (max-width: 600px) {
-p {
+cd C:\botnology101
+@media (max-width: 600px)
+p{<div>
+  <p>font-size: 12px;
+    This the first paragraph. The background color of these paragraphs have been
+    colored to distinguish them from their parent element.
+  <p>This is the second paragraph.</p>
+</div>
   font-size: 12px;
 @media (max-width: 600px) {
+
+}
 p {
   font-size: 12px;
 

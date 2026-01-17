@@ -1,5 +1,3 @@
-cd (function () {
-
   const API = {
     health: "/api/health",
     chat: "/api/chat",
@@ -107,14 +105,6 @@ cd (function () {
   function getHistory() { return lsGet("bn_history", []); }
   function setHistory(h) { lsSet("bn_history", h); }
 
-  function restoreChat() {
-    const h = getHistory();
-    if (!h.length) return;
-    for (const m of h) {
-      if (m.role === "user") renderMsg("user", m.content);
-      if (m.role === "assistant") renderMsg("assistant", m.content);
-    }
-  }
 
   async function sendChat() {
     const input = ((id) => document.getElementById(id))("chatInput");
@@ -187,24 +177,9 @@ cd (function () {
     }
   }
 
-  function pricingInit() {
-    const cadenceSel = ((id) => document.getElementById(id))("cadenceSel");
-    const getCadence = () => (cadenceSel ? cadenceSel.value : "monthly");
-    ((id) => document.getElementById(id))("buyAssociates") && (((id) => document.getElementById(id))("buyAssociates").onclick = () => startCheckout("associates", getCadence()));
-    ((id) => document.getElementById(id))("buyBachelors") && (((id) => document.getElementById(id))("buyBachelors").onclick = () => startCheckout("bachelors", getCadence()));
-    ((id) => document.getElementById(id))("buyMasters") && (((id) => document.getElementById(id))("buyMasters").onclick = () => startCheckout("masters", getCadence()));
-  }
 
-  function dashboardInit() {
-    const subjectSel = ((id) => document.getElementById(id))("subjectSel");
-    if (subjectSel) {
-      subjectSel.value = lsGet("bn_subject", "General");
-      subjectSel.onchange = () => { lsSet("bn_subject", subjectSel.value); toast("Subject set", subjectSel.value); };
-    }
-  }
 
-  function wireGlobal() {
-    ((id) => document.getElementById(id))("openAuth") && (((id) => document.getElementById(id))("openAuth").onclick = openModal);
+  function wireGlobal() {}    ((id) => document.getElementById(id))("openAuth") && (((id) => document.getElementById(id))("openAuth").onclick = openModal);
     ((id) => document.getElementById(id))("closeAuth") && (((id) => document.getElementById(id))("closeAuth").onclick = closeModal);
     ((id) => document.getElementById(id))("doAuth") && (((id) => document.getElementById(id))("doAuth").onclick = () => doAuth().catch(e => toast("Sign-in failed", String(e.message || e))));
 
@@ -215,24 +190,14 @@ cd (function () {
     ((id) => document.getElementById(id))("sendBtn") && (((id) => document.getElementById(id))("sendBtn").onclick = () => sendChat());
     ((id) => document.getElementById(id))("chatInput") && (((id) => document.getElementById(id))("chatInput").addEventListener("keydown", (e) => {
       if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChat(); }
+
+      async function boot() {
+        console.log("Botnology UI loaded OK");
+        getStudentId();
+        parseCheckoutSuccess();
+        wireGlobal();
+        await health();
+        await syncMe();
+      }
     }));
-  }
-
-  async function boot() {
-    console.log("Botnology UI loaded OK");
-    getStudentId();
-    parseCheckoutSuccess();
-    wireGlobal();
-    await health();
-    await syncMe();
-    restoreChat();
-
-    const page = document.body.dataset.page || "";
-    if (page === "pricing") pricingInit();
-    if (page === "dashboard") dashboardInit();
-  }
-
-  boot().catch(() => { });
-})();
-const newLocal = "@ | Set-Content -Encoding utf8 .script.js";
-
+  
