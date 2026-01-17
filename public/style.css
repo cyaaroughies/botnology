@@ -99,8 +99,6 @@ a:hover{opacity:.9}
 }
 .kpi b{display:block; font-size:14px; letter-spacing:.25px}
 .kpi span{display:block; margin-top:6px; color:var(--muted); font-size:13px; line-height:1.45}
-.chatwrap{margin-top:16px;display:grid;grid-template-columns:1fr 340px;gap:12px}
-@media (max-width: 1050px){ .chatwrap{grid-template-columns:1fr} }
 .chat{
   border:1px solid var(--stroke);
   border-radius:calc(var(--r) + 6px);
@@ -198,7 +196,3 @@ a:hover{opacity:.9}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:rgba(214,182,107,.35)}
 .row{display:flex; gap:10px}
 .row > *{flex:1}
-.table{width:100%;border-collapse:separate;border-spacing:0;border-radius:16px;border:1px solid rgba(255,255,255,.10);overflow:hidden}
-.table th,.table td{padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.08);font-size:13px}
-.table th{color:rgba(214,182,107,.95);text-align:left;background:rgba(0,0,0,.15)}
-.table tr:last-child td{border-bottom:none}
