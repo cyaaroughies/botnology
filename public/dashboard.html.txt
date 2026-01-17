@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Botnology 101 • Student Dashboard</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/style.css"/>
+</head>
+<body data-page="dashboard">
+  <div class="container">
+    <div class="topbar">
+      <div class="brand">
+        <img src="/dr-botonic.png" alt="Dr. Botonic"/>
+        <div class="title">
+          <b>Student Dashboard</b>
+          <span id="whoami">Guest • BN-…</span>
+        </div>
+      </div>
+      <div class="nav">
+        <div class="badge" id="planBadge">ASSOCIATES</div>
+        <button class="btn small" id="goHome">Home</button>
+        <button class="btn small" id="goPricing">Plans</button>
+        <button class="btn small" id="openAuth">Sign In</button>
+      </div>
+    </div>
+
+    <div class="hero">
+      <div>
+        <div class="h-eyebrow">
+          <span class="dot" id="healthDot"></span>
+          <span id="healthLine">Checking system…</span>
+        </div>
+        <div class="h1">Your workspace.</div>
+        <div class="sub">
+          Notes. Folders. Downloads. Practice. And Dr. Botonic on standby.
+          This is your desk — keep it organized, keep it moving.
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="row">
+          <div class="field">
+            <label>Subject Mode</label>
+            <select id="subjectSel">
+              <option>General</option>
+              <option>Anatomy</option>
+              <option>Math</option>
+              <option>Chemistry</option>
+              <option>Reading</option>
+              <option>Writing</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Quick actions</label>
+            <div class="row">
+              <button class="btn small" id="btnNewFolder">New Folder</button>
+              <button class="btn small gold" id="btnNewFile">New File</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="row">
+          <div class="field">
+            <label>Folder</label>
+            <select id="folderSel"></select>
+          </div>
+          <div class="field">
+            <label>File</label>
+            <select id="fileSel"></select>
+          </div>
+        </div>
+
+        <div style="height:10px"></div>
+
+        <textarea class="input" id="editor" style="height:220px;resize:vertical" placeholder="Write your notes, lab report draft, outline, anything…"></textarea>
+
+        <div style="height:10px"></div>
+
+        <div class="row">
+          <button class="btn gold" id="btnSave">Save</button>
+          <button class="btn" id="btnDelFile">Delete</button>
+          <button class="btn" id="btnTxt">Download .txt</button>
+          <button class="btn" id="btnDoc">Download .doc</button>
+        </div>
+      </div>
+
+      <div class="card rightpanel">
+        <div style="font-weight:900;letter-spacing:.25px">Ask Dr. Botonic</div>
+        <div class="smallmuted" style="margin-top:8px">
+          Use your subject mode, then ask. He’ll tailor the tutoring style to your plan automatically.
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="chat" style="min-height:420px">
+          <div class="chathead">
+            <div class="badge"><span class="dot"></span> Live Tutor</div>
+            <div class="smallmuted">Dashboard context</div>
+          </div>
+          <div class="messages" id="messages"></div>
+          <div class="composer">
+            <input class="input" id="chatInput" placeholder="Example: quiz me on cranial nerves…" autocomplete="off"/>
+            <button class="btn gold" id="sendBtn">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="authModal">
+    <div class="box">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <div style="font-weight:900;letter-spacing:.25px">Student Sign-In</div>
+        <button class="btn small" id="closeAuth">Close</button>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label>Your name</label>
+          <input id="authName" placeholder="Student"/>
+        </div>
+        <div class="field">
+          <label>Plan</label>
+          <select id="authPlan">
+            <option value="associates">Associates</option>
+            <option value="bachelors">Bachelors</option>
+            <option value="masters">Masters</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Email</label>
+        <input id="authEmail" placeholder="you@email.com"/>
+      </div>
+
+      <div style="height:12px"></div>
+      <button class="btn gold" style="width:100%" id="doAuth">Sign In</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">
+    <b id="toastTitle">Title</b>
+    <p id="toastMsg">Message</p>
+  </div>
+
+  <script src="/script.js"></script>
+</body>
+</html>
