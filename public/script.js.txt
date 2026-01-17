@@ -1,6 +1,7 @@
- <script>
-(function(){
-  const $ = (id)=>document.getElementById(id);
+cd C:\botnology
+@'
+(() => {
+  const $ = (id) => document.getElementById(id);
 
   const API = {
     health: "/api/health",
@@ -20,15 +21,11 @@
     toast._t = setTimeout(()=> t.style.display = "none", 3800);
   }
 
-  function uid(){
-    return (Math.random().toString(16).slice(2) + Date.now().toString(16)).slice(0, 24);
-  }
+  function uid(){ return (Math.random().toString(16).slice(2) + Date.now().toString(16)).slice(0,24); }
 
   function lsGet(key, fallback){
-    try{
-      const v = localStorage.getItem(key);
-      return v ? JSON.parse(v) : fallback;
-    }catch{ return fallback; }
+    try{ const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
+    catch{ return fallback; }
   }
   function lsSet(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
 
@@ -37,25 +34,16 @@
 
   function getStudentId(){
     let id = localStorage.getItem("bn_student_id");
-    if(!id){
-      id = "BN-" + uid().toUpperCase();
-      localStorage.setItem("bn_student_id", id);
-    }
+    if(!id){ id = "BN-" + uid().toUpperCase(); localStorage.setItem("bn_student_id", id); }
     return id;
   }
 
-  function getPlan(){
-    return (localStorage.getItem("bn_plan") || "associates").toLowerCase();
-  }
-  function setPlan(p){
-    localStorage.setItem("bn_plan", (p || "associates").toLowerCase());
-  }
+  function getPlan(){ return (localStorage.getItem("bn_plan") || "associates").toLowerCase(); }
+  function setPlan(p){ localStorage.setItem("bn_plan", (p || "associates").toLowerCase()); }
 
   async function apiGet(url){
     const tok = getToken();
-    const res = await fetch(url, {
-      headers: tok ? { "Authorization": "Bearer " + tok } : {}
-    });
+    const res = await fetch(url, { headers: tok ? { "Authorization": "Bearer " + tok } : {} });
     const data = await res.json().catch(()=>({}));
     if(!res.ok) throw new Error(data.detail || "Request failed");
     return data;
@@ -65,10 +53,7 @@
     const tok = getToken();
     const res = await fetch(url, {
       method:"POST",
-      headers:{
-        "Content-Type":"application/json",
-        ...(tok ? {"Authorization":"Bearer " + tok} : {})
-      },
+      headers:{ "Content-Type":"application/json", ...(tok ? {"Authorization":"Bearer " + tok} : {}) },
       body: JSON.stringify(body || {})
     });
     const data = await res.json().catch(()=>({}));
@@ -89,12 +74,18 @@
         const who = $("whoami");
         if(who) who.textContent = `${me.name} • ${me.student_id}`;
         return me;
+      }
+    }catch{}
+    if(badge) badge.textContent = getPlan().toUpperCase();
+    const who = $("whoami");
+    if(who) who.textContent = `Guest • ${getStudentId()}`;
+    return null;
   }
 
   async function doAuth(){
     const email = ($("authEmail")?.value || "").trim();
-    const name = ($("authName")?.value || "Student").trim();
-    const plan = ($("authPlan")?.value || getPlan()).toLowerCase();
+    const name  = ($("authName")?.value || "Student").trim();
+    const plan  = ($("authPlan")?.value || getPlan()).toLowerCase();
     if(!email || email.length < 5) return toast("Hold up", "Enter a real email.");
     const student_id = getStudentId();
 
@@ -102,7 +93,7 @@
     setToken(out.token);
     setPlan(out.plan);
     closeModal();
-    toast("Welcome", `Signed in • Plan: ${out.plan.toUpperCase()}`);
+    toast("Welcome", `Signed in • Plan: ${(out.plan || plan).toUpperCase()}`);
     await syncMe();
   }
 
@@ -116,11 +107,16 @@
     box.scrollTop = box.scrollHeight;
   }
 
-  function getHistory(){
-    return lsGet("bn_history", []);
-  }
-  function setHistory(h){
-    lsSet("bn_history", h);
+  function getHistory(){ return lsGet("bn_history", []); }
+  function setHistory(h){ lsSet("bn_history", h); }
+
+  function restoreChat(){
+    const h = getHistory();
+    if(!h.length) return;
+    for(const m of h){
+      if(m.role === "user") renderMsg("user", m.content);
+      if(m.role === "assistant") renderMsg("assistant", m.content);
+    }
   }
 
   async function sendChat(){
@@ -137,17 +133,13 @@
     while(h.length > 20) h.shift();
     setHistory(h);
 
-    const typing = "Dr. Botonic is thinking…";
-    renderMsg("assistant", typing);
+    renderMsg("assistant", "Dr. Botonic is thinking...");
     const box = $("messages");
     const last = box?.lastElementChild;
 
     try{
-      const out = await apiPost(API.chat, {
-        message: msg,
-        history: h,
-        subject: (document.body.dataset.page === "dashboard") ? (lsGet("bn_subject","General")) : "General"
-      });
+      const subject = lsGet("bn_subject","General");
+      const out = await apiPost(API.chat, { message: msg, history: h, subject });
       if(last) last.textContent = out.reply || "";
       h.push({role:"assistant", content: out.reply || ""});
       while(h.length > 20) h.shift();
@@ -156,17 +148,8 @@
       const badge = $("planBadge");
       if(badge) badge.textContent = (out.plan || getPlan()).toUpperCase();
     }catch(e){
-      if(last) last.textContent = "I hit a snag. Check OPENAI_API_KEY and try again.";
+      if(last) last.textContent = "Chat failed. Check /api/health and OPENAI_API_KEY.";
       toast("Chat failed", String(e.message || e));
-    }
-  }
-
-  function restoreChat(){
-    const h = getHistory();
-    if(!h.length) return;
-    for(const m of h){
-      if(m.role === "user") renderMsg("user", m.content);
-      if(m.role === "assistant") renderMsg("assistant", m.content);
     }
   }
 
@@ -197,7 +180,7 @@
 
   async function startCheckout(plan, cadence){
     const student_id = getStudentId();
-    const email = ($("authEmail")?.value || localStorage.getItem("bn_email") || "").trim() || undefined;
+    const email = (localStorage.getItem("bn_email") || "").trim() || undefined;
     try{
       const out = await apiPost(API.checkout, { plan, cadence, student_id, email });
       location.href = out.url;
@@ -206,184 +189,27 @@
     }
   }
 
-  function dashboardInit(){
-    const storeKey = "bn_drive_v1";
-    const subjectKey = "bn_subject";
-
-    const defaultDrive = {
-      folders: [
-        { id:"f-general", name:"General", files: [] },
-        { id:"f-anatomy", name:"Anatomy", files: [] },
-        { id:"f-math", name:"Math", files: [] },
-        { id:"f-writing", name:"Writing", files: [] }
-      ]
-    };
-
-    const drive = lsGet(storeKey, defaultDrive);
-    const subject = lsGet(subjectKey, "General");
-    lsSet(subjectKey, subject);
-
-    const folderSel = $("folderSel");
-    const fileSel = $("fileSel");
-    const editor = $("editor");
-    const subjectSel = $("subjectSel");
-
-    if(subjectSel){
-      subjectSel.value = subject;
-      subjectSel.onchange = ()=>{ lsSet(subjectKey, subjectSel.value); toast("Subject set", subjectSel.value); };
-    }
-
-    function saveDrive(){ lsSet(storeKey, drive); }
-
-    function refreshFolders(){
-      if(!folderSel) return;
-      folderSel.innerHTML = "";
-      for(const f of drive.folders){
-        const o = document.createElement("option");
-        o.value = f.id;
-        o.textContent = f.name;
-        folderSel.appendChild(o);
-      }
-      if(!folderSel.value) folderSel.value = drive.folders[0]?.id || "";
-      refreshFiles();
-    }
-
-    function refreshFiles(){
-      if(!fileSel) return;
-      fileSel.innerHTML = "";
-      const folder = drive.folders.find(x=>x.id===folderSel.value) || drive.folders[0];
-      if(!folder) return;
-
-      for(const file of folder.files){
-        const o = document.createElement("option");
-        o.value = file.id;
-        o.textContent = file.name;
-        fileSel.appendChild(o);
-      }
-      if(folder.files.length){
-        if(!fileSel.value) fileSel.value = folder.files[0].id;
-        loadFile();
-      }else{
-        if(editor) editor.value = "";
-      }
-    }
-
-    function loadFile(){
-      const folder = drive.folders.find(x=>x.id===folderSel.value);
-      if(!folder) return;
-      const file = folder.files.find(x=>x.id===fileSel.value);
-      if(editor) editor.value = file ? (file.content || "") : "";
-    }
-
-    function saveFile(){
-      const folder = drive.folders.find(x=>x.id===folderSel.value);
-      if(!folder) return;
-      const file = folder.files.find(x=>x.id===fileSel.value);
-      if(!file){ toast("No file", "Create a file first."); return; }
-      file.content = editor ? (editor.value || "") : "";
-      file.updated = Date.now();
-      saveDrive();
-      toast("Saved", file.name);
-    }
-
-    function newFile(){
-      const folder = drive.folders.find(x=>x.id===folderSel.value);
-      if(!folder) return;
-      const name = prompt("File name (example: Notes - Chapter 3)") || "";
-      const clean = name.trim();
-      if(!clean) return;
-      const id = "file-" + uid();
-      folder.files.unshift({ id, name: clean, content:"", updated: Date.now() });
-      saveDrive();
-      refreshFiles();
-      fileSel.value = id;
-      loadFile();
-      toast("Created", clean);
-    }
-
-    function newFolder(){
-      const name = prompt("Folder name") || "";
-      const clean = name.trim();
-      if(!clean) return;
-      const id = "f-" + uid();
-      drive.folders.push({ id, name: clean, files: [] });
-      saveDrive();
-      refreshFolders();
-      folderSel.value = id;
-      refreshFiles();
-      toast("Folder added", clean);
-    }
-
-    function delFile(){
-      const folder = drive.folders.find(x=>x.id===folderSel.value);
-      if(!folder) return;
-      const idx = folder.files.findIndex(x=>x.id===fileSel.value);
-      if(idx < 0) return;
-      const name = folder.files[idx].name;
-      if(!confirm(`Delete "${name}"?`)) return;
-      folder.files.splice(idx, 1);
-      saveDrive();
-      refreshFiles();
-      toast("Deleted", name);
-    }
-
-    function downloadTxt(){
-      const folder = drive.folders.find(x=>x.id===folderSel.value);
-      const file = folder?.files.find(x=>x.id===fileSel.value);
-      if(!file) return toast("No file", "Create/select a file first.");
-      const blob = new Blob([editor?.value || ""], {type:"text/plain;charset=utf-8"});
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = file.name.replace(/[^a-z0-9\-_ ]/gi,"").slice(0,80) + ".txt";
-      a.click();
-      setTimeout(()=>URL.revokeObjectURL(a.href), 1200);
-    }
-
-    function downloadDoc(){
-      const folder = drive.folders.find(x=>x.id===folderSel.value);
-      const file = folder?.files.find(x=>x.id===fileSel.value);
-      if(!file) return toast("No file", "Create/select a file first.");
-      const html = `
-        <html><head><meta charset="utf-8"></head>
-        <body><pre style="font-family:Calibri,Arial; white-space:pre-wrap; line-height:1.4">${(editor?.value||"").replace(/[&<>]/g, s=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[s]))}</pre></body></html>`;
-      const blob = new Blob([html], {type:"application/msword"});
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = file.name.replace(/[^a-z0-9\-_ ]/gi,"").slice(0,80) + ".doc";
-      a.click();
-      setTimeout(()=>URL.revokeObjectURL(a.href), 1200);
-    }
-
-    folderSel && (folderSel.onchange = refreshFiles);
-    fileSel && (fileSel.onchange = loadFile);
-
-    $("btnSave") && ($("btnSave").onclick = saveFile);
-    $("btnNewFile") && ($("btnNewFile").onclick = newFile);
-    $("btnNewFolder") && ($("btnNewFolder").onclick = newFolder);
-    $("btnDelFile") && ($("btnDelFile").onclick = delFile);
-    $("btnTxt") && ($("btnTxt").onclick = downloadTxt);
-    $("btnDoc") && ($("btnDoc").onclick = downloadDoc);
-
-    refreshFolders();
-  }
-
   function pricingInit(){
     const cadenceSel = $("cadenceSel");
-    const c = cadenceSel ? cadenceSel.value : "monthly";
-    $("buyAssociates") && ($("buyAssociates").onclick = ()=> startCheckout("associates", cadenceSel.value));
-    $("buyBachelors") && ($("buyBachelors").onclick = ()=> startCheckout("bachelors", cadenceSel.value));
-    $("buyMasters") && ($("buyMasters").onclick = ()=> startCheckout("masters", cadenceSel.value));
+    const getCadence = ()=> (cadenceSel ? cadenceSel.value : "monthly");
+    $("buyAssociates") && ($("buyAssociates").onclick = ()=> startCheckout("associates", getCadence()));
+    $("buyBachelors") && ($("buyBachelors").onclick = ()=> startCheckout("bachelors", getCadence()));
+    $("buyMasters") && ($("buyMasters").onclick = ()=> startCheckout("masters", getCadence()));
   }
 
-  function pwaInit(){
-    if(!("serviceWorker" in navigator)) return;
-    navigator.serviceWorker.register("/sw.js").catch(()=>{});
+  function dashboardInit(){
+    const subjectSel = $("subjectSel");
+    if(subjectSel){
+      subjectSel.value = lsGet("bn_subject", "General");
+      subjectSel.onchange = ()=> { lsSet("bn_subject", subjectSel.value); toast("Subject set", subjectSel.value); };
+    }
   }
 
   function wireGlobal(){
     $("openAuth") && ($("openAuth").onclick = openModal);
     $("closeAuth") && ($("closeAuth").onclick = closeModal);
     $("doAuth") && ($("doAuth").onclick = ()=> doAuth().catch(e=>toast("Sign-in failed", String(e.message||e))));
+
     $("goDash") && ($("goDash").onclick = ()=> location.href="/dashboard.html");
     $("goPricing") && ($("goPricing").onclick = ()=> location.href="/pricing.html");
     $("goHome") && ($("goHome").onclick = ()=> location.href="/index.html");
@@ -395,22 +221,19 @@
   }
 
   async function boot(){
+    console.log("Botnology UI loaded OK");
     getStudentId();
     parseCheckoutSuccess();
     wireGlobal();
-    pwaInit();
     await health();
     await syncMe();
     restoreChat();
 
     const page = document.body.dataset.page || "";
-    if(page === "dashboard") dashboardInit();
     if(page === "pricing") pricingInit();
+    if(page === "dashboard") dashboardInit();
   }
 
   boot().catch(()=>{});
 })();
-</script>
-
-
-
+'@ | Set-Content -Encoding utf8 .\script.js
