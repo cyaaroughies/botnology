@@ -237,3 +237,4 @@ cd C:\botnology
   boot().catch(()=>{});
 })();
 '@ | Set-Content -Encoding utf8 .\script.js
+
