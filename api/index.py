@@ -264,3 +264,15 @@ def serve_home():
     # If we get here, you literally don't have index.html where expected
     return {"detail": "index.html missing (expected /public/index.html or /index.html)"}
 
+# --- SAFETY NET: serve homepage if "/" hits the API ---
+from pathlib import Path
+from fastapi.responses import FileResponse
+
+@app.get("/", include_in_schema=False)
+def _home():
+    root = Path(__file__).resolve().parents[1]
+    for p in (root / "public" / "index.html", root / "index.html"):
+        if p.exists():
+            return FileResponse(str(p))
+    return {"detail": "index.html missing"}
+
