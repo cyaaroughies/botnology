@@ -1,8 +1,9 @@
+cd C:\botnology
+@'
 :root{
   --bg0:#07110c;
   --bg1:#0b1a12;
   --panel:rgba(255,255,255,.06);
-  --panel2:rgba(255,255,255,.08);
   --stroke:rgba(255,255,255,.12);
   --text:#e8f3ee;
   --muted:rgba(232,243,238,.75);
@@ -11,7 +12,6 @@
   --shadow:0 18px 60px rgba(0,0,0,.45);
   --r:18px;
 }
-
 *{box-sizing:border-box}
 html,body{height:100%}
 body{
@@ -23,12 +23,9 @@ body{
     radial-gradient(900px 600px at 80% 0%, rgba(214,182,107,.10), transparent 60%),
     linear-gradient(180deg, var(--bg0), var(--bg1));
 }
-
 a{color:var(--mint); text-decoration:none}
 a:hover{opacity:.9}
-
 .container{max-width:1160px;margin:0 auto;padding:26px 18px 80px}
-
 .topbar{
   display:flex; align-items:center; justify-content:space-between;
   gap:16px; padding:14px 14px;
@@ -37,10 +34,7 @@ a:hover{opacity:.9}
   border-radius:var(--r);
   box-shadow: var(--shadow);
 }
-
-.brand{
-  display:flex; align-items:center; gap:12px;
-}
+.brand{display:flex; align-items:center; gap:12px}
 .brand img{
   width:46px;height:46px;border-radius:999px;
   border:1px solid rgba(214,182,107,.35);
@@ -48,16 +42,10 @@ a:hover{opacity:.9}
   object-fit:cover;
   background:#0a1811;
 }
-.brand .title{
-  display:flex;flex-direction:column;line-height:1.05
-}
+.brand .title{display:flex;flex-direction:column;line-height:1.05}
 .brand .title b{font-size:14.5px;letter-spacing:.45px}
 .brand .title span{font-size:12.5px;color:var(--muted)}
-
-.nav{
-  display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end
-}
-
+.nav{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end}
 .btn{
   border:1px solid var(--stroke);
   background:rgba(255,255,255,.05);
@@ -75,7 +63,6 @@ a:hover{opacity:.9}
 }
 .btn.gold:hover{background:rgba(214,182,107,.18)}
 .btn.small{padding:8px 10px;border-radius:12px;font-size:12.5px}
-
 .hero{
   margin-top:18px;
   padding:24px;
@@ -90,37 +77,22 @@ a:hover{opacity:.9}
   grid-template-columns: 1.2fr .8fr;
   gap:18px;
 }
-@media (max-width: 900px){
-  .hero{grid-template-columns:1fr}
-}
-
+@media (max-width: 900px){ .hero{grid-template-columns:1fr} }
 .h-eyebrow{
   display:inline-flex; align-items:center; gap:8px;
   font-size:12px; letter-spacing:.6px; text-transform:uppercase;
   color:rgba(214,182,107,.95);
 }
-.h1{
-  margin:12px 0 8px;
-  font-size:36px;
-  letter-spacing:.3px;
-}
-.sub{
-  color:var(--muted);
-  line-height:1.55;
-  font-size:15.5px;
-  max-width: 62ch;
-}
-
+.h1{margin:12px 0 8px;font-size:36px;letter-spacing:.3px}
+.sub{color:var(--muted);line-height:1.55;font-size:15.5px;max-width:62ch}
 .card{
   border:1px solid var(--stroke);
   background:rgba(255,255,255,.04);
   border-radius:var(--r);
   padding:16px;
 }
-
 .grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
-@media (max-width: 900px){.grid2{grid-template-columns:1fr}}
-
+@media (max-width: 900px){ .grid2{grid-template-columns:1fr} }
 .kpi{
   border:1px solid rgba(255,255,255,.10);
   border-radius:16px;
@@ -129,15 +101,8 @@ a:hover{opacity:.9}
 }
 .kpi b{display:block; font-size:14px; letter-spacing:.25px}
 .kpi span{display:block; margin-top:6px; color:var(--muted); font-size:13px; line-height:1.45}
-
-.chatwrap{
-  margin-top:16px;
-  display:grid;
-  grid-template-columns: 1fr 340px;
-  gap:12px;
-}
-@media (max-width: 1050px){.chatwrap{grid-template-columns:1fr}}
-
+.chatwrap{margin-top:16px;display:grid;grid-template-columns:1fr 340px;gap:12px}
+@media (max-width: 1050px){ .chatwrap{grid-template-columns:1fr} }
 .chat{
   border:1px solid var(--stroke);
   border-radius:calc(var(--r) + 6px);
@@ -167,16 +132,9 @@ a:hover{opacity:.9}
   width:8px;height:8px;border-radius:999px;background:rgba(191,230,208,.95);
   box-shadow:0 0 0 4px rgba(191,230,208,.10);
 }
-.messages{
-  padding:14px;
-  overflow:auto;
-  flex:1;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
+.messages{padding:14px;overflow:auto;flex:1;display:flex;flex-direction:column;gap:10px}
 .msg{
-  max-width: 860px;
+  max-width:860px;
   padding:11px 12px;
   border-radius:16px;
   border:1px solid rgba(255,255,255,.10);
@@ -184,22 +142,9 @@ a:hover{opacity:.9}
   line-height:1.55;
   white-space:pre-wrap;
 }
-.msg.user{
-  margin-left:auto;
-  border-color:rgba(191,230,208,.22);
-  background:rgba(191,230,208,.08);
-}
-.msg.assistant{
-  border-color:rgba(214,182,107,.22);
-  background:rgba(214,182,107,.06);
-}
-
-.composer{
-  display:flex; gap:10px;
-  padding:12px;
-  border-top:1px solid var(--stroke);
-  background:rgba(0,0,0,.14);
-}
+.msg.user{margin-left:auto;border-color:rgba(191,230,208,.22);background:rgba(191,230,208,.08)}
+.msg.assistant{border-color:rgba(214,182,107,.22);background:rgba(214,182,107,.06)}
+.composer{display:flex; gap:10px;padding:12px;border-top:1px solid var(--stroke);background:rgba(0,0,0,.14)}
 .input{
   flex:1;
   border:1px solid rgba(255,255,255,.12);
@@ -210,27 +155,22 @@ a:hover{opacity:.9}
   outline:none;
 }
 .input:focus{border-color:rgba(214,182,107,.35)}
-.rightpanel .card{height:100%}
-
 .hr{height:1px;background:rgba(255,255,255,.10);margin:12px 0}
 .smallmuted{color:var(--muted);font-size:13px;line-height:1.45}
-
-.table{
-  width:100%;
-  border-collapse:separate;
-  border-spacing:0;
-  overflow:hidden;
-  border-radius:16px;
-  border:1px solid rgba(255,255,255,.10);
+.toast{
+  position:fixed; right:16px; bottom:16px;
+  width:min(380px, calc(100% - 32px));
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:18px;
+  background:rgba(0,0,0,.45);
+  backdrop-filter: blur(10px);
+  padding:12px;
+  display:none;
+  box-shadow: var(--shadow);
+  z-index:9999;
 }
-.table th,.table td{
-  padding:10px 10px;
-  border-bottom:1px solid rgba(255,255,255,.08);
-  font-size:13px;
-}
-.table th{color:rgba(214,182,107,.95);text-align:left;background:rgba(0,0,0,.15)}
-.table tr:last-child td{border-bottom:none}
-
+.toast b{display:block; color:rgba(214,182,107,.95); margin-bottom:6px}
+.toast p{margin:0;color:rgba(232,243,238,.86);font-size:13px;line-height:1.45}
 .modal{
   position:fixed; inset:0;
   display:none;
@@ -249,7 +189,7 @@ a:hover{opacity:.9}
 }
 .field{display:flex; flex-direction:column; gap:6px; margin-top:10px}
 .field label{font-size:12.5px;color:rgba(232,243,238,.82)}
-.field input,.field select{
+.field input,.field select, .field textarea{
   border:1px solid rgba(255,255,255,.12);
   background:rgba(0,0,0,.20);
   color:var(--text);
@@ -257,20 +197,11 @@ a:hover{opacity:.9}
   padding:11px 12px;
   outline:none;
 }
-.field input:focus,.field select:focus{border-color:rgba(214,182,107,.35)}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:rgba(214,182,107,.35)}
 .row{display:flex; gap:10px}
 .row > *{flex:1}
-.toast{
-  position:fixed; right:16px; bottom:16px;
-  width:min(380px, calc(100% - 32px));
-  border:1px solid rgba(255,255,255,.14);
-  border-radius:18px;
-  background:rgba(0,0,0,.45);
-  backdrop-filter: blur(10px);
-  padding:12px;
-  display:none;
-  box-shadow: var(--shadow);
-  z-index:9999;
-}
-.toast b{display:block; color:rgba(214,182,107,.95); margin-bottom:6px}
-.toast p{margin:0;color:rgba(232,243,238,.86);font-size:13px;line-height:1.45}
+.table{width:100%;border-collapse:separate;border-spacing:0;border-radius:16px;border:1px solid rgba(255,255,255,.10);overflow:hidden}
+.table th,.table td{padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.08);font-size:13px}
+.table th{color:rgba(214,182,107,.95);text-align:left;background:rgba(0,0,0,.15)}
+.table tr:last-child td{border-bottom:none}
+'@ | Set-Content -Encoding utf8 .\style.css
