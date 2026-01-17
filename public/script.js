@@ -1,5 +1,5 @@
 cd C:\botnology
-@'
+
 (() => {
   const $ = (id) => document.getElementById(id);
 
@@ -154,7 +154,8 @@ cd C:\botnology
   }
 
   async function health(){
-    try{
+    
+   try{
       const out = await apiGet(API.health);
       const dot = $("healthDot");
       if(dot) dot.style.background = out.status === "ok" ? "rgba(191,230,208,.95)" : "rgba(255,120,120,.95)";
