@@ -1,20 +1,24 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Botnology 101 • Student Dashboard</title>
   <link rel="manifest" href="/manifest.json">
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Dashboard</title>
   <link rel="stylesheet" href="/style.css"/>
+  <script defer src="/script.js"></script>
 </head>
-<body data-page="dashboard">
+<body>
   <div class="container">
     <div class="topbar">
       <div class="brand">
-        <img src="/dr-botonic.png" alt="Dr. Botonic"/>
-        <div class="title">
-          <b>Student Dashboard</b>
-          <span id="whoami">Guest • BN-…</span>
+        <img src="/dr-botonic.svg" alt="Dr Botonic"/>
+        <div>
+          <div style="font-weight:800;letter-spacing:.4px">BOTNOLOGY 101</div>
+          <div class="small">Dashboard | <span id="healthLine">API: checking...</span></div>
         </div>
       </div>
       <div class="nav">
@@ -22,6 +26,9 @@
         <button type="button" class="btn small" id="goHome">Home</button>
         <button type="button" class="btn small" id="goPricing">Plans</button>
         <button type="button" class="btn small" id="openAuth">Sign In</button>
+      <div class="row" style="margin:0">
+        <button class="btn" id="goHome">Home</button>
+        <button class="btn" id="goPricing">Pricing</button>
       </div>
     </div>
 
@@ -148,6 +155,9 @@
   </div>
 
   <script src="/script.js"></script>
+      <div class="h1">Dashboard</div>
+      <div class="sub">Navigation buttons should work now, guaranteed.</div>
+    </div>
+  </div>
 </body>
 </html>
-

@@ -4,7 +4,7 @@ import base64
 import hmac
 import hashlib
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -30,7 +30,9 @@ if not PUBLIC_DIR.exists():
     PUBLIC_DIR = ROOT_DIR
 
 # ---------- Tiny token (stateless, serverless-safe) ----------
-APP_SECRET = (os.getenv("APP_SECRET") or "botnology-dev-secret").encode("utf-8")
+# Prefer APP_SECRET, fall back to JWT_SECRET for compatibility with environment naming.
+_app_secret_env = os.getenv("APP_SECRET") or os.getenv("JWT_SECRET")
+APP_SECRET = (_app_secret_env or "botnology-dev-secret").encode("utf-8")
 
 def _b64url(b: bytes) -> str:
     return base64.urlsafe_b64encode(b).decode("utf-8").rstrip("=")
