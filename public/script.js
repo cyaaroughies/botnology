@@ -745,14 +745,15 @@
   }
 
   document.addEventListener("DOMContentLoaded", () => { 
-    boot().catch(() => {}); 
-    initCrop(); 
-    // Load badge photo, then apply it to the brand portrait if available
-    Promise.resolve()
-      .then(() => loadBadgePhoto())
-      .then(() => applyPortraitFromBadge())
-      .catch(() => applyPortraitFromBadge());
+    boot().catch(() => {});
+    initCrop();
+    // Load badge photo early; portrait application will respect file override
+    Promise.resolve().then(() => loadBadgePhoto()).catch(() => {});
   });
+  });
+
+  // Track whether a real portrait file was applied (take precedence over badge)
+  let _botonicPortraitLocked = false;
 
   async function swapBotonicPortrait() {
     const candidates = ["/dr-botonic.jpg", "/dr-botonic.png"]; // drop-in overrides
@@ -761,18 +762,27 @@
       try { const r = await fetch(p, { method: "HEAD" }); if (r.ok) { use = p; break; } } catch {}
     }
     if (!use) return; // If a drop-in file exists, prefer it
+    _botonicPortraitLocked = true;
     const imgs = document.querySelectorAll('img[data-botonic="true"]');
     imgs.forEach(img => { img.src = use; img.style.objectFit = "cover"; img.style.background = "#0a1811"; });
   }
 
   function applyPortraitFromBadge() {
-    try {
-      const badge = ((id) => document.getElementById(id))("badgePhoto");
-      const src = badge?.src || "";
-      if (!src) return;
-      const imgs = document.querySelectorAll('img[data-botonic="true"]');
-      imgs.forEach(img => { img.src = src; img.style.objectFit = "cover"; img.style.background = "#0a1811"; });
-    } catch {}
+    async function applyPortraitFromBadge() {
+      try {
+        if (_botonicPortraitLocked) return; // real file already applied
+        // If a file override exists, do not apply badge portrait
+        try {
+          const r1 = await fetch("/dr-botonic.jpg", { method: "HEAD" });
+          const r2 = await fetch("/dr-botonic.png", { method: "HEAD" });
+          if (r1.ok || r2.ok) return;
+        } catch {}
+        const badge = ((id) => document.getElementById(id))("badgePhoto");
+        const src = badge?.src || "";
+        if (!src) return;
+        const imgs = document.querySelectorAll('img[data-botonic="true"]');
+        imgs.forEach(img => { img.src = src; img.style.objectFit = "cover"; img.style.background = "#0a1811"; });
+      } catch {}
   }
 
   // ------ Badge photo helpers ------
@@ -814,7 +824,7 @@
       const img = ((id) => document.getElementById(id))("badgePhoto");
       if (img) img.src = `data:image/png;base64,${finalB64}`;
       applyBadgeShape(localStorage.getItem("bn_photo_shape") || "circle");
-      applyPortraitFromBadge();
+      try { await applyPortraitFromBadge(); } catch {}
       closeBadgeModal();
       toast("Saved", "ID badge photo updated.");
     } catch (e) {
