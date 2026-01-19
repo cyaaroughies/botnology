@@ -1,11 +1,7 @@
-cd C:\botnology
-@'
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "routes": [
-    { "src": "/api/(.*)", "dest": "api/index.py" },
     { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "public/$1" }
   ]
 }
-'@ | Set-Content -Encoding utf8 .\vercel.json
