@@ -1,28 +1,20 @@
-cd C:\botnology101
-@media (max-width: 600px)
-p{<div>
-  <p>font-size: 12px;
-    This the first paragraph. The background color of these paragraphs have been
-    colored to distinguish them from their parent element.
-  <p>This is the second paragraph.</p>
-</div>
-  font-size: 12px;
-@media (max-width: 600px) {
-
+.crop-box{
+  width:160px; height:160px;
+  border:1px solid rgba(214,182,107,.35);
+  background:#0a1811;
+  border-radius:999px;
+  overflow:hidden;
+  position:relative;
+  touch-action:none;
+  -webkit-user-select:none;
+  user-select:none;
 }
-p {
-  font-size: 12px;
-
-  --bg1:#0b1a12;
-  --panel:rgba(255,255,255,.06);
-  --stroke:rgba(255,255,255,.12);
-  --text:#e8f3ee;
-  --muted:rgba(232,243,238,.75);
-  --gold:#d6b66b
-  --mint:#bfe6d0
-  --shadow:0 18px 60px rgba(0,0,0,.45);
-  --r:18px;
+.crop-box img{
+  position:absolute; left:50%; top:50%; transform:translate(-50%, -50%) scale(1);
+  user-select:none; pointer-events:none; object-fit:cover;
 }
+.crop-box.drag{cursor:grabbing}
+@media (max-width: 600px){ }
 *{box-sizing:border-box}
 html,body{height:100%}
 body{
@@ -33,6 +25,13 @@ body{
     radial-gradient(1000px 700px at 20% 10%, rgba(191,230,208,.12), transparent 55%),
     radial-gradient(900px 600px at 80% 0%, rgba(214,182,107,.10), transparent 60%),
     linear-gradient(180deg, var(--bg0), var(--bg1));
+}
+/* Subtle animated background motion */
+body{ background-position: 20% 10%, 80% 0%, 0 0; animation: bgMove 60s linear infinite; }
+@keyframes bgMove{
+  0%{ background-position: 20% 10%, 80% 0%, 0 0; }
+  50%{ background-position: 24% 12%, 78% 2%, 0 0; }
+  100%{ background-position: 20% 10%, 80% 0%, 0 0; }
 }
 a{color:var(--mint); text-decoration:none}
 a:hover{opacity:.9}
@@ -139,11 +138,16 @@ a:hover{opacity:.9}
   color:rgba(214,182,107,.98);
   background:rgba(214,182,107,.10);
 }
+.badge-active{ border-color:rgba(82,196,127,.45); color:rgba(82,196,127,.98); background:rgba(82,196,127,.12); }
+.badge-trialing{ border-color:rgba(240,173,78,.45); color:rgba(240,173,78,.98); background:rgba(240,173,78,.12); }
+.badge-none{ border-color:rgba(255,255,255,.18); color:rgba(232,243,238,.65); background:rgba(255,255,255,.06); }
 .dot{
   width:8px;height:8px;border-radius:999px;background:rgba(191,230,208,.95);
   box-shadow:0 0 0 4px rgba(191,230,208,.10);
 }
 .messages{padding:14px;overflow:auto;flex:1;display:flex;flex-direction:column;gap:10px}
+.messages.forest{background:#0a1811; border:1px solid var(--stroke); border-radius:12px}
+.messages.light{background:rgba(255,255,255,.04); border:1px solid var(--stroke); border-radius:12px}
 .msg{
   max-width:860px;
   padding:11px 12px;
@@ -153,8 +157,8 @@ a:hover{opacity:.9}
   line-height:1.55;
   white-space:pre-wrap;
 }
-.msg.user{margin-left:auto;border-color:rgba(191,230,208,.22);background:rgba(191,230,208,.08)}
-.msg.assistant{border-color:rgba(214,182,107,.22);background:rgba(214,182,107,.06)}
+.msg.user{margin-left:auto;border-color:rgba(191,230,208,.35);background:rgba(191,230,208,.12)}
+.msg.assistant{border-color:rgba(214,182,107,.35);background:rgba(214,182,107,.10)}
 .composer{display:flex; gap:10px;padding:12px;border-top:1px solid var(--stroke);background:rgba(0,0,0,.14)}
 .input{
   flex:1;
@@ -166,6 +170,17 @@ a:hover{opacity:.9}
   outline:none;
 }
 .input:focus{border-color:rgba(214,182,107,.35)}
+/* Refined accessible focus rings */
+.btn:focus-visible,
+.input:focus-visible,
+.field input:focus-visible,
+.field select:focus-visible,
+.field textarea:focus-visible{
+  outline:2px solid rgba(214,182,107,.65);
+  outline-offset:2px;
+  box-shadow:0 0 0 4px rgba(214,182,107,.15);
+  border-color:rgba(214,182,107,.45);
+}
 .hr{height:1px;background:rgba(255,255,255,.10);margin:12px 0}
 .smallmuted{color:var(--muted);font-size:13px;line-height:1.45}
 .toast{
@@ -198,6 +213,9 @@ a:hover{opacity:.9}
   box-shadow: var(--shadow);
   padding:16px;
 }
+.modal .box .btn.small{padding:6px 9px}
+.shape-toggle{display:flex; gap:6px}
+.shape-toggle .btn.small.active{border-color:rgba(191,230,208,.45); background:rgba(191,230,208,.12)}
 .field{display:flex; flex-direction:column; gap:6px; margin-top:10px}
 .field label{font-size:12.5px;color:rgba(232,243,238,.82)}
 .field input,.field select, .field textarea{
@@ -215,9 +233,29 @@ a:hover{opacity:.9}
 .table th,.table td{padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.08);font-size:13px}
 .table th{color:rgba(214,182,107,.95);text-align:left;background:rgba(0,0,0,.15)}
 .table tr:last-child td{border-bottom:none}
-SinsertRule(rule)/* Set font size on all <p> elements */font-size: 12x;
-p {
-  font-size: 12x;
-  color: rebeccapurple;
-}.
-insertRule(rule, index)
+/* Cleaned stray CSS */
+
+/* Theme variables (defaults and Yeti override) */
+:root{
+  --bg0:#081410;
+  --bg1:#0b1a12;
+  --panel:rgba(255,255,255,.06);
+  --stroke:rgba(255,255,255,.12);
+  --text:#e8f3ee;
+  --muted:rgba(232,243,238,.75);
+  --gold:#d6b66b;
+  --mint:#bfe6d0;
+  --shadow:0 18px 60px rgba(0,0,0,.45);
+  --r:18px;
+}
+body.yeti-theme{
+  --bg0:#07121a;
+  --bg1:#0a1620;
+  --mint:#a5f3fc; /* links */
+  --gold:#7dd3fc; /* accent buttons */
+}
+body.yeti-theme .brand img{ border-color: rgba(125,211,252,.35); background:#07121a; }
+body.yeti-theme .badge{ border-color: rgba(125,211,252,.35); color: rgba(125,211,252,.98); background: rgba(125,211,252,.10); }
+
+/* Premium selection color */
+::selection{ background: rgba(214,182,107,.25); color:#0a1811; }

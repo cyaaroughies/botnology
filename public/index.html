@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Botnology 101</title>
+  <title>Botnoloy101</title>
   <link rel="stylesheet" href="/style.css"/>
   <script defer src="/script.js"></script>
 </head>
@@ -11,24 +11,64 @@
   <div class="container">
     <div class="topbar">
       <div class="brand">
-        <img src="/dr-botonic.png" alt="Dr. Botonic"/>
+          <img src="/dr-botonic.svg" alt="Professor Botnotic" data-botonic="true"/>
         <div class="title">
-          <b>BOTNOLOGY 101</b>
-          <span>Dr. Botonic • Premium AI Tutor</span>
+          <b>Botnoloy101</b>
+          <span>Professor Botnotic • Premium AI Tutor</span>
         </div>
       </div>
       <div class="nav">
-        <button class="btn small" id="goPricing">Tuition Plans</button>
-        <button class="btn small" id="goDash">Dashboard</button>
+        <a class="btn small" href="/pricing.html" id="goPricing">Tuition Plans</a>
+        <a class="btn small" href="/dashboard.html" id="goDash">Dashboard</a>
+        <a class="btn small" href="/study-hall.html" id="goStudy">Study Hall</a>
+        <button class="btn small" id="themeToggle">Yeti Mode</button>
         <button class="btn gold small" id="openAuth">Sign In</button>
       </div>
     </div>
 
-    <div class="hero" style="grid-template-columns:1fr">
-      <div class="h1">Welcome</div>
-      <div class="sub">If you can see this page, "/" routing is fixed.</div>
-      <div class="hr"></div>
-      <div class="h-eyebrow"><span class="dot" id="healthDot"></span><span id="healthLine">API: checking…</span></div>
+    <div class="hero">
+      <div>
+        <div class="h-eyebrow">Introducing Dr. Botonic</div>
+        <div class="h1">The Smartest AI Tutor</div>
+        <div class="sub">A sophisticated, soft-spoken Harvard graduate yeti professor who coaches with calm precision, scholarly depth, and a touch of humor. Available 24/7 for self-directed study with an elegant, collegiate experience.</div>
+        <div class="row" style="margin-top:12px">
+          <a class="btn gold" href="/dashboard.html" id="goDash">Enter Dashboard</a>
+          <a class="btn" href="/pricing.html" id="goPricing">View Tuition Plans</a>
+        </div>
+        <div class="hr"></div>
+        <div class="h-eyebrow"><span class="dot" id="healthDot"></span><span id="healthLine">API: checking…</span></div>
+      </div>
+      <div class="card" style="display:flex;align-items:center;gap:14px">
+          <img src="/dr-botonic.svg" alt="Professor Botnotic" style="width:120px;height:120px;border-radius:999px;border:1px solid rgba(214,182,107,.35);object-fit:cover;background:#0a1811" data-botonic="true"/>
+        <div>
+          <b>Professor Dr. Botonic</b>
+          <div class="smallmuted">Harvard (DPhil), Fellow of Collegiate Tutors Association, 40+ years mentoring across Mathematics, Physics, Computer Science, and Humanities. Speaks in a gentle English accent with a witty side.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:16px">
+      <div class="row" style="align-items:center;gap:12px">
+        <div class="small">Plan: <span id="planBadge">ASSOCIATES</span></div>
+        <div class="small" id="whoami">Guest • BN-…</div>
+        <div class="small">Cloud Sync: <span class="dot" id="syncDot"></span> <span id="syncStatus">OFF</span></div>
+        <div style="flex:1"></div>
+        <div class="badge" id="subBadge" title="Subscription status">SUBSCRIPTION: NONE</div>
+        <button class="btn small" id="resumeBtn">Resume Last Chat</button>
+        <button class="btn small" id="exportBtn">Export Chat</button>
+        <button class="btn small" id="importBtn">Import Chat</button>
+        <input type="file" id="importFile" accept="application/json" style="display:none"/>
+        <button class="btn small" id="syncNow">Sync Now</button>
+        <button class="btn small" id="openBadge">Update ID Photo</button>
+      </div>
+
+      <div class="chat" style="margin-top:12px">
+        <div id="messages" class="messages forest" style="min-height:220px;max-height:360px;overflow:auto;padding:12px"></div>
+        <div class="row" style="margin-top:10px;gap:10px">
+          <textarea id="chatInput" rows="2" placeholder="Type your message…" style="flex:1"></textarea>
+          <button class="btn gold" id="sendBtn">Send</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -65,7 +105,51 @@
 
       <div style="display:flex;gap:10px;margin-top:12px">
         <button class="btn gold" id="doAuth">Sign In</button>
-        <button class="btn" id="goPricing">See Tuition Plans</button>
+        <a class="btn" href="/pricing.html" id="goPricing">See Tuition Plans</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="badgeModal">
+    <div class="box">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="shape-toggle">
+            <button class="btn small" id="shapeCircle" title="Circle">Circle</button>
+            <button class="btn small" id="shapeSquare" title="Square">Square</button>
+          </div>
+          <b>Botnoloy101 ID Badge</b>
+        </div>
+        <button class="btn small" id="closeBadge">Close</button>
+      </div>
+      <div class="smallmuted" style="margin-top:8px">Upload a photo, then drag to position and zoom.</div>
+      <div class="row" style="margin-top:10px;align-items:center">
+        <div class="crop-box" id="cropBox">
+          <img id="cropImg" src="/dr-botonic.svg" alt="Preview"/>
+        </div>
+        <div class="field" style="min-width:240px">
+          <label for="cropZoom">Zoom</label>
+          <input type="range" id="cropZoom" min="1" max="6" step="0.01" value="1"/>
+          <label for="cropFormat">Format</label>
+          <select id="cropFormat">
+            <option value="png">PNG (transparent)</option>
+            <option value="jpeg" selected>JPEG</option>
+          </select>
+          <label for="cropQuality">JPEG Quality</label>
+          <input type="range" id="cropQuality" min="0.5" max="0.98" step="0.01" value="0.90"/>
+          <label for="cropSize">Export Size</label>
+          <select id="cropSize">
+            <option value="256">256 × 256</option>
+            <option value="512">512 × 512</option>
+            <option value="1024" selected>1024 × 1024</option>
+          </select>
+          <input type="file" id="badgeFile" accept="image/*"/>
+          <div class="smallmuted" id="exportPreview">Output: 1024×1024 JPEG (90%)</div>
+        </div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <button class="btn" id="cropReset">Reset</button>
+        <button class="btn gold" id="saveBadgePhoto">Save Photo</button>
       </div>
     </div>
   </div>
