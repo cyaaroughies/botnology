@@ -1,0 +1,18 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Vercel local config
+.vercel/
+
+# Logs
+*.log
