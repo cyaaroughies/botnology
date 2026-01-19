@@ -73,21 +73,13 @@ def bearer_payload(req: Request) -> Optional[Dict[str, Any]]:
 @app.get("/api/health", include_in_schema=False)
 def api_health():
     # no imports that can crash here
-    has_openai = bool(os.getenv("OPENAI_API_KEY"))
-    has_stripe = bool(os.getenv("STRIPE_SECRET_KEY"))
     return {
-        "status": "ok",
-<<<<<<< HEAD
-        "openai": has_openai,
-        "stripe": has_stripe,
-        "static_dir": str(PUBLIC_DIR),
-=======
-        "openai": OPENAI_ENABLED,
-        "stripe": bool(os.getenv("STRIPE_SECRET_KEY")),
-        "public_dir_exists": PUBLIC_DIR.exists(),
-        "public_dir": str(PUBLIC_DIR),
->>>>>>> 08bfa35 (UI polish: forest-green chat, resilient nav, announcements endpoint + dashboard feed, Sign-In modals, light pane variants, bubble contrast, portrait swap; date-stamped announcements)
-    }
+            "status": "ok",
+            "openai": OPENAI_ENABLED,
+            "stripe": bool(os.getenv("STRIPE_SECRET_KEY")),
+            "public_dir_exists": PUBLIC_DIR.exists(),
+            "public_dir": str(PUBLIC_DIR),
+        }
 
 # ---------- Optional auth endpoints (so UI can show plan/name) ----------
 @app.post("/api/auth", include_in_schema=False)
@@ -95,24 +87,14 @@ async def api_auth(req: Request):
     body = await req.json()
     email = (body.get("email") or "").strip()
     name = (body.get("name") or "Student").strip()
-<<<<<<< HEAD
-    student_id = (body.get("student_id") or "").strip() or "BN-UNKNOWN"
-=======
     student_id = (body.get("student_id") or "").strip()
->>>>>>> 08bfa35 (UI polish: forest-green chat, resilient nav, announcements endpoint + dashboard feed, Sign-In modals, light pane variants, bubble contrast, portrait swap; date-stamped announcements)
     plan = (body.get("plan") or "associates").strip().lower()
     if not email or "@" not in email:
         raise HTTPException(status_code=400, detail="Valid email required")
-<<<<<<< HEAD
-
-    payload = {"email": email, "name": name, "student_id": student_id, "plan": plan}
-    token = sign_token(payload)
-=======
     if not student_id:
         rnd = base64.urlsafe_b64encode(os.urandom(6)).decode("utf-8").rstrip("=").upper()
         student_id = f"BN-{rnd}"
     token = sign_token({"email": email, "name": name, "student_id": student_id, "plan": plan})
->>>>>>> 08bfa35 (UI polish: forest-green chat, resilient nav, announcements endpoint + dashboard feed, Sign-In modals, light pane variants, bubble contrast, portrait swap; date-stamped announcements)
     return {"token": token, "plan": plan, "name": name, "student_id": student_id}
 
 @app.get("/api/me", include_in_schema=False)
@@ -134,24 +116,7 @@ def api_me(req: Request):
         pass
     return {"logged_in": True, **p}
 
-<<<<<<< HEAD
-# ---------- Root safety net (fixes "/" showing {"detail":"Not Found"}) ----------
-@app.get("/", include_in_schema=False)
-def serve_root():
-    # If Vercel routes "/" to the function, serve index.html instead of JSON 404
-    candidates = [
-        ROOT_DIR / "public" / "index.html",
-        ROOT_DIR / "index.html",
-    ]
-    for p in candidates:
-        if p.exists():
-            return FileResponse(str(p))
-    return JSONResponse({"detail": "index.html missing"}, status_code=404)
 
-# ---------- Serve static (LAST; acts as catch-all for non-/api routes) ----------
-# IMPORTANT: keep this at the end so /api/* routes win first
-app.mount("/", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="static")
-=======
 @app.post("/api/chat", include_in_schema=False)
 async def api_chat(req: Request):
     body = await req.json()
@@ -623,4 +588,3 @@ async def api_quiz_grade(req: Request):
         if gold and guess and (gold == guess or gold in guess or guess in gold):
             score += 1
     return {"score": score, "total": total}
->>>>>>> 08bfa35 (UI polish: forest-green chat, resilient nav, announcements endpoint + dashboard feed, Sign-In modals, light pane variants, bubble contrast, portrait swap; date-stamped announcements)

@@ -6,7 +6,7 @@ const ASSETS = [
   "/dashboard.html",
   "/style.css",
   "/script.js",
-  "/dr-botonic.png",
+  "/dr-botonic.svg",
   "/manifest.json"
 ];
 
