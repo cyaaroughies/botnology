@@ -1,5 +1,12 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/**/*.py": {
+      "runtime": "python3.11",
+      "maxDuration": 10,
+      "memory": 512
+    }
+  },
   "routes": [
     { "handle": "filesystem" },
     { "src": "/((?!api/).*)", "dest": "public/$1" }
