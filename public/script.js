@@ -1,4 +1,4 @@
-  const API = {
+const API = {
     health: "/api/health",
     chat: "/api/chat",
     auth: "/api/auth",
@@ -544,14 +544,32 @@
 
   async function startCheckout(plan, cadence) {
     const student_id = getStudentId();
-    const email = (localStorage.getItem("bn_email") || "").trim() || undefined;
+    const email = (((id) => document.getElementById(id))("authEmail")?.value || "").trim();
+    if (!email || email.length < 5) {
+      return toast("Hold up", "Enter a valid email.");
+    }
+
     try {
-      const out = await apiPost(API.checkout, { plan, cadence, student_id, email });
-      location.href = out.url;
-    } catch (e) {
-      toast("Stripe error", String(e.message || e));
+      const response = await apiPost(API.checkout, { plan, cadence, student_id, email });
+      if (response.url) {
+        window.location.href = response.url; // Redirect to Stripe Checkout
+      } else {
+        toast("Error", "Failed to start checkout session.");
+      }
+    } catch (error) {
+      toast("Error", error.message || "Checkout failed.");
     }
   }
+
+  // Example button integration
+  const checkoutButtons = document.querySelectorAll(".checkout-button");
+  checkoutButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const plan = button.dataset.plan;
+      const cadence = button.dataset.cadence;
+      startCheckout(plan, cadence);
+    });
+  });
 
 
 
@@ -1064,5 +1082,19 @@
     ((id) => document.getElementById(id))("speakToggle") && (((id) => document.getElementById(id))("speakToggle").addEventListener("change", (e) => setSpeak(!!e.target.checked)));
     ((id) => document.getElementById(id))("voiceSelect") && (((id) => document.getElementById(id))("voiceSelect").addEventListener("change", (e) => setVoice(e.target.value)));
     ((id) => document.getElementById(id))("announceAdd") && (((id) => document.getElementById(id))("announceAdd").onclick = () => addAnnouncement());
+    document.getElementById("voice-button")?.addEventListener("click", async () => {
+      const text = "Hello, I am Dr. Botonic, your interactive tutor. Let's learn together!";
+      try {
+        const response = await apiPost(API.tts, { text });
+        if (response.audioUrl) {
+          const audio = new Audio(response.audioUrl);
+          audio.play();
+        } else {
+          toast("Error", "Failed to generate voice.");
+        }
+      } catch (error) {
+        toast("Error", error.message || "Voice interaction failed.");
+      }
+    });
   });
-  
+
