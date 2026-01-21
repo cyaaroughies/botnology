@@ -478,64 +478,6 @@ def api_storage_list(req: Request):
         out.append({"path": "/" if rel == "." else rel, "dirs": ds, "files": fs})
     return {"tree": out}
 
-@app.post("/api/storage/write", include_in_schema=False)
-async def api_storage_write(req: Request):
-    _ensure_dirs()
-    p = bearer_payload(req)
-    if not p:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    body = await req.json()
-    rel = (body.get("path") or "").strip()
-    content = body.get("content")
-    if rel == "" or content is None:
-        raise HTTPException(status_code=400, detail="Missing path or content")
-    fp = _safe_path(p.get("student_id") or "BN-UNKNOWN", rel)
-    fp.parent.mkdir(parents=True, exist_ok=True)
-    data = content if isinstance(content, str) else json.dumps(content, ensure_ascii=False)
-    fp.write_text(data, "utf-8")
-    return {"saved": True}
-
-@app.post("/api/storage/read", include_in_schema=False)
-async def api_storage_read(req: Request):
-    _ensure_dirs()
-    p = bearer_payload(req)
-    if not p:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    body = await req.json()
-    rel = (body.get("path") or "").strip()
-    if rel == "":
-        raise HTTPException(status_code=400, detail="Missing path")
-    fp = _safe_path(p.get("student_id") or "BN-UNKNOWN", rel)
-    if not fp.exists():
-        raise HTTPException(status_code=404, detail="Not Found")
-    return {"content": fp.read_text("utf-8")}
-
-@app.post("/api/storage/delete", include_in_schema=False)
-async def api_storage_delete(req: Request):
-    _ensure_dirs()
-    p = bearer_payload(req)
-    if not p:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    body = await req.json()
-    rel = (body.get("path") or "").strip()
-    if rel == "":
-        raise HTTPException(status_code=400, detail="Missing path")
-    fp = _safe_path(p.get("student_id") or "BN-UNKNOWN", rel)
-    if fp.is_dir():
-        for sub in fp.glob("**/*"):
-            if sub.is_file():
-                try:
-                    sub.unlink()
-                except Exception:
-                    pass
-        try:
-            fp.rmdir()
-        except Exception:
-            pass
-    elif fp.exists():
-        fp.unlink()
-    return {"deleted": True}
-
 @app.post("/api/tts", include_in_schema=False)
 async def api_tts(req: Request):
     body = await req.json()
@@ -593,3 +535,8 @@ async def api_quiz_grade(req: Request):
         if gold and guess and (gold == guess or gold in guess or guess in gold):
             score += 1
     return {"score": score, "total": total}
+
+# Only mount static files if the directory exists (for local development)
+# In production (Vercel), static files are served automatically from public/
+if PUBLIC_DIR.exists():
+    app.mount("/", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="static")
