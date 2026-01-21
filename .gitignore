@@ -18,3 +18,6 @@ Thumbs.db
 *.log
 .vercel
 .env*.local
+
+# Ignore environment files
+.env
