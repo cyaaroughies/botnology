@@ -1,4 +1,9 @@
+from dotenv import load_dotenv
 import os
+
+# Load environment variables from .env file
+load_dotenv()
+
 import json
 import base64
 import hmac
@@ -12,8 +17,13 @@ from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from openai import OpenAI
 import stripe
+import logging
 
 app = FastAPI()
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("stripe")
 
 # ---------- CORS (tighten later) ----------
 app.add_middleware(
@@ -177,7 +187,9 @@ def _get_price_id(plan: str, cadence: str) -> Optional[str]:
 
 @app.post("/api/stripe/create-checkout-session", include_in_schema=False)
 async def api_stripe_checkout(req: Request):
+    logger.info("Received request for create-checkout-session")
     body = await req.json()
+    logger.info(f"Request body: {body}")
     plan = (body.get("plan") or "associates").strip().lower()
     cadence = (body.get("cadence") or "monthly").strip().lower()
     student_id = (body.get("student_id") or "BN-UNKNOWN").strip()
@@ -185,10 +197,12 @@ async def api_stripe_checkout(req: Request):
 
     secret = os.getenv("STRIPE_SECRET_KEY")
     if not secret:
+        logger.error("STRIPE_SECRET_KEY is not set")
         raise HTTPException(status_code=400, detail="Stripe not configured: set STRIPE_SECRET_KEY and price IDs env vars.")
 
     price_id = _get_price_id(plan, cadence)
     if not price_id:
+        logger.error(f"Missing price ID for plan: {plan}, cadence: {cadence}")
         raise HTTPException(status_code=400, detail="Missing Stripe price id env var for selected plan/cadence.")
 
     stripe.api_key = secret
@@ -206,8 +220,10 @@ async def api_stripe_checkout(req: Request):
             client_reference_id=student_id,
             metadata={"student_id": student_id, "plan": plan, "cadence": cadence},
         )
+        logger.info(f"Stripe session created: {session.url}")
         return {"url": session.url}
     except stripe.error.StripeError as e:
+        logger.error(f"Stripe error: {e}")
         raise HTTPException(status_code=400, detail=f"Stripe error: {getattr(e, 'user_message', str(e))}")
 
 @app.exception_handler(404)
