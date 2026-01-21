@@ -1,3 +1,5 @@
+
+
 // Button Event Handlers
 document.getElementById("resumeBtn")?.addEventListener("click", () => {
     console.log("Resuming last session...");
@@ -86,3 +88,4 @@ window.addEventListener("DOMContentLoaded", () => {
 
 // Modularization
 export { fetchData, updateElementText, smoothScrollTo };
+
