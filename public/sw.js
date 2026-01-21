@@ -1,12 +1,12 @@
-const CACHE = "bn-cache-v1";
+const CACHE = "bn-cache-v2"; // Updated cache version
 const ASSETS = [
   "/",
   "/index.html",
   "/pricing.html",
   "/dashboard.html",
-  "/style.css",
-  "/script.js",
-  "/dr-botonic.svg",
+  "/style.css?v=2", // Cache-busted
+  "/script.js?v=2", // Cache-busted
+  "/dr-botonic.jpeg",
   "/manifest.json"
 ];
 

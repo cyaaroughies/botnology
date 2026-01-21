@@ -6,12 +6,20 @@
   <title>Botnoloy101</title>
   <link rel="stylesheet" href="/style.css"/>
   <script defer src="/script.js"></script>
+  <meta name="description" content="Botnoloy101: Premium AI tutor with 24/7 availability for self-directed study."/>
+  <meta name="keywords" content="AI tutor, online learning, premium education, Botnoloy101"/>
+  <meta name="author" content="Botnoloy101"/>
+  <meta property="og:title" content="Botnoloy101: Premium AI Tutor"/>
+  <meta property="og:description" content="Learn with Dr. Botonic, your premium AI tutor available 24/7."/>
+  <meta property="og:image" content="/dr-botonic.jpeg"/>
+  <meta property="og:url" content="https://botnoloy101.com"/>
+  <meta name="twitter:card" content="summary_large_image"/>
 </head>
 <body data-page="home">
   <div class="container">
-    <div class="topbar">
+    <div class="topbar" style="position: sticky; top: 0; z-index: 1000; background: rgba(0, 0, 0, 0.8);">
       <div class="brand">
-          <img src="/dr-botonic.svg" alt="Professor Botnotic" data-botonic="true"/>
+          <img src="/dr-botonic.jpeg" alt="Professor Botnotic" data-botonic="true"/>
         <div class="title">
           <b>Botnoloy101</b>
           <span>Professor Botnotic • Premium AI Tutor</span>
@@ -34,16 +42,21 @@
         <div class="row" style="margin-top:12px">
           <a class="btn gold" href="/dashboard.html" id="goDash">Enter Dashboard</a>
           <a class="btn" href="/pricing.html" id="goPricing">View Tuition Plans</a>
+          <button class="btn" id="voice-button">Speak</button>
         </div>
         <div class="hr"></div>
         <div class="h-eyebrow"><span class="dot" id="healthDot"></span><span id="healthLine">API: checking…</span></div>
       </div>
       <div class="card" style="display:flex;align-items:center;gap:14px">
-          <img src="/dr-botonic.svg" alt="Professor Botnotic" style="width:120px;height:120px;border-radius:999px;border:1px solid rgba(214,182,107,.35);object-fit:cover;background:#0a1811" data-botonic="true"/>
+          <img src="/dr-botonic.jpeg" alt="Professor Botnotic" style="width:120px;height:120px;border-radius:999px;border:1px solid rgba(214,182,107,.35);object-fit:cover;background:#0a1811" data-botonic="true"/>
         <div>
           <b>Professor Dr. Botonic</b>
           <div class="smallmuted">Harvard (DPhil), Fellow of Collegiate Tutors Association, 40+ years mentoring across Mathematics, Physics, Computer Science, and Humanities. Speaks in a gentle English accent with a witty side.</div>
         </div>
+      </div>
+      <div>
+        <img src="/photos/professor-botonic-lecture.jpg" alt="Professor Botonic giving a lecture" style="width:100%;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.2)"/>
+        <p class="smallmuted" style="text-align:center;margin-top:8px">Professor Botonic in action</p>
       </div>
     </div>
 
@@ -134,7 +147,7 @@
       <div class="smallmuted" style="margin-top:8px">Upload a photo, then drag to position and zoom.</div>
       <div class="row" style="margin-top:10px;align-items:center">
         <div class="crop-box" id="cropBox">
-          <img id="cropImg" src="/dr-botonic.svg" alt="Preview"/>
+          <img id="cropImg" src="/dr-botonic.jpeg" alt="Preview"/>
         </div>
         <div class="field" style="min-width:240px">
           <label for="cropZoom">Zoom</label>

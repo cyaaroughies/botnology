@@ -89,11 +89,16 @@ async def api_auth(req: Request):
     name = (body.get("name") or "Student").strip()
     student_id = (body.get("student_id") or "").strip()
     plan = (body.get("plan") or "associates").strip().lower()
+
     if not email or "@" not in email:
         raise HTTPException(status_code=400, detail="Valid email required")
+
+    # Enhanced student_id generation with timestamp for uniqueness
     if not student_id:
         rnd = base64.urlsafe_b64encode(os.urandom(6)).decode("utf-8").rstrip("=").upper()
-        student_id = f"BN-{rnd}"
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        student_id = f"BN-{timestamp}-{rnd}"
+
     token = sign_token({"email": email, "name": name, "student_id": student_id, "plan": plan})
     return {"token": token, "plan": plan, "name": name, "student_id": student_id}
 
