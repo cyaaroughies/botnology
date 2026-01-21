@@ -65,5 +65,24 @@ window.addEventListener("error", (event) => {
     alert("An unexpected error occurred. Please refresh the page.");
 });
 
+// Function to check if critical elements are loaded
+function checkCriticalElements() {
+    const criticalElements = ["resumeBtn", "syncNow", "goPricing", "healthLine", "doAuth"];
+    criticalElements.forEach((id) => {
+        const element = document.getElementById(id);
+        if (element) {
+            console.log(`Element with ID '${id}' is loaded.`);
+        } else {
+            console.warn(`Element with ID '${id}' is missing.`);
+        }
+    });
+}
+
+// Run the check on page load
+window.addEventListener("DOMContentLoaded", () => {
+    console.log("Running critical elements check...");
+    checkCriticalElements();
+});
+
 // Modularization
 export { fetchData, updateElementText, smoothScrollTo };
