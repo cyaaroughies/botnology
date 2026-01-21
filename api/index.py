@@ -121,7 +121,6 @@ def api_me(req: Request):
         pass
     return {"logged_in": True, **p}
 
-
 @app.post("/api/chat", include_in_schema=False)
 async def api_chat(req: Request):
     body = await req.json()
@@ -518,6 +517,46 @@ async def api_quiz_generate(req: Request):
         return {"questions": []}
     except Exception:
         return {"questions": []}
+@app.post("/api/tts", include_in_schema=False)
+async def api_tts(req: Request):
+    body = await req.json()
+    text = (body.get("text") or "").strip()
+    voice = (body.get("voice") or "alloy").strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="Missing text")
+    if not OPENAI_ENABLED or client is None:
+        return {"audio_base64": None}
+    try:
+        resp = client.audio.speech.create(model=TTS_MODEL, voice=voice, input=text)
+        data = resp.read()
+        return {"audio_base64": base64.b64encode(data).decode("utf-8")}
+    except Exception:
+        return {"audio_base64": None}
+
+@app.post("/api/quiz/generate", include_in_schema=False)
+async def api_quiz_generate(req: Request):
+    body = await req.json()
+    topic = (body.get("topic") or "General").strip()
+    level = (body.get("level") or "bachelors").strip().lower()
+    if not OPENAI_ENABLED or client is None:
+        return {"questions": [
+            {"q": "Define entropy in thermodynamics.", "a": "Entropy quantifies disorder and energy dispersal in a system."},
+            {"q": "State the chain rule in calculus.", "a": "d/dx f(g(x)) = f'(g(x))·g'(x)."},
+            {"q": "Explain Big-O of binary search.", "a": "O(log n) due to halving the search space each step."}
+        ]}
+    prompt = (
+        "Create 5 rigorous study questions with concise ideal answers for topic: "
+        + topic + ". Depth level: " + level + ". Return JSON array with keys 'q' and 'a'."
+    )
+    try:
+        out = client.chat.completions.create(model=OPENAI_MODEL, messages=[{"role": "system", "content": "You produce only valid JSON."}, {"role": "user", "content": prompt}], temperature=0.2)
+        txt = (out.choices[0].message.content or "[]").strip()
+        data = json.loads(txt)
+        if isinstance(data, list):
+            return {"questions": data}
+        return {"questions": []}
+    except Exception:
+        return {"questions": []}
 
 @app.post("/api/quiz/grade", include_in_schema=False)
 async def api_quiz_grade(req: Request):
@@ -540,3 +579,4 @@ async def api_quiz_grade(req: Request):
 # In production (Vercel), static files are served automatically from public/
 if PUBLIC_DIR.exists():
     app.mount("/", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="static")
+
