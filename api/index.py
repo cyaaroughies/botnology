@@ -626,12 +626,8 @@ try:
 except Exception as e:
     logger.info(f"Skipping static file mount (normal in Vercel): {e}")
 
-# Vercel serverless function handler
-# Wrap FastAPI with Mangum for AWS Lambda/Vercel compatibility
-if MANGUM_AVAILABLE:
-    handler = Mangum(app, lifespan="off")
-    logger.info("Using Mangum handler for Vercel")
-else:
-    # Fallback for local development
-    handler = app
+# Handler exports for different platforms
+# Railway/Render: Uses 'app' directly
+# Vercel: Would use Mangum wrapper (not currently working)
+handler = app
 
