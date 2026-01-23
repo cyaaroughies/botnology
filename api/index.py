@@ -174,21 +174,33 @@ def _get_base_url(req: Request) -> str:
 def _get_price_id(plan: str, cadence: str) -> Optional[str]:
     plan = (plan or "associates").strip().lower()
     cadence = (cadence or "monthly").strip().lower()
-    env_key = None
-    if plan == "associates" and cadence == "monthly": env_key = "STRIPE_PRICE_ASSOCIATES_MONTHLY"
-    elif plan == "associates" and cadence == "annual": env_key = "STRIPE_PRICE_ASSOCIATES_ANNUAL"
-    elif plan == "bachelors" and cadence == "monthly": env_key = "STRIPE_PRICE_BACHELORS_MONTHLY"
-    elif plan == "bachelors" and cadence == "annual": env_key = "STRIPE_PRICE_BACHELORS_ANNUAL"
-    elif plan == "masters" and cadence == "monthly": env_key = "STRIPE_PRICE_MASTERS_MONTHLY"
-    elif plan == "masters" and cadence == "annual": env_key = "STRIPE_PRICE_MASTERS_ANNUAL"
-    if not env_key:
+    
+    # Map to environment variable keys with fallback defaults
+    price_map = {
+        ("associates", "monthly"): ("STRIPE_PRICE_ASSOCIATES_MONTHLY", "price_1Sq35RK6UhzkJnxUOJOqVUxU"),
+        ("associates", "annual"): ("STRIPE_PRICE_ASSOCIATES_ANNUAL", "price_1Sq35RK6UhzkJnxUDrjqCFmD"),
+        ("bachelors", "monthly"): ("STRIPE_PRICE_BACHELORS_MONTHLY", "price_1Sq38sK6UhzkJnxUOajgkvKV"),
+        ("bachelors", "annual"): ("STRIPE_PRICE_BACHELORS_ANNUAL", "price_1Sq3BGK6UhzkJnxUEUOZwOgc"),
+        ("masters", "monthly"): ("STRIPE_PRICE_MASTERS_MONTHLY", "price_1Sq3FhK6UhzkJnxUFZEYdlQD"),
+        ("masters", "annual"): ("STRIPE_PRICE_MASTERS_ANNUAL", "price_1Sq3HwK6UhzkJnxUGZ0Gr02O"),
+    }
+    
+    env_key_and_default = price_map.get((plan, cadence))
+    if not env_key_and_default:
         return None
-    return os.getenv(env_key) or None
+    
+    env_key, default_price = env_key_and_default
+    return os.getenv(env_key) or default_price
 
 @app.post("/api/stripe/create-checkout-session", include_in_schema=False)
 async def api_stripe_checkout(req: Request):
     logger.info("Received request for create-checkout-session")
-    body = await req.json()
+    try:
+        body = await req.json()
+    except Exception as e:
+        logger.error(f"Failed to parse request body: {e}")
+        raise HTTPException(status_code=400, detail="Invalid JSON in request body")
+    
     logger.info(f"Request body: {body}")
     plan = (body.get("plan") or "associates").strip().lower()
     cadence = (body.get("cadence") or "monthly").strip().lower()
@@ -198,12 +210,12 @@ async def api_stripe_checkout(req: Request):
     secret = os.getenv("STRIPE_SECRET_KEY")
     if not secret:
         logger.error("STRIPE_SECRET_KEY is not set")
-        raise HTTPException(status_code=400, detail="Stripe not configured: set STRIPE_SECRET_KEY and price IDs env vars.")
+        raise HTTPException(status_code=500, detail="Stripe not configured: STRIPE_SECRET_KEY missing")
 
     price_id = _get_price_id(plan, cadence)
     if not price_id:
         logger.error(f"Missing price ID for plan: {plan}, cadence: {cadence}")
-        raise HTTPException(status_code=400, detail="Missing Stripe price id env var for selected plan/cadence.")
+        raise HTTPException(status_code=400, detail=f"Invalid plan ({plan}) or cadence ({cadence})")
 
     stripe.api_key = secret
     base_url = _get_base_url(req)
@@ -220,7 +232,7 @@ async def api_stripe_checkout(req: Request):
             client_reference_id=student_id,
             metadata={"student_id": student_id, "plan": plan, "cadence": cadence},
         )
-        logger.info(f"Stripe session created: {session.url}")
+        logger.info(f"Stripe session created successfully: {session.id}")
         return {"url": session.url}
     except stripe.error.StripeError as e:
         logger.error(f"Stripe error: {e}")
