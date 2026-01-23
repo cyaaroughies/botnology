@@ -86,8 +86,8 @@ function startCheckout(plan, cadence) {
       console.log(`Received response with status: ${response.status}`);
 
       if (!response.ok) {
-        const contentType = response.headers.get("Content-Type");
-        if (contentType && contentType.includes("application/json")) {
+        const contentType = response.headers.get("Content-Type") || "";
+        if (contentType.toLowerCase().includes("application/json")) {
           return response.json()
             .then((data) => {
               const errorMsg = data.detail || `HTTP ${response.status}`;
