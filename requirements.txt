@@ -1,7 +1,8 @@
-fastapi==0.115.6
-pydantic==2.10.3
-stripe==10.12.0
-openai==1.58.1
-python-dotenv==1.0.1
-PyJWT==2.10.1
+fastapi
 uvicorn
+pydantic
+stripe
+openai
+python-dotenv
+PyJWT
+mangum

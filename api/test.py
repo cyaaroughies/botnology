@@ -1,7 +1,7 @@
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from mangum import Mangum
 
 app = FastAPI()
 
@@ -26,4 +26,4 @@ def health():
         "has_openai_key": bool(os.getenv("OPENAI_API_KEY"))
     }
 
-handler = app
+handler = Mangum(app, lifespan="off")
