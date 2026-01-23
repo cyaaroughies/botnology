@@ -27,6 +27,23 @@ app = FastAPI()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("stripe")
 
+# Ensure data directories exist
+def _ensure_dirs() -> None:
+    try:
+        DATA_DIR.mkdir(exist_ok=True)
+        HISTORY_DIR.mkdir(exist_ok=True)
+        SUBS_DIR.mkdir(exist_ok=True)
+        PHOTOS_DIR.mkdir(exist_ok=True)
+        STORAGE_DIR.mkdir(exist_ok=True)
+    except Exception as e:
+        logger.warning(f"Could not create directories: {e}")
+
+# Initialize directories on module load
+try:
+    _ensure_dirs()
+except Exception as e:
+    logger.warning(f"Initialization warning: {e}")
+
 # ---------- CORS (tighten later) ----------
 app.add_middleware(
     CORSMiddleware,
@@ -243,16 +260,6 @@ async def api_stripe_checkout(req: Request):
 @app.exception_handler(404)
 async def not_found(_, __):
     return JSONResponse({"detail": "Not Found"}, status_code=404)
-
-def _ensure_dirs() -> None:
-    try:
-        DATA_DIR.mkdir(exist_ok=True)
-        HISTORY_DIR.mkdir(exist_ok=True)
-        SUBS_DIR.mkdir(exist_ok=True)
-        PHOTOS_DIR.mkdir(exist_ok=True)
-        STORAGE_DIR.mkdir(exist_ok=True)
-    except Exception:
-        pass
 
 @app.get("/api/announcements", include_in_schema=False)
 def api_announcements():
@@ -609,4 +616,7 @@ async def api_quiz_grade(req: Request):
 # In production (Vercel), static files are served automatically from public/
 if PUBLIC_DIR.exists():
     app.mount("/", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="static")
+
+# Vercel serverless function handler
+handler = app
 
