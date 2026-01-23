@@ -21,6 +21,12 @@ from fastapi.staticfiles import StaticFiles
 from openai import OpenAI
 import stripe
 
+try:
+    from mangum import Mangum
+    MANGUM_AVAILABLE = True
+except ImportError:
+    MANGUM_AVAILABLE = False
+
 app = FastAPI()
 
 # Configure logging
@@ -621,5 +627,11 @@ except Exception as e:
     logger.info(f"Skipping static file mount (normal in Vercel): {e}")
 
 # Vercel serverless function handler
-# Don't rename 'app' - Vercel auto-detects FastAPI/Starlette apps
+# Wrap FastAPI with Mangum for AWS Lambda/Vercel compatibility
+if MANGUM_AVAILABLE:
+    handler = Mangum(app, lifespan="off")
+    logger.info("Using Mangum handler for Vercel")
+else:
+    # Fallback for local development
+    handler = app
 
