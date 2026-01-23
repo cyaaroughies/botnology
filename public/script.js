@@ -1,23 +1,25 @@
 // ==========================================
 // THEME TOGGLE
 // ==========================================
-const themeToggle = document.getElementById("theme-toggle");
-
-if (!themeToggle) return;
-
-// Load saved theme preference
-const savedTheme = localStorage.getItem("botnology_theme");
-if (savedTheme === "yeti") {
-  document.body.classList.add("yeti-theme");
-  themeToggle.textContent = "Forest Mode";
+function initThemeToggle() {
+  const themeToggle = document.getElementById("theme-toggle");
+  
+  if (!themeToggle) return;
+  
+  // Load saved theme preference
+  const savedTheme = localStorage.getItem("botnology_theme");
+  if (savedTheme === "yeti") {
+    document.body.classList.add("yeti-theme");
+    themeToggle.textContent = "Forest Mode";
+  }
+  
+  themeToggle.addEventListener("click", () => {
+    const isYeti = document.body.classList.toggle("yeti-theme");
+    themeToggle.textContent = isYeti ? "Forest Mode" : "Yeti Mode";
+    localStorage.setItem("botnology_theme", isYeti ? "yeti" : "forest");
+    console.log(`Theme switched to: ${isYeti ? "yeti" : "forest"}`);
+  });
 }
-
-themeToggle.addEventListener("click", () => {
-  const isYeti = document.body.classList.toggle("yeti-theme");
-  themeToggle.textContent = isYeti ? "Forest Mode" : "Yeti Mode";
-  localStorage.setItem("botnology_theme", isYeti ? "yeti" : "forest");
-  console.log(`Theme switched to: ${isYeti ? "yeti" : "forest"}`);
-});
 
 // ==========================================
 // VOICE BUTTON
