@@ -610,14 +610,16 @@ async def api_quiz_grade(req: Request):
             score += 1
     return {"score": score, "total": total}
 
-# Only mount static files for local development, not in Vercel
-# In Vercel, static files are served directly from public/ directory
-if os.getenv("VERCEL") != "1" and PUBLIC_DIR.exists():
-    try:
+# Only mount static files for local development
+# In Vercel serverless, the public/ directory is not available
+# Static files are served directly by Vercel from the public/ folder
+try:
+    if PUBLIC_DIR.exists() and str(PUBLIC_DIR).startswith("/var/task") == False:
         app.mount("/", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="static")
-    except Exception as e:
-        logger.warning(f"Could not mount static files: {e}")
+        logger.info(f"Mounted static files from {PUBLIC_DIR}")
+except Exception as e:
+    logger.info(f"Skipping static file mount (normal in Vercel): {e}")
 
 # Vercel serverless function handler
-handler = app
+# Don't rename 'app' - Vercel auto-detects FastAPI/Starlette apps
 
