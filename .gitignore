@@ -21,3 +21,13 @@ Thumbs.db
 
 # Ignore environment files
 .env
+
+# Node modules and JavaScript dependencies
+node_modules/
+
+# Test coverage
+coverage/
+*.lcov
+
+# Jest cache
+.jest/

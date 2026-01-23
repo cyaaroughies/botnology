@@ -4,7 +4,20 @@
   "description": "Premium AI tutor web app with FastAPI backend and static frontend, deployable on Vercel.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "coverageDirectory": "coverage",
+    "collectCoverageFrom": [
+      "public/**/*.js",
+      "!public/sw.js"
+    ],
+    "testMatch": [
+      "**/__tests__/**/*.test.js"
+    ]
   },
   "repository": {
     "type": "git",
@@ -17,5 +30,11 @@
   "bugs": {
     "url": "https://github.com/cyaaroughies/botnology/issues"
   },
-  "homepage": "https://github.com/cyaaroughies/botnology#readme"
+  "homepage": "https://github.com/cyaaroughies/botnology#readme",
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "jest": "^30.2.0",
+    "jest-environment-jsdom": "^30.2.0",
+    "jsdom": "^27.4.0"
+  }
 }

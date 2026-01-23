@@ -1,17 +1,18 @@
 // ==========================================
-// THEME TOGGLE (Yeti Mode)
+// THEME TOGGLE
 // ==========================================
 function initThemeToggle() {
-  const themeToggle = document.getElementById("themeToggle");
+  const themeToggle = document.getElementById("theme-toggle");
+  
   if (!themeToggle) return;
-
+  
   // Load saved theme preference
   const savedTheme = localStorage.getItem("botnology_theme");
   if (savedTheme === "yeti") {
     document.body.classList.add("yeti-theme");
     themeToggle.textContent = "Forest Mode";
   }
-
+  
   themeToggle.addEventListener("click", () => {
     const isYeti = document.body.classList.toggle("yeti-theme");
     themeToggle.textContent = isYeti ? "Forest Mode" : "Yeti Mode";
@@ -54,12 +55,15 @@ function startCheckout(plan, cadence) {
   if (token) {
     try {
       // Decode token to get student_id and email
-      const payload = JSON.parse(atob(token.split('.')[0]));
+      const base64Payload = token.split('.')[1]; // Corrected to use the payload part of the token
+      if (!base64Payload) throw new Error("Invalid token format");
+      const decodedPayload = atob(base64Payload);
+      const payload = JSON.parse(decodedPayload);
       student_id = payload.student_id || "BN-UNKNOWN";
       email = payload.email || "";
       console.log(`Using stored credentials - student_id: ${student_id}, email: ${email}`);
     } catch (e) {
-      console.warn("Could not decode token:", e);
+      console.warn("Could not decode or parse token payload:", e);
     }
   } else {
     console.log("No stored token found, proceeding as guest");
@@ -82,21 +86,32 @@ function startCheckout(plan, cadence) {
   })
     .then((response) => {
       console.log(`Received response with status: ${response.status}`);
-      
-      // Clone response to read it twice if needed
-      const responseClone = response.clone();
-      
+
       if (!response.ok) {
-        // Try to parse as JSON first, fallback to text
-        return response.json()
-          .catch(() => responseClone.text())
-          .then(data => {
-            const errorMsg = typeof data === 'string' ? data : (data.detail || `HTTP ${response.status}`);
-            throw new Error(errorMsg);
-          });
+        const contentType = response.headers.get("Content-Type") || "";
+        if (contentType.toLowerCase().includes("application/json")) {
+          return response.json()
+            .then((data) => {
+              const errorMsg = data.detail || `HTTP ${response.status}`;
+              throw new Error(errorMsg);
+            });
+        } else {
+          return response.text()
+            .then((text) => {
+              throw new Error(text || `HTTP ${response.status}`);
+            });
+        }
       }
-      
-      return response.json();
+
+      // Attempt to parse JSON response, fallback to plain text if parsing fails
+      return response.text().then((text) => {
+        try {
+          return JSON.parse(text);
+        } catch (e) {
+          console.warn("Response is not valid JSON, returning as plain text.");
+          return { detail: text };
+        }
+      });
     })
     .then((data) => {
       console.log("Checkout session response:", data);
