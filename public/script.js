@@ -82,11 +82,20 @@ function startCheckout(plan, cadence) {
   })
     .then((response) => {
       console.log(`Received response with status: ${response.status}`);
+      
+      // Clone response to read it twice if needed
+      const responseClone = response.clone();
+      
       if (!response.ok) {
-        return response.json().then(data => {
-          throw new Error(data.detail || `HTTP ${response.status}: ${response.statusText}`);
-        });
+        // Try to parse as JSON first, fallback to text
+        return response.json()
+          .catch(() => responseClone.text())
+          .then(data => {
+            const errorMsg = typeof data === 'string' ? data : (data.detail || `HTTP ${response.status}`);
+            throw new Error(errorMsg);
+          });
       }
+      
       return response.json();
     })
     .then((data) => {

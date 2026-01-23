@@ -1,23 +1,25 @@
-from dotenv import load_dotenv
 import os
-
-# Load environment variables from .env file
-load_dotenv()
-
 import json
 import base64
 import hmac
 import hashlib
+import logging
 from pathlib import Path
 from typing import Any, Dict, Optional, List
 from datetime import datetime
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # dotenv not available in Vercel, use environment variables directly
+
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from openai import OpenAI
 import stripe
-import logging
 
 app = FastAPI()
 
