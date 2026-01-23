@@ -487,8 +487,6 @@ async def api_set_photo(req: Request):
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid photo")
 
-app.mount("/", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="static")
-
 def _storage_root(student_id: str) -> Path:
     safe = "".join(c for c in (student_id or "BN-UNKNOWN") if c.isalnum() or c in ("-", "_"))
     return STORAGE_DIR / safe
