@@ -27,23 +27,6 @@ app = FastAPI()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("stripe")
 
-# Ensure data directories exist
-def _ensure_dirs() -> None:
-    try:
-        DATA_DIR.mkdir(exist_ok=True)
-        HISTORY_DIR.mkdir(exist_ok=True)
-        SUBS_DIR.mkdir(exist_ok=True)
-        PHOTOS_DIR.mkdir(exist_ok=True)
-        STORAGE_DIR.mkdir(exist_ok=True)
-    except Exception as e:
-        logger.warning(f"Could not create directories: {e}")
-
-# Initialize directories on module load
-try:
-    _ensure_dirs()
-except Exception as e:
-    logger.warning(f"Initialization warning: {e}")
-
 # ---------- CORS (tighten later) ----------
 app.add_middleware(
     CORSMiddleware,
@@ -68,6 +51,23 @@ OPENAI_ENABLED = bool(os.getenv("OPENAI_API_KEY"))
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 TTS_MODEL = os.getenv("OPENAI_TTS_MODEL", "gpt-4o-mini-tts")
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY")) if OPENAI_ENABLED else None
+
+# Ensure data directories exist
+def _ensure_dirs() -> None:
+    try:
+        DATA_DIR.mkdir(exist_ok=True)
+        HISTORY_DIR.mkdir(exist_ok=True)
+        SUBS_DIR.mkdir(exist_ok=True)
+        PHOTOS_DIR.mkdir(exist_ok=True)
+        STORAGE_DIR.mkdir(exist_ok=True)
+    except Exception as e:
+        logger.warning(f"Could not create directories: {e}")
+
+# Initialize directories on module load
+try:
+    _ensure_dirs()
+except Exception as e:
+    logger.warning(f"Initialization warning: {e}")
 
 def _b64url(b: bytes) -> str:
     return base64.urlsafe_b64encode(b).decode("utf-8").rstrip("=")
@@ -612,10 +612,13 @@ async def api_quiz_grade(req: Request):
             score += 1
     return {"score": score, "total": total}
 
-# Only mount static files if the directory exists (for local development)
-# In production (Vercel), static files are served automatically from public/
-if PUBLIC_DIR.exists():
-    app.mount("/", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="static")
+# Only mount static files for local development, not in Vercel
+# In Vercel, static files are served directly from public/ directory
+if os.getenv("VERCEL") != "1" and PUBLIC_DIR.exists():
+    try:
+        app.mount("/", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="static")
+    except Exception as e:
+        logger.warning(f"Could not mount static files: {e}")
 
 # Vercel serverless function handler
 handler = app
