@@ -1,7 +1,5 @@
-import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from mangum import Mangum
 
 app = FastAPI()
 
@@ -14,8 +12,8 @@ app.add_middleware(
 )
 
 @app.get("/")
-@app.get("/test")
-def test():
-    return {"status": "ok", "message": "Vercel + Mangum working!"}
+def root():
+    return {"status": "ok", "message": "Test endpoint working!"}
 
-handler = Mangum(app, lifespan="off")
+# Vercel expects 'app' not 'handler' for FastAPI
+# No Mangum needed - Vercel handles ASGI automatically
