@@ -1,23 +1,27 @@
 // ==========================================
 // THEME TOGGLE
 // ==========================================
-const themeToggle = document.getElementById("theme-toggle");
+function initThemeToggle() {
+  const themeToggle = document.getElementById("themeToggle");
+  if (!themeToggle) {
+    console.log("Theme toggle button not found");
+    return;
+  }
 
-if (!themeToggle) return;
+  // Load saved theme preference
+  const savedTheme = localStorage.getItem("botnology_theme");
+  if (savedTheme === "yeti") {
+    document.body.classList.add("yeti-theme");
+    themeToggle.textContent = "Forest Mode";
+  }
 
-// Load saved theme preference
-const savedTheme = localStorage.getItem("botnology_theme");
-if (savedTheme === "yeti") {
-  document.body.classList.add("yeti-theme");
-  themeToggle.textContent = "Forest Mode";
+  themeToggle.addEventListener("click", () => {
+    const isYeti = document.body.classList.toggle("yeti-theme");
+    themeToggle.textContent = isYeti ? "Forest Mode" : "Yeti Mode";
+    localStorage.setItem("botnology_theme", isYeti ? "yeti" : "forest");
+    console.log(`Theme switched to: ${isYeti ? "yeti" : "forest"}`);
+  });
 }
-
-themeToggle.addEventListener("click", () => {
-  const isYeti = document.body.classList.toggle("yeti-theme");
-  themeToggle.textContent = isYeti ? "Forest Mode" : "Yeti Mode";
-  localStorage.setItem("botnology_theme", isYeti ? "yeti" : "forest");
-  console.log(`Theme switched to: ${isYeti ? "yeti" : "forest"}`);
-});
 
 // ==========================================
 // VOICE BUTTON
@@ -37,23 +41,21 @@ function initVoiceButton() {
 // ==========================================
 // STRIPE CHECKOUT
 // ==========================================
-function startCheckout(plan, cadence) {
+async function startCheckout(plan, cadence) {
   console.log(`Starting checkout for plan: ${plan}, cadence: ${cadence}`);
-  
+
   if (!plan || !cadence) {
     alert("Invalid plan or cadence selected.");
     return;
   }
 
-  // Get auth token from localStorage if available
   const token = localStorage.getItem("botnology_token");
   let student_id = "BN-UNKNOWN";
   let email = "";
 
   if (token) {
     try {
-      // Decode token to get student_id and email
-      const base64Payload = token.split('.')[1]; // Corrected to use the payload part of the token
+      const base64Payload = token.split('.')[1];
       if (!base64Payload) throw new Error("Invalid token format");
       const decodedPayload = atob(base64Payload);
       const payload = JSON.parse(decodedPayload);
@@ -73,57 +75,52 @@ function startCheckout(plan, cadence) {
     student_id: student_id,
     email: email
   };
+  const apiUrl = process.env.API_BASE_URL || "";
   console.log("Sending request to /api/stripe/create-checkout-session:", requestBody);
 
-  fetch("/api/stripe/create-checkout-session", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(requestBody),
-  })
-    .then((response) => {
-      console.log(`Received response with status: ${response.status}`);
-
-      if (!response.ok) {
-        const contentType = response.headers.get("Content-Type") || "";
-        if (contentType.toLowerCase().includes("application/json")) {
-          return response.json()
-            .then((data) => {
-              const errorMsg = data.detail || `HTTP ${response.status}`;
-              throw new Error(errorMsg);
-            });
-        } else {
-          return response.text()
-            .then((text) => {
-              throw new Error(text || `HTTP ${response.status}`);
-            });
-        }
-      }
-
-      // Attempt to parse JSON response, fallback to plain text if parsing fails
-      return response.text().then((text) => {
-        try {
-          return JSON.parse(text);
-        } catch (e) {
-          console.warn("Response is not valid JSON, returning as plain text.");
-          return { detail: text };
-        }
-      });
-    })
-    .then((data) => {
-      console.log("Checkout session response:", data);
-      if (data.url) {
-        console.log("Redirecting to Stripe checkout:", data.url);
-        window.location.href = data.url;
-      } else {
-        alert("Failed to create checkout session. " + (data.detail || "No URL returned"));
-      }
-    })
-    .catch((error) => {
-      console.error("Error creating checkout session:", error);
-      alert("An error occurred while opening checkout: " + error.message);
+  try {
+    const fetchResponse = await fetch(`${apiUrl}/api/stripe/create-checkout-session`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
     });
+
+    console.log(`Received response with status: ${fetchResponse.status}`);
+
+    if (!fetchResponse.ok) {
+      const contentType = fetchResponse.headers.get("Content-Type") || "";
+      let errorBody;
+      if (contentType.includes("application/json")) {
+        errorBody = await fetchResponse.json();
+      } else {
+        errorBody = await fetchResponse.text();
+      }
+      console.error("Error response from server:", errorBody);
+      throw new Error(errorBody.detail || errorBody || `HTTP ${fetchResponse.status}`);
+    }
+
+    const textResponse = await fetchResponse.text();
+    let data;
+    try {
+      data = JSON.parse(textResponse);
+    } catch (e) {
+      console.warn("Response is not valid JSON, returning as plain text.");
+      data = { detail: textResponse };
+    }
+
+    console.log("Checkout session response:", data);
+    if (data.url) {
+      console.log("Redirecting to Stripe checkout:", data.url);
+      window.location.href = data.url;
+    } else {
+      alert("Failed to create checkout session. " + (data.detail || "No URL returned"));
+    }
+  } catch (error) {
+    console.error("Error creating checkout session:", error);
+    alert("An error occurred while opening checkout: " + error.message);
+  }
 }
 
 // ==========================================
