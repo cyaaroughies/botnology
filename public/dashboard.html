@@ -10,39 +10,48 @@
 </head>
 <body>
   <div class="container">
-    <div class="topbar">
+    <div class="topbar" style="position: sticky; top: 0; z-index: 1000; background: rgba(0, 0, 0, 0.8);">
       <div class="brand">
         <img src="/dr-botonic.jpeg" alt="Professor Botnotic" data-botonic="true"/>
-        <div>
-          <div style="font-weight:800;letter-spacing:.4px">Botnoloy101</div>
-          <div class="small">Dashboard | <span id="healthLine">API: checking...</span></div>
+        <div class="title">
+          <b>Botnoloy101</b>
+          <span>Professor Botnotic • Dashboard</span>
         </div>
       </div>
-      <div class="row" style="margin:0">
-        <a class="btn" href="/index.html" id="goHome">Home</a>
-        <a class="btn" href="/pricing.html" id="goPricing">Pricing</a>
-        <a class="btn" href="/study-hall.html" id="goStudy">Study Hall</a>
-        <button class="btn" id="themeToggle">Yeti Mode</button>
+      <div class="nav">
+        <a class="btn small" href="/index.html" id="goHome">Home</a>
+        <a class="btn small" href="/pricing.html" id="goPricing">Tuition Plans</a>
+        <a class="btn small" href="/study-hall.html" id="goStudy">Study Hall</a>
+        <button class="btn small" id="themeToggle">Yeti Mode</button>
+        <button class="btn gold small" id="openAuth">Sign In</button>
       </div>
     </div>
 
-    <div class="hero">
-      <div class="h1">Dashboard</div>
-      <div class="sub">Navigation buttons should work now, guaranteed.</div>
+    <div class="hero" style="grid-template-columns:1fr">
+      <div>
+        <div class="h-eyebrow">Dashboard</div>
+        <div class="h1">Professor Botonic's Study Centre</div>
+        <div class="sub">Engage with your AI tutor for anatomy, calculus, trigonometry, and advanced sciences.</div>
+        <div class="hr"></div>
+        <div class="h-eyebrow"><span class="dot" id="healthDot"></span><span id="healthLine">API: checking…</span></div>
+      </div>
     </div>
 
     <div class="panel" style="margin-top:16px" id="voicePanel">
-      <div class="row" style="align-items:center;gap:12px">
-        <div class="small">Plan: <span id="planBadge">ASSOCIATES</span></div>
+      <div class="row" style="align-items:center;gap:12px;flex-wrap:wrap">
+        <div class="small">Plan: <span id="planBadge" class="badge">ASSOCIATES</span></div>
         <div class="small" id="whoami">Guest • BN-…</div>
         <div class="small">Cloud Sync: <span class="dot" id="syncDot"></span> <span id="syncStatus">OFF</span></div>
         <div style="flex:1"></div>
         <div class="badge" id="subBadge" title="Subscription status">SUBSCRIPTION: NONE</div>
-        <button class="btn small" id="resumeBtn">Resume Last Chat</button>
-        <button class="btn small" id="exportBtn">Export Chat</button>
-        <button class="btn small" id="importBtn">Import Chat</button>
-        <input type="file" id="importFile" accept="application/json" style="display:none"/>
-        <button class="btn small" id="syncNow">Sync Now</button>
+      </div>
+      
+      <div class="row" style="margin-top:12px;gap:8px;flex-wrap:wrap">
+        <button class="btn small" id="resumeBtn">Resume Chat</button>400px;max-height:500px;overflow:auto;padding:14px"></div>
+        <div class="row" style="margin-top:10px;gap:10px">
+          <textarea id="chatInput" rows="2" placeholder="Ask Professor Botonic…" style="flex:1;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#e8f3ee;border-radius:14px;padding:12px;outline:none;font-family:inherit;font-size:14px;resize:vertical"></textarea>
+          <button class="btn gold" id="sendBtn" style="align-self:flex-endept="application/json" style="display:none"/>
+        <button class="btn small gold" id="syncNow">Sync Now</button>
       </div>
 
       <div class="chat" style="margin-top:12px">
