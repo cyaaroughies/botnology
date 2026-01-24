@@ -17,5 +17,9 @@
   "bugs": {
     "url": "https://github.com/cyaaroughies/botnology/issues"
   },
-  "homepage": "https://github.com/cyaaroughies/botnology#readme"
+  "homepage": "https://github.com/cyaaroughies/botnology#readme",
+  "dependencies": {
+    "express": "^5.2.1",
+    "vercel": "^50.5.0"
+  }
 }

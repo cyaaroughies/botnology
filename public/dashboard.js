@@ -93,9 +93,9 @@ function initChat() {
 
 function addWelcomeMessage() {
   const messages = {
-    associates: "Good day. I'm Professor Botonic, your AI tutor. Ask me anything to begin your studies.",
-    bachelors: "Welcome, dear student. I'm Professor Botonic from Harvard. Let us embark on a journey of deeper understanding together. What shall we explore today?",
-    masters: "Greetings, my distinguished scholar. I am Professor Botonic, and it is an honour to mentor you. With my elite guidance, we shall achieve intellectual excellence. What complex matter shall we tackle?"
+    associates: "Good afternoon. I am Professor Botonic from Harvard. I specialize in anatomy, calculus, trigonometry, and the sciences. Let us begin with the fundamentals—what subject interests you today?",
+    bachelors: "Greetings, dear scholar. I am Professor Botonic, Harvard faculty. My expertise spans anatomy, advanced mathematics, physics, and chemistry. I shall provide structured, rigorous instruction. What challenging topic shall we explore?",
+    masters: "Welcome, my distinguished colleague. I am Professor Botonic, Harvard professor emeritus. My academic focus encompasses human anatomy, differential calculus, trigonometric analysis, quantum mechanics, and organic chemistry. I offer elite-level mentorship with mathematical precision and theoretical depth. What complex intellectual pursuit demands our attention today?"
   };
   
   const welcomeMsg = messages[currentPlan] || messages.associates;

@@ -167,14 +167,34 @@ async def api_chat(req: Request):
     plan = (body.get("plan") or "associates").strip().lower()
     if not OPENAI_ENABLED or client is None:
         return {"reply": f"(Demo) Dr. Botonic heard: {msg}", "plan": plan}
-    sys_prompt = (
-        "You are Dr. Botonic, a 72-year-old sophisticated Harvard graduate yeti professor. "
-        "You speak calm, soft English with a subtle accent. "
-        "You are the smartest AI tutor in the industry. "
-        "Be concise yet deeply insightful, use earthy, scholarly tone, and optionally a tasteful gentle joke. "
-        "Adapt depth to the student's plan: Associates = foundational guidance, Bachelors = deeper explanations and structured steps, Masters = elite coaching with advanced insights, references, and study strategies. "
-        "Subject: " + subject
-    )
+    
+    # Tier-specific system prompts for academic excellence
+    if plan == "masters":
+        sys_prompt = (
+            "You are Dr. Botonic, a distinguished 72-year-old Harvard professor with expertise in anatomy, calculus, trigonometry, physics, chemistry, and advanced mathematics. "
+            "You speak with refined British English precision. Your responses are deeply analytical, methodical, and comprehensive. "
+            "Provide: (1) Thorough theoretical foundations, (2) Step-by-step derivations with mathematical rigor, (3) Real-world applications, "
+            "(4) Common pitfalls and advanced insights, (5) References to key theorems or principles. "
+            "Use precise terminology. Include formulas when relevant. Challenge the student intellectually while maintaining sophistication. "
+            "Subject: " + subject
+        )
+    elif plan == "bachelors":
+        sys_prompt = (
+            "You are Dr. Botonic, a 72-year-old Harvard professor specializing in anatomy, calculus, trigonometry, and STEM disciplines. "
+            "You speak with a calm, scholarly British English tone. Provide structured, detailed explanations with clear steps. "
+            "Include: (1) Core concepts and definitions, (2) Worked examples with intermediate steps, (3) Practical problem-solving strategies. "
+            "Use appropriate academic vocabulary. Encourage deeper understanding through logical progression. "
+            "Subject: " + subject
+        )
+    else:  # associates
+        sys_prompt = (
+            "You are Dr. Botonic, a 72-year-old Harvard professor tutoring in anatomy, calculus, trigonometry, and foundational sciences. "
+            "You speak with a gentle, encouraging British English accent. Provide clear, foundational guidance. "
+            "Focus on: (1) Core principles explained simply, (2) Building blocks before complexity, (3) Encouraging questions and exploration. "
+            "Be approachable yet academically sound. Guide students to understanding fundamentals thoroughly. "
+            "Subject: " + subject
+        )
+    
     messages: List[Dict[str, str]] = [{"role": "system", "content": sys_prompt}]
     if isinstance(hist, list):
         for m in hist[-16:]:
@@ -237,10 +257,12 @@ async def api_stripe_checkout(req: Request):
         logger.error("STRIPE_SECRET_KEY is not set")
         raise HTTPException(status_code=500, detail="Stripe not configured: STRIPE_SECRET_KEY missing")
 
+    logger.info(f"Fetching price ID for plan: {plan}, cadence: {cadence}")
     price_id = _get_price_id(plan, cadence)
     if not price_id:
-        logger.error(f"Missing price ID for plan: {plan}, cadence: {cadence}")
+        logger.error(f"Invalid plan ({plan}) or cadence ({cadence})")
         raise HTTPException(status_code=400, detail=f"Invalid plan ({plan}) or cadence ({cadence})")
+    logger.info(f"Price ID resolved: {price_id}")
 
     stripe.api_key = secret
     base_url = _get_base_url(req)
@@ -629,5 +651,7 @@ except Exception as e:
 # Handler exports for different platforms
 # Railway/Render: Uses 'app' directly
 # Vercel: Would use Mangum wrapper (not currently working)
-handler = app
+# Add logging to verify Mangum handler initialization
+logger.info("Initializing Mangum handler for FastAPI app")
+handler = Mangum(app)
 
