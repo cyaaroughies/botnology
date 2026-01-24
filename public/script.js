@@ -31,10 +31,43 @@ function initVoiceButton() {
   if (!voiceButton) return;
 
   voiceButton.addEventListener("click", () => {
-    const text = "Hello! I am Professor Botonic, your premium AI tutor. Let's learn together!";
+    const text = "Good afternoon. I am Professor Botonic, your premium AI tutor from Harvard. Jolly good to make your acquaintance. Shall we embark on a spot of learning together?";
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.voice = speechSynthesis.getVoices().find(voice => voice.name.includes("English"));
-    speechSynthesis.speak(utterance);
+    
+    // Wait for voices to load
+    const setVoice = () => {
+      const voices = speechSynthesis.getVoices();
+      // Try to find a British English voice
+      const britishVoice = voices.find(v => 
+        v.lang.includes('en-GB') || 
+        v.name.includes('British') || 
+        v.name.includes('Daniel') ||
+        v.name.includes('Oliver')
+      );
+      
+      if (britishVoice) {
+        utterance.voice = britishVoice;
+        console.log('Using British voice:', britishVoice.name);
+      } else {
+        // Fallback to any English voice
+        const englishVoice = voices.find(v => v.lang.startsWith('en'));
+        if (englishVoice) {
+          utterance.voice = englishVoice;
+          console.log('Using English voice:', englishVoice.name);
+        }
+      }
+      
+      utterance.rate = 0.9; // Slightly slower for sophistication
+      utterance.pitch = 0.9; // Slightly lower pitch
+      speechSynthesis.speak(utterance);
+    };
+    
+    // Voices might not be loaded yet
+    if (speechSynthesis.getVoices().length === 0) {
+      speechSynthesis.addEventListener('voiceschanged', setVoice, { once: true });
+    } else {
+      setVoice();
+    }
   });
 }
 
