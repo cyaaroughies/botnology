@@ -310,6 +310,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadStudentData();
   initializeTabs();
   initializeFilters();
+  initializeStudentCard();
   renderEnrolledCourses();
   renderCourseCatalog();
   renderAssignments();
@@ -330,10 +331,191 @@ function loadUserData() {
       document.getElementById('studentName').textContent = currentUser.name;
       document.getElementById('planBadge').textContent = currentUser.plan.toUpperCase();
       document.getElementById('studentId').textContent = 'BN-' + currentUser.id.slice(0, 6).toUpperCase();
+      
+      // Load student photo
+      loadStudentPhoto();
     } catch (e) {
       console.error('User data parse error:', e);
     }
   }
+}
+
+// ───────────────────────────────────────
+// STUDENT ID CARD WITH PHOTO UPLOAD
+// ───────────────────────────────────────
+function initializeStudentCard() {
+  const studentCard = document.getElementById('studentCard');
+  const photoUpload = document.getElementById('photoUpload');
+  const studentPhoto = document.getElementById('studentPhoto');
+  
+  // Click card to upload photo OR show ID card popup
+  studentCard?.addEventListener('click', (e) => {
+    // If user is signed in, show ID card popup
+    if (currentUser.id !== 'guest') {
+      showStudentIdCard();
+    } else {
+      // Guest user - prompt to upload photo
+      photoUpload?.click();
+    }
+  });
+  
+  // Handle photo upload
+  photoUpload?.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please upload an image file (JPG, PNG, GIF, etc.)');
+      return;
+    }
+    
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size must be less than 5MB');
+      return;
+    }
+    
+    // Read and store image
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const imageData = event.target.result;
+      
+      // Save to localStorage
+      const key = `botnology_photo_${currentUser.id}`;
+      localStorage.setItem(key, imageData);
+      
+      // Update all displays
+      updateStudentPhoto(imageData);
+      
+      // Add animation
+      studentPhoto.style.transform = 'scale(1.05)';
+      setTimeout(() => {
+        studentPhoto.style.transform = 'scale(1)';
+      }, 300);
+      
+      // Show success message
+      showNotification('✅ Profile photo updated!');
+    };
+    
+    reader.onerror = () => {
+      alert('Error reading file. Please try again.');
+    };
+    
+    reader.readAsDataURL(file);
+  });
+  
+  // Close ID card modal
+  document.getElementById('closeIdCard')?.addEventListener('click', () => {
+    document.getElementById('studentIdModal').classList.remove('show');
+  });
+}
+
+function updateStudentPhoto(imageData) {
+  // Update main student photo
+  const studentPhoto = document.getElementById('studentPhoto');
+  if (studentPhoto) {
+    studentPhoto.src = imageData;
+  }
+  
+  // Update ID card photo
+  const idCardPhoto = document.getElementById('idCardPhoto');
+  if (idCardPhoto) {
+    idCardPhoto.src = imageData;
+  }
+}
+
+function showStudentIdCard() {
+  // Update ID card with current data
+  document.getElementById('idCardName').textContent = currentUser.name;
+  document.getElementById('idCardPlan').textContent = currentUser.plan.toUpperCase() + ' DEGREE';
+  document.getElementById('idCardStudentId').textContent = 'BN-' + currentUser.id.slice(0, 6).toUpperCase();
+  document.getElementById('idCardGpa').textContent = calculateGPA().toFixed(2);
+  document.getElementById('idCardEnrolled').textContent = studentData.enrolledCourses.length + ' Courses';
+  document.getElementById('idCardLevel').textContent = Math.floor(studentData.xp / 1000) + 1;
+  document.getElementById('idCardIssued').textContent = new Date().getFullYear();
+  
+  // Load photo
+  const key = `botnology_photo_${currentUser.id}`;
+  const stored = localStorage.getItem(key);
+  if (stored) {
+    document.getElementById('idCardPhoto').src = stored;
+  } else {
+    document.getElementById('idCardPhoto').src = '/dr-botonic.jpeg';
+  }
+  
+  // Show modal
+  document.getElementById('studentIdModal').classList.add('show');
+}
+
+function loadStudentPhoto() {
+  const key = `botnology_photo_${currentUser.id}`;
+  const stored = localStorage.getItem(key);
+  
+  if (stored) {
+    const studentPhoto = document.getElementById('studentPhoto');
+    if (studentPhoto) {
+      studentPhoto.src = stored;
+    }
+  }
+}
+
+function showNotification(message) {
+  // Create notification element
+  const notification = document.createElement('div');
+  notification.style.cssText = `
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    padding: 16px 24px;
+    background: linear-gradient(135deg, var(--gold), rgba(255,215,0,.8));
+    color: var(--black);
+    border-radius: 12px;
+    font-weight: 700;
+    box-shadow: 0 8px 24px rgba(255,215,0,.3);
+    z-index: 10000;
+    animation: slideIn 0.3s ease;
+  `;
+  notification.textContent = message;
+  
+  document.body.appendChild(notification);
+  
+  // Remove after 3 seconds
+  setTimeout(() => {
+    notification.style.animation = 'slideOut 0.3s ease';
+    setTimeout(() => {
+      notification.remove();
+    }, 300);
+  }, 3000);
+}
+
+// Add animation styles
+if (!document.getElementById('notification-styles')) {
+  const style = document.createElement('style');
+  style.id = 'notification-styles';
+  style.textContent = `
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
+  `;
+  document.head.appendChild(style);
 }
 
 document.getElementById('openAuth')?.addEventListener('click', () => {

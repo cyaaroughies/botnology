@@ -79,12 +79,17 @@
 
         <!-- ========== STUDENT INFO PANEL ========== -->
         <div style="display:grid;grid-template-columns:1fr 2fr;gap:20px;margin:24px 0">
-          <div class="instructor-card" style="flex-direction:column;text-align:center">
-            <img src="/dr-botonic.jpeg" alt="Dr. Botonic" class="instructor-img"/>
+          <div class="instructor-card" style="flex-direction:column;text-align:center;cursor:pointer;position:relative" id="studentCard" title="Click to upload profile photo">
+            <div style="position:relative;display:inline-block">
+              <img src="/dr-botonic.jpeg" alt="Student Photo" class="instructor-img" id="studentPhoto"/>
+              <div style="position:absolute;bottom:0;right:0;width:32px;height:32px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid var(--black);font-size:16px">📷</div>
+            </div>
+            <input type="file" id="photoUpload" accept="image/*" style="display:none"/>
             <div>
               <div style="font-weight:800;font-size:18px;margin-bottom:4px" id="studentName">Guest Student</div>
               <div class="badge gold" id="planBadge">ASSOCIATES</div>
               <div style="margin-top:12px;font-size:14px;color:rgba(232,243,238,.7)">Student ID: <span id="studentId">BN-000000</span></div>
+              <div style="margin-top:8px;font-size:12px;color:rgba(255,215,0,.8);font-weight:600">Click to upload photo</div>
             </div>
           </div>
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
@@ -263,6 +268,68 @@
 
       <div id="modalCourseContent">
         <!-- Course details will be rendered here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== STUDENT ID CARD POPUP ========== -->
+  <div class="modal" id="studentIdModal">
+    <div class="box" style="max-width:450px;background:linear-gradient(135deg, rgba(255,215,0,.15), rgba(0,0,0,.95));border:3px solid var(--gold)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+        <div style="font-weight:800;font-size:20px;color:var(--gold)">🎓 Student ID Card</div>
+        <button class="btn small" id="closeIdCard">Close</button>
+      </div>
+      
+      <div style="background:linear-gradient(135deg, #1a1a1a, #0a0a0a);border:2px solid var(--gold);border-radius:16px;padding:32px;text-align:center;box-shadow:0 8px 32px rgba(255,215,0,.2)">
+        <!-- Logo Header -->
+        <div style="margin-bottom:20px">
+          <div style="font-size:24px;font-weight:900;color:var(--gold);letter-spacing:1px">BOTNOLOGY101</div>
+          <div style="font-size:11px;color:rgba(232,243,238,.6);letter-spacing:2px;margin-top:4px">ELITE ACADEMIC INSTITUTION</div>
+        </div>
+        
+        <!-- Student Photo -->
+        <div style="position:relative;display:inline-block;margin-bottom:20px">
+          <img id="idCardPhoto" src="/dr-botonic.jpeg" alt="Student" style="width:140px;height:140px;border-radius:50%;border:4px solid var(--gold);object-fit:cover;box-shadow:0 4px 16px rgba(255,215,0,.3)"/>
+          <button class="btn small gold" style="position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);font-size:11px;padding:6px 12px" onclick="document.getElementById('photoUpload').click()">
+            📷 Change Photo
+          </button>
+        </div>
+        
+        <!-- Student Info -->
+        <div style="border-top:1px solid rgba(255,215,0,.3);padding-top:20px">
+          <div style="font-weight:800;font-size:22px;margin-bottom:8px;color:#fff" id="idCardName">Guest Student</div>
+          <div style="margin-bottom:16px">
+            <div class="badge gold" id="idCardPlan" style="font-size:13px;padding:8px 16px">ASSOCIATES DEGREE</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px;text-align:left">
+            <div>
+              <div style="font-size:11px;color:rgba(232,243,238,.5);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px">Student ID</div>
+              <div style="font-weight:700;color:var(--gold);font-size:16px" id="idCardStudentId">BN-000000</div>
+            </div>
+            <div>
+              <div style="font-size:11px;color:rgba(232,243,238,.5);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px">GPA</div>
+              <div style="font-weight:700;color:var(--gold);font-size:16px" id="idCardGpa">0.00</div>
+            </div>
+            <div>
+              <div style="font-size:11px;color:rgba(232,243,238,.5);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px">Enrolled</div>
+              <div style="font-weight:700;color:#fff;font-size:16px" id="idCardEnrolled">0 Courses</div>
+            </div>
+            <div>
+              <div style="font-size:11px;color:rgba(232,243,238,.5);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px">Level</div>
+              <div style="font-weight:700;color:#fff;font-size:16px" id="idCardLevel">1</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Footer -->
+        <div style="margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,215,0,.3)">
+          <div style="font-size:10px;color:rgba(232,243,238,.4);letter-spacing:1px">Issued: <span id="idCardIssued">2026</span></div>
+          <div style="font-size:10px;color:rgba(232,243,238,.4);margin-top:4px">Valid for current academic year</div>
+        </div>
+      </div>
+      
+      <div style="text-align:center;margin-top:20px">
+        <button class="btn gold" onclick="window.print()" style="font-weight:700">🖨️ Print ID Card</button>
       </div>
     </div>
   </div>
