@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>My Courses • Botnology101</title>
+  <link rel="stylesheet" href="/style.css"/>
+  <script defer src="/script.js"></script>
+  <script defer src="/courses.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <style>
+    .course-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;margin:24px 0}
+    .course-card{border:2px solid rgba(255,255,255,.08);border-radius:20px;padding:24px;background:linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,.02));transition:all .3s;cursor:pointer;position:relative;overflow:hidden}
+    .course-card:hover{border-color:var(--gold);transform:translateY(-4px);box-shadow:0 8px 24px rgba(255,215,0,.15)}
+    .course-card.enrolled{border-color:rgba(255,215,0,.3);background:linear-gradient(135deg, rgba(255,215,0,.08), rgba(255,215,0,.02))}
+    .course-header{display:flex;gap:16px;align-items:flex-start;margin-bottom:16px}
+    .course-icon{width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg, var(--gold), rgba(255,215,0,.6));display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0}
+    .course-title{font-size:20px;font-weight:800;margin-bottom:6px;color:var(--gold)}
+    .course-code{font-size:13px;color:rgba(232,243,238,.6);font-weight:600;letter-spacing:.8px}
+    .course-desc{font-size:14px;line-height:1.6;color:rgba(232,243,238,.8);margin:12px 0}
+    .course-meta{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,.08)}
+    .course-stat{display:flex;align-items:center;gap:6px;font-size:13px;color:rgba(232,243,238,.7)}
+    .progress-bar{width:100%;height:8px;background:rgba(255,255,255,.1);border-radius:10px;overflow:hidden;margin:12px 0}
+    .progress-fill{height:100%;background:linear-gradient(90deg, var(--gold), rgba(255,215,0,.6));transition:width .5s}
+    .syllabus{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:24px;margin:20px 0}
+    .syllabus-item{padding:16px;border-left:3px solid rgba(255,255,255,.15);margin:12px 0;background:rgba(255,255,255,.02);border-radius:8px;transition:all .2s}
+    .syllabus-item:hover{border-left-color:var(--gold);background:rgba(255,215,0,.05)}
+    .syllabus-item.completed{border-left-color:#10b981;opacity:.7}
+    .assignment-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:20px;margin:12px 0}
+    .grade-badge{display:inline-block;padding:8px 16px;border-radius:10px;font-weight:800;font-size:18px}
+    .grade-a{background:linear-gradient(135deg, #10b981, #059669);color:#fff}
+    .grade-b{background:linear-gradient(135deg, #3b82f6, #2563eb);color:#fff}
+    .grade-c{background:linear-gradient(135deg, #f59e0b, #d97706);color:#fff}
+    .grade-f{background:linear-gradient(135deg, #ef4444, #dc2626);color:#fff}
+    .instructor-card{display:flex;gap:20px;align-items:center;padding:24px;background:linear-gradient(135deg, rgba(255,215,0,.1), rgba(255,215,0,.02));border:2px solid rgba(255,215,0,.2);border-radius:18px;margin:20px 0}
+    .instructor-img{width:100px;height:100px;border-radius:50%;border:3px solid var(--gold);object-fit:cover}
+    .tab-group{display:flex;gap:8px;margin:20px 0;flex-wrap:wrap;position:sticky;top:80px;background:var(--black);padding:12px 0;z-index:50}
+    .tab{padding:12px 24px;border-radius:12px;background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);cursor:pointer;transition:all .2s;font-size:15px;font-weight:700}
+    .tab:hover{background:rgba(255,255,255,.08)}
+    .tab.active{background:var(--gold);color:var(--black);border-color:var(--gold)}
+    .tab-content{display:none}
+    .tab-content.active{display:block}
+    .catalog-filters{display:flex;gap:12px;flex-wrap:wrap;margin:20px 0;padding:16px;background:rgba(255,255,255,.03);border-radius:14px}
+    .filter-btn{padding:8px 16px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.02);cursor:pointer;transition:all .2s;font-size:14px;font-weight:600}
+    .filter-btn:hover{border-color:var(--gold)}
+    .filter-btn.active{background:var(--gold);color:var(--black);border-color:var(--gold)}
+    .achievement-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;background:linear-gradient(135deg, rgba(255,215,0,.15), rgba(255,215,0,.05));border:2px solid var(--gold);border-radius:12px;margin:6px;font-size:14px;font-weight:700}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- ========== PREMIER BLACK TOPBAR ========== -->
+    <div class="topbar" style="background:rgba(0,0,0,0.85);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(255,215,0,0.1)">
+      <div class="brand">
+        <img src="/dr-botonic.jpeg" alt="Dr. Botonic"/>
+        <div class="title">
+          <div style="font-weight:800;letter-spacing:.6px;font-size:16px">Botnology101</div>
+          <div style="font-size:12px;color:rgba(232,243,238,.7)">Course Management</div>
+        </div>
+      </div>
+      <div class="row" style="margin:0;gap:8px">
+        <a class="btn small" href="/index.html">Home</a>
+        <a class="btn small" href="/dashboard.html">Dashboard</a>
+        <a class="btn small gold" href="/courses.html">My Courses</a>
+        <a class="btn small" href="/study-hall.html">Study Hall</a>
+        <a class="btn small" href="/pricing.html">Pricing</a>
+        <button class="btn small" id="openAuth">Sign In</button>
+        <button class="btn small" id="themeToggle">Yeti Mode</button>
+      </div>
+    </div>
+
+    <!-- ========== HERO SECTION ========== -->
+    <div class="hero">
+      <div>
+        <div class="h-eyebrow">🎓 ADVANCED ACADEMIC SYSTEM</div>
+        <h1 class="h1" style="margin:12px 0">My Course Portal</h1>
+        <div class="sub" style="max-width:800px">Enroll in elite STEM courses, track your progress, complete assignments, and earn your degree with Dr. Botonic's guidance.</div>
+
+        <!-- ========== STUDENT INFO PANEL ========== -->
+        <div style="display:grid;grid-template-columns:1fr 2fr;gap:20px;margin:24px 0">
+          <div class="instructor-card" style="flex-direction:column;text-align:center">
+            <img src="/dr-botonic.jpeg" alt="Dr. Botonic" class="instructor-img"/>
+            <div>
+              <div style="font-weight:800;font-size:18px;margin-bottom:4px" id="studentName">Guest Student</div>
+              <div class="badge gold" id="planBadge">ASSOCIATES</div>
+              <div style="margin-top:12px;font-size:14px;color:rgba(232,243,238,.7)">Student ID: <span id="studentId">BN-000000</span></div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+            <div style="padding:20px;border-radius:16px;background:linear-gradient(135deg, rgba(16,185,129,.15), rgba(16,185,129,.05));border:2px solid rgba(16,185,129,.3);text-align:center">
+              <div style="font-size:14px;color:rgba(232,243,238,.7);margin-bottom:8px">Enrolled Courses</div>
+              <div style="font-size:42px;font-weight:900;color:#10b981" id="enrolledCount">0</div>
+            </div>
+            <div style="padding:20px;border-radius:16px;background:linear-gradient(135deg, rgba(59,130,246,.15), rgba(59,130,246,.05));border:2px solid rgba(59,130,246,.3);text-align:center">
+              <div style="font-size:14px;color:rgba(232,243,238,.7);margin-bottom:8px">Overall GPA</div>
+              <div style="font-size:42px;font-weight:900;color:#3b82f6" id="overallGPA">0.0</div>
+            </div>
+            <div style="padding:20px;border-radius:16px;background:linear-gradient(135deg, rgba(255,215,0,.15), rgba(255,215,0,.05));border:2px solid rgba(255,215,0,.3);text-align:center">
+              <div style="font-size:14px;color:rgba(232,243,238,.7);margin-bottom:8px">Achievements</div>
+              <div style="font-size:42px;font-weight:900;color:var(--gold)" id="achievementCount">0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========== TAB NAVIGATION ========== -->
+        <div class="tab-group">
+          <button class="tab active" data-tab="enrolled">📚 My Courses</button>
+          <button class="tab" data-tab="catalog">🔍 Course Catalog</button>
+          <button class="tab" data-tab="assignments">📝 Assignments</button>
+          <button class="tab" data-tab="grades">📊 Grades</button>
+          <button class="tab" data-tab="achievements">🏆 Achievements</button>
+        </div>
+
+        <!-- ========== TAB: ENROLLED COURSES ========== -->
+        <div class="tab-content active" id="tab-enrolled">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+            <div style="font-size:24px;font-weight:800">Currently Enrolled</div>
+            <button class="btn gold" onclick="document.querySelector('[data-tab=catalog]').click()">+ Add Course</button>
+          </div>
+          <div id="enrolledCourses" class="course-grid">
+            <!-- Enrolled courses will be rendered here -->
+          </div>
+          <div id="enrolledEmpty" style="text-align:center;padding:60px 20px;display:none">
+            <img src="/dr-botonic.jpeg" alt="Dr. Botonic" style="width:120px;height:120px;border-radius:50%;margin-bottom:20px;border:3px solid var(--gold)"/>
+            <div style="font-size:20px;font-weight:700;margin-bottom:12px">No Courses Enrolled Yet</div>
+            <div style="color:rgba(232,243,238,.7);margin-bottom:20px">Browse the course catalog and start your academic journey!</div>
+            <button class="btn gold" onclick="document.querySelector('[data-tab=catalog]').click()">Explore Course Catalog</button>
+          </div>
+        </div>
+
+        <!-- ========== TAB: COURSE CATALOG ========== -->
+        <div class="tab-content" id="tab-catalog">
+          <div style="font-size:24px;font-weight:800;margin-bottom:12px">Course Catalog</div>
+          <div style="color:rgba(232,243,238,.7);margin-bottom:20px">Choose courses that match your subscription tier and academic goals.</div>
+          
+          <div class="catalog-filters">
+            <div style="font-weight:600;margin-right:12px;display:flex;align-items:center">Filter:</div>
+            <button class="filter-btn active" data-filter="all">All Courses</button>
+            <button class="filter-btn" data-filter="anatomy">🫀 Anatomy</button>
+            <button class="filter-btn" data-filter="math">📐 Mathematics</button>
+            <button class="filter-btn" data-filter="physics">⚛️ Physics</button>
+            <button class="filter-btn" data-filter="chemistry">🧪 Chemistry</button>
+            <button class="filter-btn" data-filter="biology">🧬 Biology</button>
+          </div>
+
+          <div id="catalogCourses" class="course-grid">
+            <!-- Course catalog will be rendered here -->
+          </div>
+        </div>
+
+        <!-- ========== TAB: ASSIGNMENTS ========== -->
+        <div class="tab-content" id="tab-assignments">
+          <div style="font-size:24px;font-weight:800;margin-bottom:20px">Assignments & Assessments</div>
+          <div id="assignmentsList">
+            <!-- Assignments will be rendered here -->
+          </div>
+        </div>
+
+        <!-- ========== TAB: GRADES ========== -->
+        <div class="tab-content" id="tab-grades">
+          <div style="font-size:24px;font-weight:800;margin-bottom:20px">Academic Performance</div>
+          <div style="display:grid;grid-template-columns:2fr 1fr;gap:24px">
+            <div>
+              <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:24px;margin-bottom:20px">
+                <div style="font-weight:700;margin-bottom:16px">GPA Trend</div>
+                <canvas id="gpaChart" style="max-height:300px"></canvas>
+              </div>
+              <div id="courseGrades">
+                <!-- Course grades will be rendered here -->
+              </div>
+            </div>
+            <div>
+              <div style="background:linear-gradient(135deg, rgba(255,215,0,.1), rgba(255,215,0,.02));border:2px solid rgba(255,215,0,.2);border-radius:16px;padding:24px;text-align:center">
+                <img src="/dr-botonic.jpeg" alt="Dr. Botonic" style="width:100px;height:100px;border-radius:50%;margin-bottom:16px;border:3px solid var(--gold)"/>
+                <div style="font-weight:800;font-size:20px;margin-bottom:8px">Dr. Botonic Says:</div>
+                <div style="font-size:14px;line-height:1.6;color:rgba(232,243,238,.8)" id="professorComment">
+                  "Excellent progress! Keep up the outstanding work."
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========== TAB: ACHIEVEMENTS ========== -->
+        <div class="tab-content" id="tab-achievements">
+          <div style="font-size:24px;font-weight:800;margin-bottom:20px">Your Achievements</div>
+          <div style="display:grid;grid-template-columns:1fr 2fr;gap:24px">
+            <div style="text-align:center;padding:40px 20px;background:linear-gradient(135deg, rgba(255,215,0,.1), rgba(255,215,0,.02));border:2px solid rgba(255,215,0,.2);border-radius:16px">
+              <img src="/dr-botonic.jpeg" alt="Dr. Botonic" style="width:140px;height:140px;border-radius:50%;margin-bottom:20px;border:4px solid var(--gold)"/>
+              <div style="font-size:28px;font-weight:900;color:var(--gold);margin-bottom:8px">Level <span id="studentLevel">1</span></div>
+              <div style="font-size:14px;color:rgba(232,243,238,.7);margin-bottom:16px">Academic Explorer</div>
+              <div class="progress-bar">
+                <div class="progress-fill" id="levelProgress" style="width:0%"></div>
+              </div>
+              <div style="font-size:13px;color:rgba(232,243,238,.6);margin-top:8px">
+                <span id="xpCurrent">0</span> / <span id="xpNext">1000</span> XP
+              </div>
+            </div>
+            <div>
+              <div style="font-weight:700;font-size:18px;margin-bottom:16px">Badges Earned</div>
+              <div id="achievementBadges" style="display:flex;flex-wrap:wrap;gap:12px">
+                <!-- Achievement badges will be rendered here -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SIGN IN MODAL ========== -->
+  <div class="modal" id="authModal">
+    <div class="box">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:20px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <img src="/dr-botonic.jpeg" alt="Dr. Botonic" style="width:50px;height:50px;border-radius:50%;border:2px solid var(--gold)"/>
+          <b style="font-size:18px">Student Sign In</b>
+        </div>
+        <button class="btn small" id="closeAuth">Close</button>
+      </div>
+
+      <div class="field">
+        <label for="authName">Name</label>
+        <input id="authName" type="text" placeholder="Student Name"/>
+      </div>
+
+      <div class="field">
+        <label for="authEmail">Email</label>
+        <input id="authEmail" type="email" placeholder="you@email.com"/>
+      </div>
+
+      <div class="field">
+        <label for="authPlan">Subscription Tier</label>
+        <select id="authPlan">
+          <option value="associates">Associates Degree</option>
+          <option value="bachelors">Bachelors Degree</option>
+          <option value="masters">Masters Degree</option>
+        </select>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:20px">
+        <button class="btn gold" id="doAuth" style="flex:1;font-weight:700">Sign In</button>
+        <a class="btn" href="/pricing.html">See Tuition Plans</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== COURSE DETAIL MODAL ========== -->
+  <div class="modal" id="courseModal">
+    <div class="box" style="max-width:800px;max-height:85vh;overflow-y:auto">
+      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:20px">
+        <div style="display:flex;gap:16px;align-items:start">
+          <div class="course-icon" id="modalCourseIcon">📚</div>
+          <div>
+            <div class="course-title" id="modalCourseTitle">Course Title</div>
+            <div class="course-code" id="modalCourseCode">COURSE-101</div>
+          </div>
+        </div>
+        <button class="btn small" id="closeCourseModal">Close</button>
+      </div>
+
+      <div id="modalCourseContent">
+        <!-- Course details will be rendered here -->
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
