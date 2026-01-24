@@ -75,11 +75,10 @@ async function startCheckout(plan, cadence) {
     student_id: student_id,
     email: email
   };
-  const apiUrl = process.env.API_BASE_URL || "";
   console.log("Sending request to /api/stripe/create-checkout-session:", requestBody);
 
   try {
-    const fetchResponse = await fetch(`${apiUrl}/api/stripe/create-checkout-session`, {
+    const fetchResponse = await fetch("/api/stripe/create-checkout-session", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
