@@ -19,7 +19,6 @@ function initThemeToggle() {
     const isYeti = document.body.classList.toggle("yeti-theme");
     themeToggle.textContent = isYeti ? "Forest Mode" : "Yeti Mode";
     localStorage.setItem("botnology_theme", isYeti ? "yeti" : "forest");
-    console.log(`Theme switched to: ${isYeti ? "yeti" : "forest"}`);
   });
 }
 
@@ -33,43 +32,23 @@ function initVoiceButton() {
   voiceButton.addEventListener("click", () => {
     const text = "Good afternoon. I am Professor Botonic, your premium AI tutor from Harvard. Jolly good to make your acquaintance. Shall we embark on a spot of learning together?";
     const utterance = new SpeechSynthesisUtterance(text);
-    
+
     // Wait for voices to load
     const setVoice = () => {
       const voices = speechSynthesis.getVoices();
       // Try to find a British English voice
-      const britishVoice = voices.find(v => 
-        v.lang.includes('en-GB') || 
-        v.name.includes('British') || 
-        v.name.includes('Daniel') ||
-        v.name.includes('Oliver')
-      );
-      
-      if (britishVoice) {
-        utterance.voice = britishVoice;
-        console.log('Using British voice:', britishVoice.name);
-      } else {
-        // Fallback to any English voice
-        const englishVoice = voices.find(v => v.lang.startsWith('en'));
-        if (englishVoice) {
-          utterance.voice = englishVoice;
-          console.log('Using English voice:', englishVoice.name);
-        }
-      }
-      
-      utterance.rate = 0.9; // Slightly slower for sophistication
-      utterance.pitch = 0.9; // Slightly lower pitch
-      speechSynthesis.speak(utterance);
+      const britishVoice = voices.find(v => v.lang === "en-GB");
+      if (britishVoice) utterance.voice = britishVoice;
     };
-    
-    // Voices might not be loaded yet
-    if (speechSynthesis.getVoices().length === 0) {
-      speechSynthesis.addEventListener('voiceschanged', setVoice, { once: true });
-    } else {
-      setVoice();
-    }
+
+    speechSynthesis.addEventListener("voiceschanged", setVoice);
+    setVoice();
+    speechSynthesis.speak(utterance);
   });
 }
+
+// Initialize voice button on page load
+document.addEventListener('DOMContentLoaded', initVoiceButton);
 
 // ==========================================
 // STRIPE CHECKOUT
@@ -182,6 +161,8 @@ function initAuthModal() {
       const email = document.getElementById("authEmail")?.value.trim() || "";
       const plan = document.getElementById("authPlan")?.value || "associates";
 
+      console.log("Auth payload:", { name, email, plan }); // Debug log for payload
+
       if (!email || !email.includes("@")) {
         alert("Please enter a valid email address.");
         return;
@@ -194,17 +175,19 @@ function initAuthModal() {
           body: JSON.stringify({ name, email, plan })
         });
 
+        console.log("Auth response:", response); // Debug log for response
+
         if (!response.ok) {
           throw new Error("Authentication failed");
         }
 
         const data = await response.json();
+        console.log("Auth success data:", data); // Debug log for success data
+
         localStorage.setItem("botnology_token", data.token);
-        console.log("Auth successful:", data);
         alert(`Welcome, ${data.name}! You're signed in with ${data.plan} plan.`);
         authModal.style.display = "none";
-        
-        // Update UI to show signed-in state
+
         if (openAuth) {
           openAuth.textContent = "Signed In";
           openAuth.classList.remove("gold");
@@ -247,6 +230,74 @@ async function checkHealth() {
 }
 
 // ==========================================
+// STUDENT DESKTOP FEATURES
+// ==========================================
+function initStudentDesktop() {
+  const coffeeBtn = document.getElementById("coffeeBtn");
+  const penBtn = document.getElementById("penBtn");
+  const paperBtn = document.getElementById("paperBtn");
+  const fsSearch = document.getElementById("fsSearch");
+  const fsRefresh = document.getElementById("fsRefresh");
+  const fsTree = document.getElementById("fsTree");
+  const fsPath = document.getElementById("fsPath");
+
+  if (coffeeBtn) {
+    coffeeBtn.addEventListener("click", () => {
+      alert("Enjoy your coffee! ☕");
+    });
+  } else {
+    console.warn("Coffee button not found.");
+  }
+
+  if (penBtn) {
+    penBtn.addEventListener("click", () => {
+      alert("Here's your pen! ✒️");
+    });
+  } else {
+    console.warn("Pen button not found.");
+  }
+
+  if (paperBtn) {
+    paperBtn.addEventListener("click", () => {
+      alert("Here's some paper! 📄");
+    });
+  } else {
+    console.warn("Paper button not found.");
+  }
+
+  if (fsSearch) {
+    fsSearch.addEventListener("input", (event) => {
+      const query = event.target.value.toLowerCase();
+      console.log(`Filtering files with query: ${query}`);
+      // Implement file filtering logic here
+    });
+  }
+
+  if (fsRefresh) {
+    fsRefresh.addEventListener("click", () => {
+      console.log("Refreshing file system view...");
+      // Implement refresh logic here
+    });
+  }
+
+  if (fsTree) {
+    console.log("File system tree initialized.");
+    // Implement file system tree rendering logic here
+  }
+
+  if (fsPath) {
+    fsPath.addEventListener("change", (event) => {
+      const path = event.target.value;
+      console.log(`Path updated to: ${path}`);
+      // Implement path update logic here
+    });
+  }
+}
+
+// Delay student desktop initialization to ensure DOM is fully loaded
+window.addEventListener("load", initStudentDesktop);
+
+// ==========================================
 // INITIALIZATION
 // ==========================================
 document.addEventListener("DOMContentLoaded", () => {
@@ -255,7 +306,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize all features
   initThemeToggle();
   initVoiceButton();
-  initAuthModal();
+  initStudentDesktop();
   checkHealth();
   
   // Check for checkout success/cancel
@@ -274,3 +325,177 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Attach startCheckout to the global window object
 window.startCheckout = startCheckout;
+
+// Chat System for Index Page
+let chatMessages = [];
+
+function initializeChat() {
+  const sendBtn = document.getElementById('sendBtn');
+  const chatInput = document.getElementById('chatInput');
+
+  if (!sendBtn || !chatInput) {
+    console.error('Chat elements not found on the page.');
+    return;
+  }
+
+  sendBtn.addEventListener('click', sendMessage);
+  chatInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  addWelcomeMessage();
+}
+
+function addWelcomeMessage() {
+  const welcome = {
+    role: 'assistant',
+    content: `Welcome! I'm Professor Botnotic. How can I assist you today?`
+  };
+
+  chatMessages = [welcome];
+  renderMessages();
+}
+
+function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+
+  if (!text) return;
+
+  chatMessages.push({ role: 'user', content: text });
+  renderMessages();
+  input.value = '';
+
+  // Simulate assistant response
+  setTimeout(() => {
+    chatMessages.push({ role: 'assistant', content: 'Let me think about that...' });
+    renderMessages();
+  }, 1000);
+}
+
+function renderMessages() {
+  const container = document.getElementById('messages');
+  if (!container) {
+    console.error('Messages container not found.');
+    return;
+  }
+
+  container.innerHTML = '';
+
+  chatMessages.forEach(msg => {
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `msg msg-${msg.role}`;
+
+    const label = msg.role === 'user' ? 'You' : 'Professor Botnotic';
+
+    msgDiv.innerHTML = `
+      <div class="msg-label">${label}</div>
+      <div class="msg-text">${msg.content}</div>
+    `;
+
+    container.appendChild(msgDiv);
+  });
+
+  container.scrollTop = container.scrollHeight;
+}
+
+// Initialize chat on page load
+document.addEventListener('DOMContentLoaded', initializeChat);
+
+// Button Handlers for Chat Panel
+function initializeChatButtons() {
+  const resumeBtn = document.getElementById('resumeBtn');
+  const exportBtn = document.getElementById('exportBtn');
+  const importBtn = document.getElementById('importBtn');
+  const importFile = document.getElementById('importFile');
+  const syncNow = document.getElementById('syncNow');
+  const openBadge = document.getElementById('openBadge');
+  const startNewChat = document.getElementById('startNewChat');
+
+  // Resume last chat
+  if (resumeBtn) {
+    resumeBtn.addEventListener('click', () => {
+      if (chatMessages.length > 0) {
+        alert('Resuming last chat...');
+      } else {
+        alert('No previous chat to resume.');
+      }
+    });
+  }
+
+  // Export chat
+  if (exportBtn) {
+    exportBtn.addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify(chatMessages, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `chat-history-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  }
+
+  // Import chat
+  if (importBtn && importFile) {
+    importBtn.addEventListener('click', () => importFile.click());
+    importFile.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const importedMessages = JSON.parse(event.target.result);
+            chatMessages = importedMessages;
+            renderMessages();
+            alert('Chat history imported successfully.');
+          } catch (err) {
+            alert('Failed to import chat history. Invalid file format.');
+          }
+        };
+        reader.readAsText(file);
+      }
+    });
+  }
+
+  // Sync Now
+  if (syncNow) {
+    syncNow.addEventListener('click', () => {
+      alert('Syncing data to the cloud...');
+      // Add sync logic here
+    });
+  }
+
+  // Open Badge
+  if (openBadge) {
+    openBadge.addEventListener('click', () => {
+      alert('Opening badge update modal...');
+      // Add badge update logic here
+    });
+  }
+
+  // Start New Chat
+  if (startNewChat) {
+    startNewChat.addEventListener('click', () => {
+      chatMessages = [];
+      renderMessages();
+      alert('Started a new chat session.');
+    });
+  }
+}
+
+// Initialize buttons on page load
+document.addEventListener('DOMContentLoaded', initializeChatButtons);
+
+// Temporary debug logs for student desktop buttons
+console.log("Initializing student desktop...");
+const coffeeBtn = document.getElementById("coffeeBtn");
+const penBtn = document.getElementById("penBtn");
+const paperBtn = document.getElementById("paperBtn");
+
+if (!coffeeBtn) console.warn("Coffee button not found.");
+if (!penBtn) console.warn("Pen button not found.");
+if (!paperBtn) console.warn("Paper button not found.");
