@@ -657,19 +657,20 @@ function renderEnrolledCourses() {
 function renderCourseCatalog() {
   const container = document.getElementById('catalogCourses');
   container.innerHTML = '';
-  
+
   Object.values(COURSE_CATALOG).forEach(course => {
     // Filter by tier
     const tierOrder = { associates: 1, bachelors: 2, masters: 3 };
     const userTierLevel = tierOrder[currentUser.plan];
     const courseTierLevel = tierOrder[course.tier];
-    
+
     if (courseTierLevel > userTierLevel) {
       return; // Don't show courses above user's tier
     }
-    
+
     const isEnrolled = studentData.enrolledCourses.includes(course.id);
-    const card = createCourseCard(course, isEnrolled);
+    const grade = studentData.grades[course.id] || { current: 0, letter: 'N/A' }; // Ensure grade object
+    const card = createCourseCard(course, isEnrolled, 0, grade);
     container.appendChild(card);
   });
 }
@@ -1085,3 +1086,16 @@ window.CourseSystem = {
   awardAchievement,
   studentData
 };
+
+// Temporary script to log localStorage content
+console.log('botnology_user:', localStorage.getItem('botnology_user'));
+
+// Temporary simulation script to test loadUserData functionality
+localStorage.setItem('botnology_user', JSON.stringify({
+  name: 'Test User',
+  email: 'testuser@example.com',
+  plan: 'bachelors',
+  id: 'test123'
+}));
+loadUserData();
+console.log('Simulated currentUser:', currentUser);

@@ -16,7 +16,7 @@
   <meta name="twitter:card" content="summary_large_image"/>
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
 </head>
-<body data-page="home">
+<body data-page="home" class="text-soft-gold">
   <div class="container">
     <div class="topbar" style="position: sticky; top: 0; z-index: 1000; background: rgba(0, 0, 0, 0.8);">
       <div class="brand">
@@ -45,6 +45,7 @@
           <a class="btn gold" href="/dashboard.html" id="goDash">Enter Dashboard</a>
           <a class="btn" href="/pricing.html" id="goPricing">View Tuition Plans</a>
           <button class="btn" id="voice-button">Speak</button>
+          <button class="btn small" id="startNewChat">Start New Chat</button>
         </div>
         <div class="hr"></div>
         <div class="h-eyebrow"><span class="dot" id="healthDot"></span><span id="healthLine">API: checking…</span></div>
@@ -77,7 +78,7 @@
         <button class="btn small" id="openBadge">Update ID Photo</button>
       </div>
 
-      <div class="chat" style="margin-top:12px">
+      <div class="chat" style="display:none;margin-top:12px">
         <div id="messages" class="messages forest" style="min-height:220px;max-height:360px;overflow:auto;padding:12px"></div>
         <div class="row" style="margin-top:10px;gap:10px">
           <textarea id="chatInput" rows="2" placeholder="Type your message…" style="flex:1"></textarea>
@@ -179,5 +180,43 @@
             <option value="1024" selected>1024 × 1024</option>
           </select>
           <input type="file" id="badgeFile" accept="image/*"/>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="importModal">
+    <div class="box">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <b>Import Chat</b>
+        <button class="btn small" id="closeImport">Close</button>
+      </div>
+
+      <div class="field">
+        <label for="importFile">File</label>
+        <input id="importFile" type="file" accept="application/json" style="display:none"/>
+        <button class="btn" id="importButton">Choose File</button>
+      </div>
+
+      <div class="field">
+        <label for="importPlan">Plan</label>
+        <select id="importPlan">
+          <option value="associates">Associates</option>
+          <option value="bachelors">Bachelors</option>
+          <option value="masters">Masters</option>
+        </select>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:12px">
+        <button class="btn gold" id="doImport">Import</button>
+        <a class="btn" href="/pricing.html" id="goPricing">See Tuition Plans</a>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn small" id="coffeeBtn">Coffee</button>
+  <button class="btn small" id="penBtn">Pen</button>
+</body>
+</html>
 
 
