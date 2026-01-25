@@ -247,6 +247,65 @@ async function checkHealth() {
 }
 
 // ==========================================
+// STUDENT DESKTOP FEATURES
+// ==========================================
+function initStudentDesktop() {
+  const coffeeBtn = document.getElementById("coffeeBtn");
+  const penBtn = document.getElementById("penBtn");
+  const paperBtn = document.getElementById("paperBtn");
+  const fsSearch = document.getElementById("fsSearch");
+  const fsRefresh = document.getElementById("fsRefresh");
+  const fsTree = document.getElementById("fsTree");
+  const fsPath = document.getElementById("fsPath");
+
+  if (coffeeBtn) {
+    coffeeBtn.addEventListener("click", () => {
+      alert("Enjoy your coffee! ☕");
+    });
+  }
+
+  if (penBtn) {
+    penBtn.addEventListener("click", () => {
+      alert("Here's your pen! ✒️");
+    });
+  }
+
+  if (paperBtn) {
+    paperBtn.addEventListener("click", () => {
+      alert("Here's some paper! 📄");
+    });
+  }
+
+  if (fsSearch) {
+    fsSearch.addEventListener("input", (event) => {
+      const query = event.target.value.toLowerCase();
+      console.log(`Filtering files with query: ${query}`);
+      // Implement file filtering logic here
+    });
+  }
+
+  if (fsRefresh) {
+    fsRefresh.addEventListener("click", () => {
+      console.log("Refreshing file system view...");
+      // Implement refresh logic here
+    });
+  }
+
+  if (fsTree) {
+    console.log("File system tree initialized.");
+    // Implement file system tree rendering logic here
+  }
+
+  if (fsPath) {
+    fsPath.addEventListener("change", (event) => {
+      const path = event.target.value;
+      console.log(`Path updated to: ${path}`);
+      // Implement path update logic here
+    });
+  }
+}
+
+// ==========================================
 // INITIALIZATION
 // ==========================================
 document.addEventListener("DOMContentLoaded", () => {
@@ -255,7 +314,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize all features
   initThemeToggle();
   initVoiceButton();
-  initAuthModal();
+  initStudentDesktop();
   checkHealth();
   
   // Check for checkout success/cancel
