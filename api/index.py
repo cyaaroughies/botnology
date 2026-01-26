@@ -1,10 +1,3 @@
-# Import logging module
-import logging
-
-# Ensure logger is defined at the top
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("api")
-
 import os
 import json
 import base64
@@ -27,7 +20,27 @@ from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from openai import OpenAI
 import stripe
-from starlette.responses import Response
+
+try:
+    from mangum import Mangum
+    MANGUM_AVAILABLE = True
+except ImportError:
+    MANGUM_AVAILABLE = False
+
+app = FastAPI()
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("stripe")
+
+# ---------- CORS (tighten later) ----------
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # ---------- Paths ----------
 ROOT_DIR = Path(__file__).resolve().parents[1]  # repo root on Vercel: /var/task
@@ -44,17 +57,6 @@ OPENAI_ENABLED = bool(os.getenv("OPENAI_API_KEY"))
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 TTS_MODEL = os.getenv("OPENAI_TTS_MODEL", "gpt-4o-mini-tts")
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY")) if OPENAI_ENABLED else None
-
-# Ensure app is defined before any conditional logic
-app = FastAPI()
-
-# Conditional Mangum handler initialization
-if os.getenv("RAILWAY_ENVIRONMENT"):
-    from mangum import Mangum
-    logger.info("Initializing Mangum handler for deployment")
-    handler = Mangum(app)
-else:
-    logger.info("Using FastAPI app directly for local development")
 
 # Ensure data directories exist
 def _ensure_dirs() -> None:
@@ -165,34 +167,14 @@ async def api_chat(req: Request):
     plan = (body.get("plan") or "associates").strip().lower()
     if not OPENAI_ENABLED or client is None:
         return {"reply": f"(Demo) Dr. Botonic heard: {msg}", "plan": plan}
-    
-    # Tier-specific system prompts for academic excellence
-    if plan == "masters":
-        sys_prompt = (
-            "You are Dr. Botonic, a distinguished 72-year-old Harvard professor with expertise in anatomy, calculus, trigonometry, physics, chemistry, and advanced mathematics. "
-            "You speak with refined British English precision. Your responses are deeply analytical, methodical, and comprehensive. "
-            "Provide: (1) Thorough theoretical foundations, (2) Step-by-step derivations with mathematical rigor, (3) Real-world applications, "
-            "(4) Common pitfalls and advanced insights, (5) References to key theorems or principles. "
-            "Use precise terminology. Include formulas when relevant. Challenge the student intellectually while maintaining sophistication. "
-            "Subject: " + subject
-        )
-    elif plan == "bachelors":
-        sys_prompt = (
-            "You are Dr. Botonic, a 72-year-old Harvard professor specializing in anatomy, calculus, trigonometry, and STEM disciplines. "
-            "You speak with a calm, scholarly British English tone. Provide structured, detailed explanations with clear steps. "
-            "Include: (1) Core concepts and definitions, (2) Worked examples with intermediate steps, (3) Practical problem-solving strategies. "
-            "Use appropriate academic vocabulary. Encourage deeper understanding through logical progression. "
-            "Subject: " + subject
-        )
-    else:  # associates
-        sys_prompt = (
-            "You are Dr. Botonic, a 72-year-old Harvard professor tutoring in anatomy, calculus, trigonometry, and foundational sciences. "
-            "You speak with a gentle, encouraging British English accent. Provide clear, foundational guidance. "
-            "Focus on: (1) Core principles explained simply, (2) Building blocks before complexity, (3) Encouraging questions and exploration. "
-            "Be approachable yet academically sound. Guide students to understanding fundamentals thoroughly. "
-            "Subject: " + subject
-        )
-    
+    sys_prompt = (
+        "You are Dr. Botonic, a 72-year-old sophisticated Harvard graduate yeti professor. "
+        "You speak calm, soft English with a subtle accent. "
+        "You are the smartest AI tutor in the industry. "
+        "Be concise yet deeply insightful, use earthy, scholarly tone, and optionally a tasteful gentle joke. "
+        "Adapt depth to the student's plan: Associates = foundational guidance, Bachelors = deeper explanations and structured steps, Masters = elite coaching with advanced insights, references, and study strategies. "
+        "Subject: " + subject
+    )
     messages: List[Dict[str, str]] = [{"role": "system", "content": sys_prompt}]
     if isinstance(hist, list):
         for m in hist[-16:]:
@@ -255,12 +237,10 @@ async def api_stripe_checkout(req: Request):
         logger.error("STRIPE_SECRET_KEY is not set")
         raise HTTPException(status_code=500, detail="Stripe not configured: STRIPE_SECRET_KEY missing")
 
-    logger.info(f"Fetching price ID for plan: {plan}, cadence: {cadence}")
     price_id = _get_price_id(plan, cadence)
     if not price_id:
-        logger.error(f"Invalid plan ({plan}) or cadence ({cadence})")
+        logger.error(f"Missing price ID for plan: {plan}, cadence: {cadence}")
         raise HTTPException(status_code=400, detail=f"Invalid plan ({plan}) or cadence ({cadence})")
-    logger.info(f"Price ID resolved: {price_id}")
 
     stripe.api_key = secret
     base_url = _get_base_url(req)
@@ -578,6 +558,46 @@ async def api_quiz_generate(req: Request):
         return {"questions": []}
     except Exception:
         return {"questions": []}
+@app.post("/api/tts", include_in_schema=False)
+async def api_tts(req: Request):
+    body = await req.json()
+    text = (body.get("text") or "").strip()
+    voice = (body.get("voice") or "alloy").strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="Missing text")
+    if not OPENAI_ENABLED or client is None:
+        return {"audio_base64": None}
+    try:
+        resp = client.audio.speech.create(model=TTS_MODEL, voice=voice, input=text)
+        data = resp.read()
+        return {"audio_base64": base64.b64encode(data).decode("utf-8")}
+    except Exception:
+        return {"audio_base64": None}
+
+@app.post("/api/quiz/generate", include_in_schema=False)
+async def api_quiz_generate(req: Request):
+    body = await req.json()
+    topic = (body.get("topic") or "General").strip()
+    level = (body.get("level") or "bachelors").strip().lower()
+    if not OPENAI_ENABLED or client is None:
+        return {"questions": [
+            {"q": "Define entropy in thermodynamics.", "a": "Entropy quantifies disorder and energy dispersal in a system."},
+            {"q": "State the chain rule in calculus.", "a": "d/dx f(g(x)) = f'(g(x))·g'(x)."},
+            {"q": "Explain Big-O of binary search.", "a": "O(log n) due to halving the search space each step."}
+        ]}
+    prompt = (
+        "Create 5 rigorous study questions with concise ideal answers for topic: "
+        + topic + ". Depth level: " + level + ". Return JSON array with keys 'q' and 'a'."
+    )
+    try:
+        out = client.chat.completions.create(model=OPENAI_MODEL, messages=[{"role": "system", "content": "You produce only valid JSON."}, {"role": "user", "content": prompt}], temperature=0.2)
+        txt = (out.choices[0].message.content or "[]").strip()
+        data = json.loads(txt)
+        if isinstance(data, list):
+            return {"questions": data}
+        return {"questions": []}
+    except Exception:
+        return {"questions": []}
 
 @app.post("/api/quiz/grade", include_in_schema=False)
 async def api_quiz_grade(req: Request):
@@ -596,28 +616,37 @@ async def api_quiz_grade(req: Request):
             score += 1
     return {"score": score, "total": total}
 
-# Mount static files and define root route
-from fastapi.responses import FileResponse
 
-# Custom StaticFiles class to handle JavaScript MIME type
+
+# Only mount static files if public/ exists (works for Railway and local dev)
 class CustomStaticFiles(StaticFiles):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
     async def get_response(self, path: str, scope):
         response = await super().get_response(path, scope)
         if path.endswith(".js"):
             response.headers["Content-Type"] = "application/javascript"
         return response
 
-# Replace StaticFiles with CustomStaticFiles
-app.mount("/", CustomStaticFiles(directory=PUBLIC_DIR, html=True), name="static")
+def safe_mount_static_and_spa(app):
+    if PUBLIC_DIR.exists():
+        app.mount("/", CustomStaticFiles(directory=PUBLIC_DIR, html=True), name="static")
+        # Fallback route for any unmatched path (SPA support)
+        @app.get("/{full_path:path}", include_in_schema=False)
+        def spa_fallback(full_path: str):
+            index_file = PUBLIC_DIR / "index.html"
+            if index_file.exists():
+                return FileResponse(index_file)
+            return JSONResponse({"detail": "Index file not found"}, status_code=404)
+    else:
+        logger.warning("public/ directory missing; static assets disabled")
 
-# Define root route to serve index.html
-@app.get("/")
-def read_root():
-    index_file = PUBLIC_DIR / "index.html"
-    if index_file.exists():
-        return FileResponse(index_file)
-    return JSONResponse({"detail": "Index file not found"}, status_code=404)
+# Always call safe_mount_static_and_spa at runtime, but never at import time if directory is missing
+try:
+    safe_mount_static_and_spa(app)
+except Exception as e:
+    logger.warning(f"Static file mounting skipped: {e}")
+
+# Handler exports for different platforms
+# Railway/Render: Uses 'app' directly
+# Vercel: Would use Mangum wrapper (not currently working)
+handler = app
 
