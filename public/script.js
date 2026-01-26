@@ -1,89 +1,33 @@
-<<<<<<< HEAD
-﻿(() => {
-  const $ = (id) => document.getElementById(id);
-
-  async function health(){
-    try{
-      const r = await fetch("/api/health");
-      const j = await r.json();
-      const line = $("healthLine");
-      if(line) line.textContent = `API: ${j.status} | OpenAI: ${j.openai ? "ON":"OFF"} | Stripe: ${j.stripe ? "ON":"OFF"}`;
-    }catch{
-      const line = $("healthLine");
-      if(line) line.textContent = "API: OFFLINE";
-    }
-  }
-
-  function addMsg(role, text){
-    const box = $("messages");
-    if(!box) return;
-    const d = document.createElement("div");
-    d.className = "msg " + (role === "user" ? "user" : "assistant");
-    d.textContent = text;
-    box.appendChild(d);
-    box.scrollTop = box.scrollHeight;
-  }
-
-  async function send(){
-    const input = $("chatInput");
-    if(!input) return;
-    const msg = (input.value || "").trim();
-    if(!msg) return;
-    input.value = "";
-    addMsg("user", msg);
-    addMsg("assistant", "Thinking...");
-
-    const box = $("messages");
-    const last = box ? box.lastElementChild : null;
-
-    try{
-      const r = await fetch("/api/chat", {
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify({ message: msg })
-      });
-      const j = await r.json();
-      if(last) last.textContent = j.reply || "(no reply)";
-    }catch(e){
-      if(last) last.textContent = "Chat failed.";
-    }
-  }
-
-  function wire(){
-    $("goHome") && ($("goHome").onclick = ()=> location.href="/");
-    $("goPricing") && ($("goPricing").onclick = ()=> location.href="/pricing.html");
-    $("goDash") && ($("goDash").onclick = ()=> location.href="/dashboard.html");
-    $("sendBtn") && ($("sendBtn").onclick = ()=> send());
-    $("chatInput") && ($("chatInput").addEventListener("keydown", (e)=>{
-      if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); send(); }
-    }));
-  }
-
-  wire();
-  health();
-})();
-=======
-// Botnology101 Home Page Script
-
+// Botnology101 Dashboard Script
 // ========== Utility ==========
 function $(id) { return document.getElementById(id); }
 function q(sel) { return document.querySelector(sel); }
 function qa(sel) { return Array.from(document.querySelectorAll(sel)); }
-function escapeHTML(str) { return str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escapeHTML(str) { return str.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 function show(el) { el && (el.style.display = ""); }
 function hide(el) { el && (el.style.display = "none"); }
-function setText(id, txt) { const el=$(id); if(el) el.textContent=txt; }
+function setText(id, txt) { const el = $(id); if (el) el.textContent = txt; }
 function badgeClass(plan) {
-  plan = (plan||"").toLowerCase();
-  if (plan==="masters") return "badge gold";
-  if (plan==="bachelors") return "badge";
+  plan = (plan || "").toLowerCase();
+  if (plan === "masters") return "badge gold";
+  if (plan === "bachelors") return "badge";
   return "badge";
 }
-
 // ========== State ==========
 let user = { name: "Guest", plan: "associates", student_id: "BN-…", token: null };
-
+let announcements = [];
+let chatHistory = [];
+let subscription = { status: "none" };
+// ========== Auth Modal ==========
+function openAuthModal() {
+  // Implement modal open logic if needed
+}
+function closeAuthModal() {
+  // Implement modal close logic if needed
+}
+if ($("openAuth")) $("openAuth").onclick = openAuthModal;
 // ========== API Health ==========
+
 async function checkHealth() {
   try {
     const res = await fetch("/api/health");
@@ -96,8 +40,8 @@ async function checkHealth() {
   }
 }
 checkHealth();
-
 // ========== Whoami & Plan ==========
+
 async function fetchMe() {
   try {
     const res = await fetch("/api/me", { headers: user.token ? { Authorization: "Bearer " + user.token } : {} });
@@ -105,104 +49,101 @@ async function fetchMe() {
     if (data.logged_in) {
       user = { ...user, ...data };
       setText("whoami", `${user.name} • ${user.student_id}`);
-      setText("planBadge", (user.plan||"ASSOCIATES").toUpperCase());
+      setText("planBadge", (user.plan || "ASSOCIATES").toUpperCase());
       $("planBadge").className = badgeClass(user.plan);
+      setText("badgeName", user.name);
+      setText("badgeId", user.student_id);
+      setText("badgePlan", (user.plan || "ASSOCIATES").toUpperCase());
     }
-  } catch {}
+  } catch { }
 }
 fetchMe();
-
 // ========== Subscription ==========
+
 async function fetchSubscription() {
   try {
     const res = await fetch("/api/subscription", { headers: user.token ? { Authorization: "Bearer " + user.token } : {} });
     const data = await res.json();
-    setText("subBadge", "SUBSCRIPTION: " + (data.status||"NONE").toUpperCase());
-  } catch {}
+    subscription = data;
+    setText("subBadge", "SUBSCRIPTION: " + (data.status || "NONE").toUpperCase());
+  } catch { }
 }
 fetchSubscription();
+// ========== Announcements ==========
 
-// ========== Auth Modal ==========
-if ($("openAuth")) $("openAuth").onclick = () => show($("authModal"));
-if ($("closeAuth")) $("closeAuth").onclick = () => hide($("authModal"));
-if ($("doAuth")) $("doAuth").onclick = async () => {
-  const name = $("authName").value.trim() || "Student";
-  const email = $("authEmail").value.trim();
-  const plan = $("authPlan").value;
-  if (!email || !email.includes("@")) {
-    alert("Please enter a valid email.");
-    return;
-  }
+async function fetchAnnouncements() {
   try {
-    const res = await fetch("/api/auth", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, plan })
-    });
+    const res = await fetch("/api/announcements");
     const data = await res.json();
-    if (data.token) {
-      user = { ...user, ...data, token: data.token };
-      hide($("authModal"));
-      fetchMe();
-      fetchSubscription();
-      showToast("Signed in!", `Welcome, ${user.name}`);
-    } else {
-      alert("Sign in failed.");
+    announcements = data.items || [];
+    renderAnnouncements();
+  } catch { }
+}
+function renderAnnouncements() {
+  const list = $("announcementsList");
+  if (!list) return;
+  list.innerHTML = announcements.map(a => `<div class="message">${escapeHTML(a.text)}${a.date ? `<span class="smallmuted" style="margin-left:8px">${escapeHTML(a.date)}</span>` : ""}</div>`
+  ).join("");
+}
+if ($("announceAdd")) {
+  $("announceAdd").onclick = async () => {
+    const txt = $("announceText").value.trim();
+    if (!txt) return;
+    try {
+      const res = await fetch("/api/announcements", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(user.token ? { Authorization: "Bearer " + user.token } : {}) },
+        body: JSON.stringify({ text: txt })
+      });
+      if (res.ok) {
+        $("announceText").value = "";
+        fetchAnnouncements();
+      }
+    } catch { }
+  };
+}
+fetchAnnouncements();
+// ========== Chat ==========
+if ($("sendBtn")) {
+  $("sendBtn").onclick = async () => {
+    const msg = $("chatInput").value.trim();
+    if (!msg) return;
+    $("chatInput").value = "";
+    chatHistory.push({ role: "user", content: msg });
+    renderChat();
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(user.token ? { Authorization: "Bearer " + user.token } : {}) },
+        body: JSON.stringify({ message: msg, history: chatHistory.slice(-10), plan: user.plan })
+      });
+      const data = await res.json();
+      chatHistory.push({ role: "assistant", content: data.reply });
+      renderChat();
+      if ($("speakToggle") && $("speakToggle").checked) speak(data.reply);
+    } catch (e) {
+      chatHistory.push({ role: "assistant", content: "(Error: could not reach API)" });
+      renderChat();
     }
-  } catch {
-    alert("Sign in failed.");
-  }
-};
-
-// ========== Theme Toggle ==========
-if ($("themeToggle")) $("themeToggle").onclick = () => {
-  document.body.classList.toggle("yeti");
-};
-
-// ========== Chat Panel ==========
-if ($("startNewChat")) $("startNewChat").onclick = () => {
-  const chat = q(".chat");
-  if (chat) {
-    chat.style.display = "";
-    $("chatInput") && ($("chatInput").value = "");
-    $("messages") && ( $("messages").innerHTML = "" );
-  }
-};
-if ($("resumeBtn")) $("resumeBtn").onclick = () => {
-  const chat = q(".chat");
-  if (chat) chat.style.display = "";
-};
-if ($("sendBtn")) $("sendBtn").onclick = async () => {
-  const msg = $("chatInput").value.trim();
-  if (!msg) return;
-  $("chatInput").value = "";
-  const messages = $("messages");
-  if (messages) {
-    messages.innerHTML += `<div class="message user">${escapeHTML(msg)}</div>`;
-    messages.scrollTop = messages.scrollHeight;
-  }
-  try {
-    const res = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", ...(user.token ? { Authorization: "Bearer " + user.token } : {}) },
-      body: JSON.stringify({ message: msg, plan: user.plan })
-    });
-    const data = await res.json();
-    if (messages) {
-      messages.innerHTML += `<div class="message assistant">${escapeHTML(data.reply||"(No reply)")}</div>`;
-      messages.scrollTop = messages.scrollHeight;
-    }
-  } catch {
-    if (messages) {
-      messages.innerHTML += `<div class="message assistant">(Error: could not reach API)</div>`;
-      messages.scrollTop = messages.scrollHeight;
-    }
-  }
-};
-
-// ========== Badge Modal ==========
-if ($("openBadge")) $("openBadge").onclick = () => show($("badgeModal"));
-if ($("closeBadge")) $("closeBadge").onclick = () => hide($("badgeModal"));
+  };
+}
+function renderChat() {
+  const msgs = $("messages");
+  if (!msgs) return;
+  msgs.innerHTML = chatHistory.map(m => `<div class="message ${m.role}">${escapeHTML(m.content)}</div>`
+  ).join("");
+  msgs.scrollTop = msgs.scrollHeight;
+}
+// ========== TTS ==========
+function speak(text) {
+  if (!window.speechSynthesis) return;
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.voice = speechSynthesis.getVoices().find(v => v.name.toLowerCase().includes(($("voiceSelect")?.value || "alloy").toLowerCase())) || null;
+  speechSynthesis.speak(utter);
+}
+// ========== Badge Photo ==========
+if ($("openBadge")) $("openBadge").onclick = () => $("badgeModal").style.display = "";
+if ($("closeBadge")) $("closeBadge").onclick = () => $("badgeModal").style.display = "none";
 if ($("badgeFile")) $("badgeFile").onchange = e => {
   const file = e.target.files[0];
   if (!file) return;
@@ -210,52 +151,57 @@ if ($("badgeFile")) $("badgeFile").onchange = e => {
   reader.onload = ev => $("cropImg").src = ev.target.result;
   reader.readAsDataURL(file);
 };
-
-// ========== Import/Export ==========
-if ($("exportBtn")) $("exportBtn").onclick = () => {
-  const messages = $("messages");
-  if (!messages) return;
-  const data = { chat: messages.innerText || "" };
-  const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "botnology-chat.json";
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+if ($("saveBadgePhoto")) $("saveBadgePhoto").onclick = async () => {
+  const img = $("cropImg").src;
+  if (!img.startsWith("data:")) return;
+  try {
+    await fetch("/api/photo", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...(user.token ? { Authorization: "Bearer " + user.token } : {}) },
+      body: JSON.stringify({ photo_base64: img.split(",")[1] })
+    });
+    $("badgePhoto").src = img;
+    $("badgeModal").style.display = "none";
+  } catch { }
 };
-if ($("importBtn")) $("importBtn").onclick = () => show($("importModal"));
-if ($("closeImport")) $("closeImport").onclick = () => hide($("importModal"));
-if ($("importButton")) $("importButton").onclick = () => $("importFile").click();
-if ($("doImport")) $("doImport").onclick = () => {
-  const file = $("importFile").files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    try {
-      const data = JSON.parse(ev.target.result);
-      if (data.chat && $("messages")) $("messages").innerText = data.chat;
-      hide($("importModal"));
-      showToast("Import successful", "Chat imported.");
-    } catch {
-      alert("Invalid file.");
-    }
-  };
-  reader.readAsText(file);
+// ========== Quiz ==========
+if ($("quizGenerate")) $("quizGenerate").onclick = async () => {
+  const topic = $("quizTopic").value.trim();
+  const level = $("quizLevel").value;
+  try {
+    const res = await fetch("/api/quiz/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...(user.token ? { Authorization: "Bearer " + user.token } : {}) },
+      body: JSON.stringify({ topic, level })
+    });
+    const data = await res.json();
+    renderQuiz(data.questions || []);
+  } catch { }
 };
-
-// ========== Toast ==========
-function showToast(title, msg) {
-  setText("toastTitle", title);
-  setText("toastMsg", msg);
-  const toast = $("toast");
-  if (!toast) return;
-  toast.style.display = "";
-  setTimeout(() => { toast.style.display = "none"; }, 2500);
+function renderQuiz(questions) {
+  const list = $("quizList");
+  if (!list) return;
+  list.innerHTML = (questions || []).map((q, i) => `<tr><td>${escapeHTML(q.q || "")}</td><td><input data-qi="${i}" class="input" placeholder="Your answer"/></td></tr>`
+  ).join("");
+  $("quizScore").textContent = `Score: 0 / ${questions.length}`;
 }
+if ($("quizGrade")) $("quizGrade").onclick = () => {
+  const rows = qa("#quizList input");
+  const answers = rows.map(r => r.value.trim());
+  // For demo, just count non-empty
+  const score = answers.filter(a => a).length;
+  $("quizScore").textContent = `Score: ${score} / ${rows.length}`;
+};
+// ========== File Storage ==========
+if ($("fsRefresh")) $("fsRefresh").onclick = async () => {
+  try {
+    const res = await fetch("/api/storage/list", { headers: user.token ? { Authorization: "Bearer " + user.token } : {} });
+    const data = await res.json();
+    $("fsTree").textContent = JSON.stringify(data.tree, null, 2);
+  } catch { }
+};
+// ========== Theme Toggle ==========
+if ($("themeToggle")) $("themeToggle").onclick = () => {
+  document.body.classList.toggle("yeti");
+};
 
-// ========== Misc Buttons ==========
-if ($("coffeeBtn")) $("coffeeBtn").onclick = () => showToast("☕️ Coffee Break", "Take a quick break and come back refreshed!");
-if ($("penBtn")) $("penBtn").onclick = () => showToast("🖊️ Pen Mode", "Ready for note-taking!");
->>>>>>> b6fc6183b85d5f2b0664d1993105fef4760ba176
