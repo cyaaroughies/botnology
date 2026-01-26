@@ -4,7 +4,7 @@
 - **Botnology 101** is a premium AI tutor web app with a FastAPI backend (Python) and a static frontend (HTML/JS/CSS in `public/`).
 - Deployable on Vercel; static assets served from `public/`, API handled by FastAPI in `api/index.py`.
 - Data is persisted in JSON files under `data/` (history, subscriptions, storage, photos, announcements).
-
+ 
 ## Key Architecture & Patterns
 - **API:** All backend endpoints are defined in `api/index.py` using FastAPI. Endpoints are grouped by resource (auth, chat, tts, announcements, history, storage, stripe, etc.).
 - **Authentication:** Custom HMAC bearer tokens (see `sign_token`, `verify_token`). Auth endpoints: `/api/auth`, `/api/me`.
