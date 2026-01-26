@@ -1,0 +1,25 @@
+{
+  "name": "botnology",
+  "version": "1.0.0",
+  "description": "Premium AI tutor web app with FastAPI backend and static frontend, deployable on Vercel.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cyaaroughies/botnology.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/cyaaroughies/botnology/issues"
+  },
+  "homepage": "https://github.com/cyaaroughies/botnology#readme",
+  "dependencies": {
+    "express": "^5.2.1",
+    "vercel": "^50.5.0"
+  }
+}

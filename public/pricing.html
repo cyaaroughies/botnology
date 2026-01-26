@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ﻿<!doctype html>
 <html lang="en">
 <head>
@@ -30,3 +31,115 @@
   </div>
 </body>
 </html>
+=======
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Botnology 101 • Tuition Plans</title>
+  <link rel="stylesheet" href="/style.css"/>
+  <script defer src="/script.js"></script>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+</head>
+<body data-page="pricing">
+  <div class="container">
+    <div class="topbar" style="position: sticky; top: 0; z-index: 1000; background: rgba(0, 0, 0, 0.8);">
+      <div class="brand">
+        <img src="/dr-botonic.jpeg" alt="Professor Botnotic" data-botonic="true"/>
+        <div class="title">
+          <b>Botnoloy101</b>
+          <span>Professor Botnotic • Premium AI Tutor</span>
+        </div>
+      </div>
+      <div class="nav">
+        <a class="btn small" href="/index.html" id="goHome">Home</a>
+        <a class="btn small" href="/dashboard.html" id="goDash">Dashboard</a>
+        <button class="btn small" id="themeToggle">Yeti Mode</button>
+        <button class="btn gold small" id="openAuth">Sign In</button>
+      </div>
+    </div>
+    <div class="hero" style="grid-template-columns:1fr">
+      <div class="h1">Choose Your Plan</div>
+      <div class="sub">Select a plan and billing cadence. Sign in first to attach your email.</div>
+      <div class="hr"></div>
+      <div class="grid2">
+        <div class="card">
+          <b>Associates</b>
+          <div class="smallmuted">Foundational guidance, focused study prompts, cloud sync, and session exports.</div>
+          <ul class="smallmuted" style="margin-top:8px">
+            <li>Guided Q&A with Dr. Botonic</li>
+            <li>Study Hall tools and notes</li>
+            <li>Local and cloud chat history</li>
+          </ul>
+          <div class="row" style="margin-top:10px">
+            <button class="btn" onclick="startCheckout('associates','monthly')">Monthly</button>
+            <button class="btn" onclick="startCheckout('associates','annual')">Annual</button>
+          </div>
+        </div>
+        <div class="card">
+          <b>Bachelors</b>
+          <div class="smallmuted">Deeper explanations, structured steps, desktop storage, and quiz practice.</div>
+          <ul class="smallmuted" style="margin-top:8px">
+            <li>Enhanced tutoring depth and references</li>
+            <li>Student Desktop file/folder tools</li>
+            <li>Practice quiz generation</li>
+          </ul>
+          <div class="row" style="margin-top:10px">
+            <button class="btn" onclick="startCheckout('bachelors','monthly')">Monthly</button>
+            <button class="btn" onclick="startCheckout('bachelors','annual')">Annual</button>
+          </div>
+        </div>
+        <div class="card">
+          <b>Masters</b>
+          <div class="smallmuted">Elite coaching, priority responses, voice replies, and advanced study sets.</div>
+          <ul class="smallmuted" style="margin-top:8px">
+            <li>Premium mentoring strategies</li>
+            <li>Voice responses (TTS) with selectable voices</li>
+            <li>Advanced quiz modes and saved sets</li>
+          </ul>
+          <div class="row" style="margin-top:10px">
+            <button class="btn" onclick="startCheckout('masters','monthly')">Monthly</button>
+            <button class="btn" onclick="startCheckout('masters','annual')">Annual</button>
+          </div>
+        </div>
+      </div>
+      <div class="h-eyebrow"><span class="dot" id="healthDot"></span><span id="healthLine">API: checking…</span></div>
+    </div>
+  </div>
+  <!-- Sign In modal to ensure pricing page Sign In works -->
+  <div class="modal" id="authModal">
+    <div class="box">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <b>Student Sign In</b>
+        <button class="btn small" id="closeAuth">Close</button>
+      </div>
+
+      <div class="field">
+        <label for="authName">Name</label>
+        <input id="authName" type="text" placeholder="Student"/>
+      </div>
+
+      <div class="field">
+        <label for="authEmail">Email</label>
+        <input id="authEmail" type="email" placeholder="you@email.com"/>
+      </div>
+
+      <div class="field">
+        <label for="authPlan">Plan</label>
+        <select id="authPlan">
+          <option value="associates">Associates</option>
+          <option value="bachelors">Bachelors</option>
+          <option value="masters">Masters</option>
+        </select>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:12px">
+        <button class="btn gold" id="doAuth">Sign In</button>
+        <a class="btn" href="/pricing.html" id="goPricing">See Tuition Plans</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+>>>>>>> b6fc6183b85d5f2b0664d1993105fef4760ba176

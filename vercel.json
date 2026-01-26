@@ -1,6 +1,18 @@
+<<<<<<< HEAD
 ﻿{
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "routes": [
     { "src": "/(.*)", "dest": "api/index.py" }
   ]
 }
+=======
+{
+  "builds": [
+    { "src": "api/index.py", "use": "@vercel/python" }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "api/index.py" },
+    { "src": "/(.*)", "dest": "/public/$1" }
+  ]
+}
+>>>>>>> b6fc6183b85d5f2b0664d1993105fef4760ba176

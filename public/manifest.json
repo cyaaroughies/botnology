@@ -1,0 +1,9 @@
+{
+  "name": "Botnoloy101",
+  "short_name": "Botnoloy101",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#07110c",
+  "theme_color": "#0b1a12",
+  "icons": []
+}

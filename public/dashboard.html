@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ﻿<!doctype html>
 <html lang="en">
 <head>
@@ -30,3 +31,269 @@
   </div>
 </body>
 </html>
+=======
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="/style.css"/>
+  <script defer src="/dashboard.js"></script>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+</head>
+<body>
+  <div class="container">
+    <div class="topbar" style="position: sticky; top: 0; z-index: 1000; background: rgba(0, 0, 0, 0.8);">
+      <div class="brand">
+        <img src="/dr-botonic.jpeg" alt="Professor Botnotic" data-botonic="true"/>
+        <div class="title">
+          <b>Botnoloy101</b>
+          <span>Professor Botnotic • Dashboard</span>
+        </div>
+      </div>
+      <div class="nav">
+        <a class="btn small" href="/index.html" id="goHome">Home</a>
+        <a class="btn small" href="/courses.html">My Courses</a>
+        <a class="btn small" href="/pricing.html" id="goPricing">Tuition Plans</a>
+        <a class="btn small" href="/study-hall.html" id="goStudy">Study Hall</a>
+        <button class="btn small" id="themeToggle">Yeti Mode</button>
+        <button class="btn gold small" id="openAuth">Sign In</button>
+      </div>
+    </div>
+
+    <div class="hero" style="grid-template-columns:1fr">
+      <div>
+        <div class="h-eyebrow">Dashboard</div>
+        <div class="h1">Professor Botonic's Study Centre</div>
+        <div class="sub">Engage with your AI tutor for anatomy, calculus, trigonometry, and advanced sciences.</div>
+        <div class="hr"></div>
+        <div class="h-eyebrow"><span class="dot" id="healthDot"></span><span id="healthLine">API: checking…</span></div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:16px" id="voicePanel">
+      <div class="row" style="align-items:center;gap:12px;flex-wrap:wrap">
+        <div class="small">Plan: <span id="planBadge" class="badge">ASSOCIATES</span></div>
+        <div class="small" id="whoami">Guest • BN-…</div>
+        <div class="small">Cloud Sync: <span class="dot" id="syncDot"></span> <span id="syncStatus">OFF</span></div>
+        <div style="flex:1"></div>
+        <div class="badge" id="subBadge" title="Subscription status">SUBSCRIPTION: NONE</div>
+      </div>
+      
+      <div class="row" style="margin-top:12px;gap:8px;flex-wrap:wrap;justify-content:center">
+        <a href="https://www.instagram.com/accounts/login/" target="_blank" class="btn small" style="display:flex;align-items:center;gap:8px">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0">
+            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+          </svg>
+          Instagram
+        </a>
+        <a href="https://twitter.com/i/flow/login" target="_blank" class="btn small" style="display:flex;align-items:center;gap:8px">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+          </svg>
+          Twitter
+        </a>
+        <a href="https://www.facebook.com/login/" target="_blank" class="btn small" style="display:flex;align-items:center;gap:8px">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0">
+            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+          </svg>
+          Facebook
+        </a>
+      </div>
+      
+      <div class="row" style="margin-top:12px;gap:8px;flex-wrap:wrap">
+        <button class="btn small" id="newChatBtn">New Chat</button>
+        <button class="btn small" id="exportBtn">Export Chat</button>
+        <input type="file" id="importInput" accept="application/json" style="display:none"/>
+        <button class="btn small gold" id="syncNow">Sync Now</button>
+      </div>
+
+      <div class="chat" style="margin-top:12px">
+        <div id="messages" class="messages forest" style="min-height:220px;max-height:360px;overflow:auto;padding:12px"></div>
+        <div class="row" style="margin-top:10px;gap:10px">
+          <textarea id="chatInput" rows="2" placeholder="Type your message…" style="flex:1"></textarea>
+          <button class="btn gold" id="sendBtn">Send</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:16px">
+      <div class="row" style="align-items:center;gap:12px">
+        <div class="h-eyebrow">Announcements</div>
+        <div style="flex:1"></div>
+      </div>
+      <div class="messages light" style="padding:12px; margin-top:10px">
+        <div id="announcementsList"></div>
+        <div id="announceControls" class="row" style="margin-top:10px; gap:10px">
+          <input class="input" id="announceText" placeholder="Write a new announcement…"/>
+          <button class="btn gold" id="announceAdd">Post</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:16px">
+      <div class="row" style="align-items:center;gap:12px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <img id="badgePhoto" src="/dr-botonic.jpeg" alt="Student Photo" style="width:60px;height:60px;border-radius:999px;border:1px solid rgba(214,182,107,.35);object-fit:cover;background:#0a1811"/>
+          <div>
+            <div><b id="badgeName">Student</b></div>
+            <div class="small">ID: <span id="badgeId">BN-…</span> • <span id="badgePlan">ASSOCIATES</span></div>
+          </div>
+        </div>
+        <div style="flex:1"></div>
+        <button class="btn" id="openBadge">Update ID Photo</button>
+      </div>
+    </div>
+
+    <div class="modal" id="badgeModal">
+      <div class="box">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="shape-toggle">
+              <button class="btn small" id="shapeCircle" title="Circle">Circle</button>
+              <button class="btn small" id="shapeSquare" title="Square">Square</button>
+            </div>
+            <b>Botnoloy101 ID Badge</b>
+          </div>
+          <button class="btn small" id="closeBadge">Close</button>
+        </div>
+        <div class="smallmuted" style="margin-top:8px">Upload a photo, then drag to position and zoom.</div>
+        <div class="row" style="margin-top:10px;align-items:center">
+          <div class="crop-box" id="cropBox">
+            <img id="cropImg" src="/dr-botonic.jpeg" alt="Preview"/>
+          </div>
+          <div class="field" style="min-width:240px">
+            <label for="cropZoom">Zoom</label>
+            <input type="range" id="cropZoom" min="1" max="6" step="0.01" value="1"/>
+            <label for="cropFormat">Format</label>
+            <select id="cropFormat">
+              <option value="png">PNG (transparent)</option>
+              <option value="jpeg" selected>JPEG</option>
+            </select>
+            <label for="cropQuality">JPEG Quality</label>
+            <input type="range" id="cropQuality" min="0.5" max="0.98" step="0.01" value="0.90"/>
+            <label for="cropSize">Export Size</label>
+            <select id="cropSize">
+              <option value="256">256 × 256</option>
+              <option value="512">512 × 512</option>
+              <option value="1024" selected>1024 × 1024</option>
+            </select>
+            <input type="file" id="badgeFile" accept="image/*"/>
+            <div class="smallmuted" id="exportPreview">Output: 1024×1024 JPEG (90%)</div>
+          </div>
+        </div>
+        <div class="row" style="margin-top:12px">
+          <button class="btn" id="cropReset">Reset</button>
+          <button class="btn gold" id="saveBadgePhoto">Save Photo</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:16px">
+      <div class="row" style="align-items:center;gap:12px">
+        <div class="h-eyebrow">Student Desktop</div>
+        <div style="flex:1"></div>
+        <button class="btn small" id="coffeeBtn">Grab a Coffee</button>
+        <button class="btn small" id="penBtn">Grab a Pen</button>
+        <button class="btn small" id="paperBtn">Grab Paper</button>
+      </div>
+      <div class="grid2" style="margin-top:12px">
+        <div class="card">
+          <div class="row" style="align-items:center;gap:8px">
+            <input class="input" id="fsSearch" placeholder="Filter files"/>
+            <button class="btn small" id="fsRefresh">Refresh</button>
+          </div>
+          <div id="fsTree" style="margin-top:10px; max-height:320px; overflow:auto"></div>
+        </div>
+        <div class="card">
+          <div class="field">
+            <label>Path</label>
+            <input id="fsPath" placeholder="folder/file.txt"/>
+          </div>
+          <div class="field" style="margin-top:10px">
+            <label>Content</label>
+            <textarea id="fsEditor" rows="12" placeholder="Start writing your report..."></textarea>
+          </div>
+          <div class="row" style="margin-top:10px">
+            <button class="btn" id="fsNewFile">New File</button>
+            <button class="btn" id="fsNewFolder">New Folder</button>
+            <button class="btn gold" id="fsSave">Save</button>
+            <button class="btn" id="fsDelete">Delete</button>
+            <button class="btn" id="fsDownload">Download</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:16px">
+      <div class="row" style="align-items:center;gap:12px">
+        <div class="h-eyebrow">Voice</div>
+        <div style="flex:1"></div>
+        <label class="small" style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="speakToggle"/> Speak replies</label>
+        <select id="voiceSelect" class="btn small" style="min-width:160px">
+          <option value="alloy">Alloy</option>
+          <option value="verse">Verse</option>
+          <option value="aria">Aria</option>
+        </select>
+      </div>
+      <audio id="ttsAudio" style="width:100%;margin-top:12px" controls></audio>
+    </div>
+
+    <div class="panel" style="margin-top:16px">
+      <div class="row" style="align-items:center;gap:12px">
+        <div class="h-eyebrow">Practice Quizzes</div>
+        <div style="flex:1"></div>
+        <button class="btn small" id="quizGenerate">Generate</button>
+        <button class="btn small" id="quizGrade">Grade</button>
+      </div>
+      <div class="grid2" style="margin-top:12px">
+        <div class="card">
+          <div class="field">
+            <label>Topic</label>
+            <input id="quizTopic" placeholder="e.g., Linear Algebra, Organic Chemistry"/>
+          </div>
+          <div class="field" style="margin-top:10px">
+            <label>Level</label>
+            <select id="quizLevel">
+              <option value="associates">Associates</option>
+              <option value="bachelors" selected>Bachelors</option>
+              <option value="masters">Masters</option>
+            </select>
+          </div>
+          <div class="row" id="quizAdvanced" style="margin-top:10px; gap:10px">
+            <div class="field">
+              <label>Question Count</label>
+              <select id="quizCount">
+                <option value="5" selected>5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Mode</label>
+              <select id="quizMode">
+                <option value="short" selected>Short Answer</option>
+                <option value="mc">Multiple Choice</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <table class="table" id="quizTable">
+            <thead><tr><th style="width:55%">Question</th><th>Answer</th></tr></thead>
+            <tbody id="quizList"></tbody>
+          </table>
+          <div class="smallmuted" id="quizScore" style="margin-top:8px">Score: 0 / 0</div>
+          <div class="row" style="margin-top:10px">
+            <button class="btn" id="quizSave">Save Set</button>
+            <button class="btn" id="quizLoadLast">Load Last Set</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+
+>>>>>>> b6fc6183b85d5f2b0664d1993105fef4760ba176

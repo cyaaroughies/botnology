@@ -1,0 +1,9 @@
+{
+    "scripts": {
+        "start": "node index.js",
+        "dev": "nodemon index.js",
+        "test": "jest",
+        "lint": "eslint .",
+        "format": "prettier --write ."
+    }
+}
