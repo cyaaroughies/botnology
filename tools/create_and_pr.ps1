@@ -1,0 +1,305 @@
+#!/usr/bin/env pwsh
+<#
+Creates a branch, writes public/dashboard.html with accessibility fixes,
+commits, pushes, and creates a PR via the GitHub API.
+
+Usage:
+  - Open PowerShell in the repo root (where .git/ is).
+  - Set $env:GITHUB_TOKEN = "ghp_xxx..."
+  - ./tools/create_and_pr.ps1
+
+Optional environment variables:
+  - $env:BRANCH (default: fix/dashboard-accessibility)
+  - $env:BASE (default: main)
+  - $env:PR_TITLE (default provided)
+  - $env:PR_BODY  (default provided)
+
+#>
+
+# Stop on error
+$ErrorActionPreference = 'Stop'
+
+function Fail([string]$msg) {
+  Write-Error $msg
+  exit 1
+}
+
+# Ensure in repo root
+if (-not (Test-Path ".git")) {
+  Fail "This script must be run from the repo root (where .git is)."
+}
+
+# Ensure token present
+if (-not $env:GITHUB_TOKEN) {
+  Fail "Please set GITHUB_TOKEN environment variable first:
+  In PowerShell: `$env:GITHUB_TOKEN = 'ghp_...YOURTOKEN...'`"
+}
+
+# Configurable values (can be set in env)
+$branch = $env:BRANCH -or "fix/dashboard-accessibility"
+$base = $env:BASE -or "main"
+$prTitle = $env:PR_TITLE -or "fix: markup & accessibility improvements for public/dashboard.html"
+$prBody = $env:PR_BODY -or "Fix invalid viewport meta and improve accessibility/usability (labels, button types, input types, ARIA attributes). No JS behavior changes.`n`nFiles changed:`n- public/dashboard.html"
+
+# Ensure working tree is clean
+$porcelain = git status --porcelain
+if ($porcelain) {
+  Write-Host "You have uncommitted changes. Either commit/stash them first, or continue at your own risk."
+  $yn = Read-Host "Continue anyway and possibly overwrite local changes? (y/N)"
+  if ($yn -notmatch '^[Yy]') {
+    Fail "Aborted. Commit or stash changes and re-run."
+  }
+}
+
+# Try to infer owner/repo from origin
+$remoteUrl = & git remote get-url origin 2>$null
+if (-not $remoteUrl) {
+  Write-Host "Couldn't read 'origin' remote URL."
+  $ownerRepo = Read-Host "Enter repository in owner/repo format (e.g. cyaaroughies/botnology)"
+} else {
+  # Parse various remote formats
+  if ($remoteUrl -match 'github\.com[:/](.+?)(\.git)?$') {
+    $ownerRepo = $matches[1]
+  } else {
+    Write-Host "Unrecognized origin URL format: $remoteUrl"
+    $ownerRepo = Read-Host "Enter repository in owner/repo format (e.g. cyaaroughies/botnology)"
+  }
+}
+
+if (-not $ownerRepo -or $ownerRepo -notmatch '^[^/]+/[^/]+$') {
+  Fail "Invalid repository identifier: $ownerRepo"
+}
+
+# Create branch
+Write-Host "Creating and switching to branch: $branch"
+& git checkout -b $branch
+
+# Write the improved HTML to public/dashboard.html
+$targetPath = "public/dashboard.html"
+$dir = Split-Path $targetPath -Parent
+if (-not (Test-Path $dir)) {
+  New-Item -ItemType Directory -Path $dir -Force | Out-Null
+}
+
+$html = @'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Botnology 101 • Student Dashboard</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/style.css"/>
+</head>
+<body data-page="dashboard">
+  <div class="container">
+    <div class="topbar">
+      <div class="brand">
+        <img src="/dr-botonic.png" alt="Dr. Botonic"/>
+        <div class="title">
+          <b>Student Dashboard</b>
+          <span id="whoami">Guest • BN-…</span>
+        </div>
+      </div>
+      <div class="nav">
+        <div class="badge" id="planBadge">ASSOCIATES</div>
+        <button type="button" class="btn small" id="goHome">Home</button>
+        <button type="button" class="btn small" id="goPricing">Plans</button>
+        <button type="button" class="btn small" id="openAuth">Sign In</button>
+      </div>
+    </div>
+
+    <div class="hero">
+      <div>
+        <div class="h-eyebrow">
+          <span class="dot" id="healthDot"></span>
+          <span id="healthLine">Checking system…</span>
+        </div>
+        <div class="h1">Your workspace.</div>
+        <div class="sub">
+          Notes. Folders. Downloads. Practice. And Dr. Botonic on standby.
+          This is your desk — keep it organized, keep it moving.
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="row">
+          <div class="field">
+            <label for="subjectSel">Subject Mode</label>
+            <select id="subjectSel">
+              <option value="general">General</option>
+              <option value="anatomy">Anatomy</option>
+              <option value="math">Math</option>
+              <option value="chemistry">Chemistry</option>
+              <option value="reading">Reading</option>
+              <option value="writing">Writing</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Quick actions</label>
+            <div class="row">
+              <button type="button" class="btn small" id="btnNewFolder">New Folder</button>
+              <button type="button" class="btn small gold" id="btnNewFile">New File</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="row">
+          <div class="field">
+            <label for="folderSel">Folder</label>
+            <select id="folderSel"></select>
+          </div>
+          <div class="field">
+            <label for="fileSel">File</label>
+            <select id="fileSel"></select>
+          </div>
+        </div>
+
+        <div style="height:10px"></div>
+
+        <textarea aria-label="Notes editor" class="input" id="editor" style="height:220px;resize:vertical" placeholder="Write your notes, lab report draft, outline, anything…"></textarea>
+
+        <div style="height:10px"></div>
+
+        <div class="row">
+          <button type="button" class="btn gold" id="btnSave">Save</button>
+          <button type="button" class="btn" id="btnDelFile">Delete</button>
+          <button type="button" class="btn" id="btnTxt">Download .txt</button>
+          <button type="button" class="btn" id="btnDoc">Download .doc</button>
+        </div>
+      </div>
+
+      <div class="card rightpanel">
+        <div style="font-weight:900;letter-spacing:.25px">Ask Dr. Botonic</div>
+        <div class="smallmuted" style="margin-top:8px">
+          Use your subject mode, then ask. He’ll tailor the tutoring style to your plan automatically.
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="chat" style="min-height:420px">
+          <div class="chathead">
+            <div class="badge"><span class="dot"></span> Live Tutor</div>
+            <div class="smallmuted">Dashboard context</div>
+          </div>
+          <div class="messages" id="messages" role="log" aria-live="polite"></div>
+          <div class="composer">
+            <input type="text" aria-label="Chat input" class="input" id="chatInput" placeholder="Example: quiz me on cranial nerves…" autocomplete="off"/>
+            <button type="button" class="btn gold" id="sendBtn">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <div class="box">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <div id="authTitle" style="font-weight:900;letter-spacing:.25px">Student Sign-In</div>
+        <button type="button" class="btn small" id="closeAuth" aria-label="Close sign in modal">Close</button>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="authName">Your name</label>
+          <input id="authName" type="text" placeholder="Student"/>
+        </div>
+        <div class="field">
+          <label for="authPlan">Plan</label>
+          <select id="authPlan">
+            <option value="associates">Associates</option>
+            <option value="bachelors">Bachelors</option>
+            <option value="masters">Masters</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="authEmail">Email</label>
+        <input id="authEmail" type="email" placeholder="you@email.com"/>
+      </div>
+
+      <div style="height:12px"></div>
+      <button type="button" class="btn gold" style="width:100%" id="doAuth">Sign In</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <b id="toastTitle">Title</b>
+    <p id="toastMsg">Message</p>
+  </div>
+
+  <script src="/script.js"></script>
+</body>
+</html>
+'@
+
+# Write file in UTF8
+$null = $html | Out-File -FilePath $targetPath -Encoding utf8 -Force
+Write-Host "Wrote $targetPath"
+
+# Stage + commit
+& git add $targetPath
+& git commit -m $prTitle
+
+# Push branch
+Write-Host "Pushing branch to origin..."
+& git push -u origin $branch
+
+# Create PR via API
+$apiUrl = "https://api.github.com/repos/$ownerRepo/pulls"
+$headers = @{
+  Authorization = "token $env:GITHUB_TOKEN"
+  Accept = "application/vnd.github+json"
+  "User-Agent" = "PowerShell-Script"
+}
+
+$body = @{
+  title = $prTitle
+  head  = $branch
+  base  = $base
+  body  = $prBody
+} | ConvertTo-Json -Depth 6
+
+try {
+  Write-Host "Creating Pull Request via GitHub API..."
+  $response = Invoke-RestMethod -Method Post -Uri $apiUrl -Headers $headers -Body $body -ContentType "application/json"
+  if ($response.html_url) {
+    Write-Host "Pull Request created: $($response.html_url)"
+    exit 0
+  } else {
+    Write-Host "PR creation response:"
+    $response | ConvertTo-Json | Write-Host
+    exit 0
+  }
+} catch {
+  # If PR already exists (422), try to find it
+  $err = $_.Exception.Response
+  if ($err -ne $null) {
+    $status = $err.StatusCode.value__
+    $stream = $err.GetResponseStream()
+    $reader = New-Object System.IO.StreamReader($stream)
+    $text = $reader.ReadToEnd()
+    Write-Host "GitHub API returned status $status. Message:"
+    Write-Host $text
+
+    if ($status -eq 422) {
+      Write-Host "A PR may already exist from this branch. Searching for existing PR..."
+      $searchUrl = "https://api.github.com/repos/$ownerRepo/pulls?head=$($ownerRepo.Split('/')[0]):$branch&state=all"
+      $existing = Invoke-RestMethod -Method Get -Uri $searchUrl -Headers $headers
+      if ($existing -and $existing.Count -gt 0) {
+        Write-Host "Found existing PR(s):"
+        $existing | ForEach-Object { Write-Host "$($_.html_url) - $($_.title) - $($_.state)" }
+        exit 0
+      } else {
+        Fail "PR creation failed with 422 and no existing PRs found. Response: $text"
+      }
+    } else {
+      Fail "PR creation failed (status $status). Response: $text"
+    }
+  } else {
+    Fail "PR creation failed: $($_.Exception.Message)"
+  }
+}

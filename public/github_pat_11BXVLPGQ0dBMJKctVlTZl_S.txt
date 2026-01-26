@@ -1,0 +1,18 @@
+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
+
+git hub key for botnology101-tutor, exp. 1/17/27
+
+
+
+Git Bash 
+GITHUB_TOKEN="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"
+
+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    
+
+
+x39po4km.up.railway.app
+
+Type	Name	Value
+CNAME	
+www
+x39po4km.up.railway.app
