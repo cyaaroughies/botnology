@@ -6,3 +6,8 @@ openai
 python-dotenv
 PyJWT
 mangum
+httpx
+aiofiles
+python-multipart
+ipython
+pytest

@@ -7,15 +7,16 @@ app.use(express.json());
 app.post('/api/stripe/create-checkout-session', (req, res) => {
   const { plan, cadence, student_id, email } = req.body;
 
-  if (!plan || !cadence || !student_id || !email) {
+  // Accept email as optional, but require plan, cadence, student_id
+  if (!plan || !cadence || !student_id) {
     return res.status(400).json({
-      error: 'Missing required fields',
+      error: 'Missing required fields: plan, cadence, student_id',
     });
   }
 
   // Simulate a successful response
   res.json({
-    url: `https://mock-stripe.com/checkout?plan=${plan}&cadence=${cadence}`,
+    url: `https://mock-stripe.com/checkout?plan=${encodeURIComponent(plan)}&cadence=${encodeURIComponent(cadence)}&student_id=${encodeURIComponent(student_id)}${email ? `&email=${encodeURIComponent(email)}` : ''}`,
   });
 });
 

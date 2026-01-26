@@ -1,222 +1,195 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Botnoloy101</title>
-  <link rel="stylesheet" href="/style.css"/>
-  <script defer src="/script.js"></script>
-  <meta name="description" content="Botnoloy101: Premium AI tutor with 24/7 availability for self-directed study."/>
-  <meta name="keywords" content="AI tutor, online learning, premium education, Botnoloy101"/>
-  <meta name="author" content="Botnoloy101"/>
-  <meta property="og:title" content="Botnoloy101: Premium AI Tutor"/>
-  <meta property="og:description" content="Learn with Dr. Botonic, your premium AI tutor available 24/7."/>
-  <meta property="og:image" content="dr-botonic.jpeg"/>
-  <meta property="og:url" content="https://botnoloy101.com"/>
-  <meta name="twitter:card" content="summary_large_image"/>
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
-</head>
-<body data-page="home" class="text-soft-gold">
-  <div class="container">
-    <div class="topbar" style="position: sticky; top: 0; z-index: 1000; background: rgba(0, 0, 0, 0.8);">
-      <div class="brand">
-          <img src="/dr-botonic.jpeg" alt="Professor Botnotic" data-botonic="true"/>
-        <div class="title">
-          <b>Botnoloy101</b>
-          <span>Professor Botnotic • Premium AI Tutor</span>
-        </div>
-      </div>
-      <div class="nav">
-        <a class="btn small" href="/courses.html">My Courses</a>
-        <a class="btn small" href="/pricing.html" id="goPricing">Tuition Plans</a>
-        <a class="btn small" href="/dashboard.html" id="goDash">Dashboard</a>
-        <a class="btn small" href="/study-hall.html" id="goStudy">Study Hall</a>
-        <button class="btn small" id="themeToggle">Yeti Mode</button>
-        <button class="btn gold small" id="openAuth">Sign In</button>
-      </div>
-    </div>
+// Botnology101 Home Page Script
 
-    <div class="hero">
-      <div>
-        <div class="h-eyebrow">Introducing Dr. Botonic</div>
-        <div class="h1">The Smartest AI Tutor</div>
-        <div class="sub">A sophisticated, soft-spoken Harvard graduate yeti professor who coaches with calm precision, scholarly depth, and a touch of humor. Available 24/7 for self-directed study with an elegant, collegiate experience.</div>
-        <div class="row" style="margin-top:12px">
-          <a class="btn gold" href="/dashboard.html" id="goDash">Enter Dashboard</a>
-          <a class="btn" href="/pricing.html" id="goPricing">View Tuition Plans</a>
-          <button class="btn" id="voice-button">Speak</button>
-          <button class="btn small" id="startNewChat">Start New Chat</button>
-        </div>
-        <div class="hr"></div>
-        <div class="h-eyebrow"><span class="dot" id="healthDot"></span><span id="healthLine">API: checking…</span></div>
-      </div>
-      <div class="card" style="display:flex;align-items:center;gap:14px">
-          <img src="/dr-botonic.jpeg" alt="Professor Botnotic" style="width:120px;height:120px;border-radius:999px;border:1px solid rgba(214,182,107,.35);object-fit:cover;background:#0a1811" data-botonic="true"/>
-        <div>
-          <b>Professor Dr. Botonic</b>
-          <div class="smallmuted">Harvard (DPhil), Fellow of Collegiate Tutors Association, 40+ years mentoring across Mathematics, Physics, Computer Science, and Humanities. Speaks in a gentle English accent with a witty side.</div>
-        </div>
-      </div>
-      <div>
-        <img src="/photos/lecture-time.jpg" alt="Professor Botonic giving a lecture" style="width:100%;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.2)"/>
-        <p class="smallmuted" style="text-align:center;margin-top:8px">Professor Botonic in action</p>
-      </div>
-    </div>
+// ========== Utility ==========
+function $(id) { return document.getElementById(id); }
+function q(sel) { return document.querySelector(sel); }
+function qa(sel) { return Array.from(document.querySelectorAll(sel)); }
+function escapeHTML(str) { return str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function show(el) { el && (el.style.display = ""); }
+function hide(el) { el && (el.style.display = "none"); }
+function setText(id, txt) { const el=$(id); if(el) el.textContent=txt; }
+function badgeClass(plan) {
+  plan = (plan||"").toLowerCase();
+  if (plan==="masters") return "badge gold";
+  if (plan==="bachelors") return "badge";
+  return "badge";
+}
 
-    <div class="panel" style="margin-top:16px">
-      <div class="row" style="align-items:center;gap:12px">
-        <div class="small">Plan: <span id="planBadge">ASSOCIATES</span></div>
-        <div class="small" id="whoami">Guest • BN-…</div>
-        <div class="small">Cloud Sync: <span class="dot" id="syncDot"></span> <span id="syncStatus">OFF</span></div>
-        <div style="flex:1"></div>
-        <div class="badge" id="subBadge" title="Subscription status">SUBSCRIPTION: NONE</div>
-        <button class="btn small" id="resumeBtn">Resume Last Chat</button>
-        <button class="btn small" id="exportBtn">Export Chat</button>
-        <button class="btn small" id="importBtn">Import Chat</button>
-        <input type="file" id="importFile" accept="application/json" style="display:none"/>
-        <button class="btn small" id="syncNow">Sync Now</button>
-        <button class="btn small" id="openBadge">Update ID Photo</button>
-      </div>
+// ========== State ==========
+let user = { name: "Guest", plan: "associates", student_id: "BN-…", token: null };
 
-      <div class="chat" style="display:none;margin-top:12px">
-        <div id="messages" class="messages forest" style="min-height:220px;max-height:360px;overflow:auto;padding:12px"></div>
-        <div class="row" style="margin-top:10px;gap:10px">
-          <textarea id="chatInput" rows="2" placeholder="Type your message…" style="flex:1"></textarea>
-          <button class="btn gold" id="sendBtn">Send</button>
-        </div>
-      </div>
-    </div>
+// ========== API Health ==========
+async function checkHealth() {
+  try {
+    const res = await fetch("/api/health");
+    const data = await res.json();
+    setText("healthLine", "API: " + (data.status === "ok" ? "online" : "offline"));
+    $("healthDot").style.background = data.status === "ok" ? "#10b981" : "#f43f5e";
+  } catch {
+    setText("healthLine", "API: offline");
+    $("healthDot").style.background = "#f43f5e";
+  }
+}
+checkHealth();
 
-    <section id="exciting-features" class="hero">
-      <div class="hero-content">
-        <h2>Exciting Features</h2>
-        <p>Discover the amazing capabilities of Dr. Botonic, your premium AI tutor. From personalized learning plans to real-time assistance, explore what makes Dr. Botonic unique!</p>
-        <ul>
-          <li>24/7 availability for all your learning needs</li>
-          <li>Interactive study sessions with real-time feedback</li>
-          <li>Support for a wide range of subjects</li>
-        </ul>
-      </div>
-    </section>
+// ========== Whoami & Plan ==========
+async function fetchMe() {
+  try {
+    const res = await fetch("/api/me", { headers: user.token ? { Authorization: "Bearer " + user.token } : {} });
+    const data = await res.json();
+    if (data.logged_in) {
+      user = { ...user, ...data };
+      setText("whoami", `${user.name} • ${user.student_id}`);
+      setText("planBadge", (user.plan||"ASSOCIATES").toUpperCase());
+      $("planBadge").className = badgeClass(user.plan);
+    }
+  } catch {}
+}
+fetchMe();
 
-    <section id="dr-botonic-photo" class="hero">
-      <div class="hero-content">
-        <h2>Meet Dr. Botonic</h2>
-        <img src="/photos/dr-botonic.jpg" alt="Dr. Botonic" style="width:100%;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.2)"/>
-        <p class="smallmuted" style="text-align:center;margin-top:8px">Dr. Botonic, your AI tutor, ready to guide you to success!</p>
-      </div>
-    </section>
-  </div>
+// ========== Subscription ==========
+async function fetchSubscription() {
+  try {
+    const res = await fetch("/api/subscription", { headers: user.token ? { Authorization: "Bearer " + user.token } : {} });
+    const data = await res.json();
+    setText("subBadge", "SUBSCRIPTION: " + (data.status||"NONE").toUpperCase());
+  } catch {}
+}
+fetchSubscription();
 
-  <div class="toast" id="toast">
-    <b id="toastTitle">Notice</b>
-    <p id="toastMsg">…</p>
-  </div>
+// ========== Auth Modal ==========
+if ($("openAuth")) $("openAuth").onclick = () => show($("authModal"));
+if ($("closeAuth")) $("closeAuth").onclick = () => hide($("authModal"));
+if ($("doAuth")) $("doAuth").onclick = async () => {
+  const name = $("authName").value.trim() || "Student";
+  const email = $("authEmail").value.trim();
+  const plan = $("authPlan").value;
+  if (!email || !email.includes("@")) {
+    alert("Please enter a valid email.");
+    return;
+  }
+  try {
+    const res = await fetch("/api/auth", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, plan })
+    });
+    const data = await res.json();
+    if (data.token) {
+      user = { ...user, ...data, token: data.token };
+      hide($("authModal"));
+      fetchMe();
+      fetchSubscription();
+      showToast("Signed in!", `Welcome, ${user.name}`);
+    } else {
+      alert("Sign in failed.");
+    }
+  } catch {
+    alert("Sign in failed.");
+  }
+};
 
-  <div class="modal" id="authModal">
-    <div class="box">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-        <b>Student Sign In</b>
-        <button class="btn small" id="closeAuth">Close</button>
-      </div>
+// ========== Theme Toggle ==========
+if ($("themeToggle")) $("themeToggle").onclick = () => {
+  document.body.classList.toggle("yeti");
+};
 
-      <div class="field">
-        <label for="authName">Name</label>
-        <input id="authName" type="text" placeholder="Student"/>
-      </div>
+// ========== Chat Panel ==========
+if ($("startNewChat")) $("startNewChat").onclick = () => {
+  const chat = q(".chat");
+  if (chat) {
+    chat.style.display = "";
+    $("chatInput") && ($("chatInput").value = "");
+    $("messages") && ( $("messages").innerHTML = "" );
+  }
+};
+if ($("resumeBtn")) $("resumeBtn").onclick = () => {
+  const chat = q(".chat");
+  if (chat) chat.style.display = "";
+};
+if ($("sendBtn")) $("sendBtn").onclick = async () => {
+  const msg = $("chatInput").value.trim();
+  if (!msg) return;
+  $("chatInput").value = "";
+  const messages = $("messages");
+  if (messages) {
+    messages.innerHTML += `<div class="message user">${escapeHTML(msg)}</div>`;
+    messages.scrollTop = messages.scrollHeight;
+  }
+  try {
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...(user.token ? { Authorization: "Bearer " + user.token } : {}) },
+      body: JSON.stringify({ message: msg, plan: user.plan })
+    });
+    const data = await res.json();
+    if (messages) {
+      messages.innerHTML += `<div class="message assistant">${escapeHTML(data.reply||"(No reply)")}</div>`;
+      messages.scrollTop = messages.scrollHeight;
+    }
+  } catch {
+    if (messages) {
+      messages.innerHTML += `<div class="message assistant">(Error: could not reach API)</div>`;
+      messages.scrollTop = messages.scrollHeight;
+    }
+  }
+};
 
-      <div class="field">
-        <label for="authEmail">Email</label>
-        <input id="authEmail" type="email" placeholder="you@email.com"/>
-      </div>
+// ========== Badge Modal ==========
+if ($("openBadge")) $("openBadge").onclick = () => show($("badgeModal"));
+if ($("closeBadge")) $("closeBadge").onclick = () => hide($("badgeModal"));
+if ($("badgeFile")) $("badgeFile").onchange = e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => $("cropImg").src = ev.target.result;
+  reader.readAsDataURL(file);
+};
 
-      <div class="field">
-        <label for="authPlan">Plan</label>
-        <select id="authPlan">
-          <option value="associates">Associates</option>
-          <option value="bachelors">Bachelors</option>
-          <option value="masters">Masters</option>
-        </select>
-      </div>
+// ========== Import/Export ==========
+if ($("exportBtn")) $("exportBtn").onclick = () => {
+  const messages = $("messages");
+  if (!messages) return;
+  const data = { chat: messages.innerText || "" };
+  const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "botnology-chat.json";
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+};
+if ($("importBtn")) $("importBtn").onclick = () => show($("importModal"));
+if ($("closeImport")) $("closeImport").onclick = () => hide($("importModal"));
+if ($("importButton")) $("importButton").onclick = () => $("importFile").click();
+if ($("doImport")) $("doImport").onclick = () => {
+  const file = $("importFile").files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (data.chat && $("messages")) $("messages").innerText = data.chat;
+      hide($("importModal"));
+      showToast("Import successful", "Chat imported.");
+    } catch {
+      alert("Invalid file.");
+    }
+  };
+  reader.readAsText(file);
+};
 
-      <div style="display:flex;gap:10px;margin-top:12px">
-        <button class="btn gold" id="doAuth">Sign In</button>
-        <a class="btn" href="/pricing.html" id="goPricing">See Tuition Plans</a>
-      </div>
-    </div>
-  </div>
+// ========== Toast ==========
+function showToast(title, msg) {
+  setText("toastTitle", title);
+  setText("toastMsg", msg);
+  const toast = $("toast");
+  if (!toast) return;
+  toast.style.display = "";
+  setTimeout(() => { toast.style.display = "none"; }, 2500);
+}
 
-  <div class="modal" id="badgeModal">
-    <div class="box">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-        <div style="display:flex;align-items:center;gap:8px">
-          <div class="shape-toggle">
-            <button class="btn small" id="shapeCircle" title="Circle">Circle</button>
-            <button class="btn small" id="shapeSquare" title="Square">Square</button>
-          </div>
-          <b>Botnoloy101 ID Badge</b>
-        </div>
-        <button class="btn small" id="closeBadge">Close</button>
-      </div>
-      <div class="smallmuted" style="margin-top:8px">Upload a photo, then drag to position and zoom.</div>
-      <div class="row" style="margin-top:10px;align-items:center">
-        <div class="crop-box" id="cropBox">
-            <img id="cropImg" src="/dr-botonic.jpeg" alt="Preview"/>
-        </div>
-        <div class="field" style="min-width:240px">
-          <label for="cropZoom">Zoom</label>
-          <input type="range" id="cropZoom" min="1" max="6" step="0.01" value="1"/>
-          <label for="cropFormat">Format</label>
-          <select id="cropFormat">
-            <option value="png">PNG (transparent)</option>
-            <option value="jpeg" selected>JPEG</option>
-          </select>
-          <label for="cropQuality">JPEG Quality</label>
-          <input type="range" id="cropQuality" min="0.5" max="0.98" step="0.01" value="0.90"/>
-          <label for="cropSize">Export Size</label>
-          <select id="cropSize">
-            <option value="256">256 × 256</option>
-            <option value="512">512 × 512</option>
-            <option value="1024" selected>1024 × 1024</option>
-          </select>
-          <input type="file" id="badgeFile" accept="image/*"/>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal" id="importModal">
-    <div class="box">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-        <b>Import Chat</b>
-        <button class="btn small" id="closeImport">Close</button>
-      </div>
-
-      <div class="field">
-        <label for="importFile">File</label>
-        <input id="importFile" type="file" accept="application/json" style="display:none"/>
-        <button class="btn" id="importButton">Choose File</button>
-      </div>
-
-      <div class="field">
-        <label for="importPlan">Plan</label>
-        <select id="importPlan">
-          <option value="associates">Associates</option>
-          <option value="bachelors">Bachelors</option>
-          <option value="masters">Masters</option>
-        </select>
-      </div>
-
-      <div style="display:flex;gap:10px;margin-top:12px">
-        <button class="btn gold" id="doImport">Import</button>
-        <a class="btn" href="/pricing.html" id="goPricing">See Tuition Plans</a>
-      </div>
-    </div>
-  </div>
-
-  <button class="btn small" id="coffeeBtn">Coffee</button>
-  <button class="btn small" id="penBtn">Pen</button>
-</body>
-</html>
-
-
+// ========== Misc Buttons ==========
+if ($("coffeeBtn")) $("coffeeBtn").onclick = () => showToast("☕️ Coffee Break", "Take a quick break and come back refreshed!");
+if ($("penBtn")) $("penBtn").onclick = () => showToast("🖊️ Pen Mode", "Ready for note-taking!");

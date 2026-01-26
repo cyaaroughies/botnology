@@ -1,276 +1,218 @@
-// ==========================================
-// DASHBOARD CHAT FUNCTIONALITY
-// ==========================================
+// Botnology101 Dashboard Script
 
+// ========== Utility ==========
+function $(id) { return document.getElementById(id); }
+function q(sel) { return document.querySelector(sel); }
+function qa(sel) { return Array.from(document.querySelectorAll(sel)); }
+function escapeHTML(str) { return str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function show(el) { el && (el.style.display = ""); }
+function hide(el) { el && (el.style.display = "none"); }
+function setText(id, txt) { const el=$(id); if(el) el.textContent=txt; }
+function badgeClass(plan) {
+  plan = (plan||"").toLowerCase();
+  if (plan==="masters") return "badge gold";
+  if (plan==="bachelors") return "badge";
+  return "badge";
+}
+
+// ========== State ==========
+let user = { name: "Guest", plan: "associates", student_id: "BN-…", token: null };
+let announcements = [];
 let chatHistory = [];
-let currentPlan = 'associates'; // Default plan
+let subscription = { status: "none" };
 
-// Initialize dashboard
-document.addEventListener("DOMContentLoaded", () => {
-  console.log("Dashboard initializing...");
-  
-  // Load user data from token
-  const token = localStorage.getItem("botnology_token");
-  if (token) {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      currentPlan = payload.plan || 'associates';
-      document.getElementById('whoami').textContent = `${payload.name || 'Student'} • ${payload.student_id || 'BN-UNKNOWN'}`;
-      document.getElementById('planBadge').textContent = currentPlan.toUpperCase();
-      document.getElementById('badgePlan').textContent = currentPlan.toUpperCase();
-      document.getElementById('badgeName').textContent = payload.name || 'Student';
-      document.getElementById('badgeId').textContent = payload.student_id || 'BN-UNKNOWN';
-    } catch (e) {
-      console.warn("Could not parse token:", e);
-    }
-  }
-  
-  // Load chat history from localStorage
-  const savedHistory = localStorage.getItem(`botnology_chat_${currentPlan}`);
-  if (savedHistory) {
-    try {
-      chatHistory = JSON.parse(savedHistory);
-      displayHistory();
-    } catch (e) {
-      console.warn("Could not load chat history:", e);
-    }
-  }
-  
-  // Initialize chat
-  initChat();
-  initThemeToggle();
-  checkHealth();
-  
-  // Add welcome message if no history
-  if (chatHistory.length === 0) {
-    addWelcomeMessage();
-  }
-});
-
-function initChat() {
-  const sendBtn = document.getElementById('sendBtn');
-  const chatInput = document.getElementById('chatInput');
-  const resumeBtn = document.getElementById('resumeBtn');
-  const exportBtn = document.getElementById('exportBtn');
-  const importBtn = document.getElementById('importBtn');
-  const importFile = document.getElementById('importFile');
-  
-  if (!sendBtn || !chatInput) return;
-  
-  // Send message on button click
-  sendBtn.addEventListener('click', () => sendMessage());
-  
-  // Send message on Enter (Shift+Enter for new line)
-  chatInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  });
-  
-  // Resume last chat
-  if (resumeBtn) {
-    resumeBtn.addEventListener('click', () => {
-      if (chatHistory.length > 0) {
-        chatInput.focus();
-      } else {
-        alert('No previous chat to resume.');
-      }
-    });
-  }
-  
-  // Export chat
-  if (exportBtn) {
-    exportBtn.addEventListener('click', () => exportChat());
-  }
-  
-  // Import chat
-  if (importBtn && importFile) {
-    importBtn.addEventListener('click', () => importFile.click());
-    importFile.addEventListener('change', (e) => importChat(e));
-  }
+// ========== Auth Modal ==========
+function openAuthModal() {
+  // Implement modal open logic if needed
 }
-
-function addWelcomeMessage() {
-  const messages = {
-    associates: "Good afternoon. I am Professor Botonic from Harvard. I specialize in anatomy, calculus, trigonometry, and the sciences. Let us begin with the fundamentals—what subject interests you today?",
-    bachelors: "Greetings, dear scholar. I am Professor Botonic, Harvard faculty. My expertise spans anatomy, advanced mathematics, physics, and chemistry. I shall provide structured, rigorous instruction. What challenging topic shall we explore?",
-    masters: "Welcome, my distinguished colleague. I am Professor Botonic, Harvard professor emeritus. My academic focus encompasses human anatomy, differential calculus, trigonometric analysis, quantum mechanics, and organic chemistry. I offer elite-level mentorship with mathematical precision and theoretical depth. What complex intellectual pursuit demands our attention today?"
-  };
-  
-  const welcomeMsg = messages[currentPlan] || messages.associates;
-  addMessage('assistant', welcomeMsg);
+function closeAuthModal() {
+  // Implement modal close logic if needed
 }
+if ($("openAuth")) $("openAuth").onclick = openAuthModal;
 
-async function sendMessage() {
-  const chatInput = document.getElementById('chatInput');
-  const sendBtn = document.getElementById('sendBtn');
-  const message = chatInput.value.trim();
-  
-  if (!message) return;
-  
-  // Add user message to UI
-  addMessage('user', message);
-  chatInput.value = '';
-  sendBtn.disabled = true;
-  sendBtn.textContent = 'Thinking...';
-  
-  try {
-    const response = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        message: message,
-        history: chatHistory,
-        plan: currentPlan,
-        subject: 'General'
-      })
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
-    }
-    
-    const data = await response.json();
-    addMessage('assistant', data.reply);
-    
-  } catch (error) {
-    console.error('Chat error:', error);
-    addMessage('assistant', '❌ I apologize, but I encountered a technical difficulty. Please try again.');
-  } finally {
-    sendBtn.disabled = false;
-    sendBtn.textContent = 'Send';
-    chatInput.focus();
-  }
-}
-
-function addMessage(role, content) {
-  const messagesDiv = document.getElementById('messages');
-  if (!messagesDiv) return;
-  
-  // Add to history
-  chatHistory.push({ role, content });
-  
-  // Save to localStorage
-  localStorage.setItem(`botnology_chat_${currentPlan}`, JSON.stringify(chatHistory));
-  
-  // Create message element
-  const msgDiv = document.createElement('div');
-  msgDiv.className = role === 'user' ? 'msg-user' : 'msg-assistant';
-  
-  const label = document.createElement('div');
-  label.className = 'msg-label';
-  label.textContent = role === 'user' ? 'You' : 'Dr. Botonic';
-  
-  const text = document.createElement('div');
-  text.className = 'msg-text';
-  text.textContent = content;
-  
-  msgDiv.appendChild(label);
-  msgDiv.appendChild(text);
-  messagesDiv.appendChild(msgDiv);
-  
-  // Scroll to bottom
-  messagesDiv.scrollTop = messagesDiv.scrollHeight;
-}
-
-function displayHistory() {
-  const messagesDiv = document.getElementById('messages');
-  if (!messagesDiv) return;
-  
-  messagesDiv.innerHTML = '';
-  chatHistory.forEach(msg => {
-    const msgDiv = document.createElement('div');
-    msgDiv.className = msg.role === 'user' ? 'msg-user' : 'msg-assistant';
-    
-    const label = document.createElement('div');
-    label.className = 'msg-label';
-    label.textContent = msg.role === 'user' ? 'You' : 'Dr. Botonic';
-    
-    const text = document.createElement('div');
-    text.className = 'msg-text';
-    text.textContent = msg.content;
-    
-    msgDiv.appendChild(label);
-    msgDiv.appendChild(text);
-    messagesDiv.appendChild(msgDiv);
-  });
-  
-  messagesDiv.scrollTop = messagesDiv.scrollHeight;
-}
-
-function exportChat() {
-  if (chatHistory.length === 0) {
-    alert('No chat history to export.');
-    return;
-  }
-  
-  const dataStr = JSON.stringify(chatHistory, null, 2);
-  const blob = new Blob([dataStr], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `botnology-chat-${currentPlan}-${Date.now()}.json`;
-  a.click();
-  
-  URL.revokeObjectURL(url);
-}
-
-function importChat(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    try {
-      const imported = JSON.parse(e.target.result);
-      if (Array.isArray(imported)) {
-        chatHistory = imported;
-        localStorage.setItem(`botnology_chat_${currentPlan}`, JSON.stringify(chatHistory));
-        displayHistory();
-        alert('Chat history imported successfully!');
-      } else {
-        alert('Invalid chat file format.');
-      }
-    } catch (error) {
-      alert('Error importing chat: ' + error.message);
-    }
-  };
-  reader.readAsText(file);
-}
-
-function initThemeToggle() {
-  const themeToggle = document.getElementById("themeToggle");
-  if (!themeToggle) return;
-
-  const savedTheme = localStorage.getItem("botnology_theme");
-  if (savedTheme === "yeti") {
-    document.body.classList.add("yeti-theme");
-    themeToggle.textContent = "Forest Mode";
-  }
-
-  themeToggle.addEventListener("click", () => {
-    const isYeti = document.body.classList.toggle("yeti-theme");
-    themeToggle.textContent = isYeti ? "Forest Mode" : "Yeti Mode";
-    localStorage.setItem("botnology_theme", isYeti ? "yeti" : "forest");
-  });
-}
-
+// ========== API Health ==========
 async function checkHealth() {
-  const healthLine = document.getElementById("healthLine");
-  if (!healthLine) return;
-
   try {
-    const response = await fetch("/api/health");
-    const data = await response.json();
-    
-    if (data.status === "ok") {
-      healthLine.textContent = "API: Online ✓";
-    } else {
-      healthLine.textContent = "API: Degraded";
-    }
-  } catch (error) {
-    healthLine.textContent = "API: Offline";
+    const res = await fetch("/api/health");
+    const data = await res.json();
+    setText("healthLine", "API: " + (data.status === "ok" ? "online" : "offline"));
+    $("healthDot").style.background = data.status === "ok" ? "#10b981" : "#f43f5e";
+  } catch {
+    setText("healthLine", "API: offline");
+    $("healthDot").style.background = "#f43f5e";
   }
 }
+checkHealth();
+
+// ========== Whoami & Plan ==========
+async function fetchMe() {
+  try {
+    const res = await fetch("/api/me", { headers: user.token ? { Authorization: "Bearer " + user.token } : {} });
+    const data = await res.json();
+    if (data.logged_in) {
+      user = { ...user, ...data };
+      setText("whoami", `${user.name} • ${user.student_id}`);
+      setText("planBadge", (user.plan||"ASSOCIATES").toUpperCase());
+      $("planBadge").className = badgeClass(user.plan);
+      setText("badgeName", user.name);
+      setText("badgeId", user.student_id);
+      setText("badgePlan", (user.plan||"ASSOCIATES").toUpperCase());
+    }
+  } catch {}
+}
+fetchMe();
+
+// ========== Subscription ==========
+async function fetchSubscription() {
+  try {
+    const res = await fetch("/api/subscription", { headers: user.token ? { Authorization: "Bearer " + user.token } : {} });
+    const data = await res.json();
+    subscription = data;
+    setText("subBadge", "SUBSCRIPTION: " + (data.status||"NONE").toUpperCase());
+  } catch {}
+}
+fetchSubscription();
+
+// ========== Announcements ==========
+async function fetchAnnouncements() {
+  try {
+    const res = await fetch("/api/announcements");
+    const data = await res.json();
+    announcements = data.items || [];
+    renderAnnouncements();
+  } catch {}
+}
+function renderAnnouncements() {
+  const list = $("announcementsList");
+  if (!list) return;
+  list.innerHTML = announcements.map(a =>
+    `<div class="message">${escapeHTML(a.text)}${a.date ? `<span class="smallmuted" style="margin-left:8px">${escapeHTML(a.date)}</span>` : ""}</div>`
+  ).join("");
+}
+if ($("announceAdd")) {
+  $("announceAdd").onclick = async () => {
+    const txt = $("announceText").value.trim();
+    if (!txt) return;
+    try {
+      const res = await fetch("/api/announcements", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(user.token ? { Authorization: "Bearer " + user.token } : {}) },
+        body: JSON.stringify({ text: txt })
+      });
+      if (res.ok) {
+        $("announceText").value = "";
+        fetchAnnouncements();
+      }
+    } catch {}
+  };
+}
+fetchAnnouncements();
+
+// ========== Chat ==========
+if ($("sendBtn")) {
+  $("sendBtn").onclick = async () => {
+    const msg = $("chatInput").value.trim();
+    if (!msg) return;
+    $("chatInput").value = "";
+    chatHistory.push({ role: "user", content: msg });
+    renderChat();
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(user.token ? { Authorization: "Bearer " + user.token } : {}) },
+        body: JSON.stringify({ message: msg, history: chatHistory.slice(-10), plan: user.plan })
+      });
+      const data = await res.json();
+      chatHistory.push({ role: "assistant", content: data.reply });
+      renderChat();
+      if ($("speakToggle") && $("speakToggle").checked) speak(data.reply);
+    } catch (e) {
+      chatHistory.push({ role: "assistant", content: "(Error: could not reach API)" });
+      renderChat();
+    }
+  };
+}
+function renderChat() {
+  const msgs = $("messages");
+  if (!msgs) return;
+  msgs.innerHTML = chatHistory.map(m =>
+    `<div class="message ${m.role}">${escapeHTML(m.content)}</div>`
+  ).join("");
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+// ========== TTS ==========
+function speak(text) {
+  if (!window.speechSynthesis) return;
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.voice = speechSynthesis.getVoices().find(v => v.name.toLowerCase().includes(($("voiceSelect")?.value||"alloy").toLowerCase())) || null;
+  speechSynthesis.speak(utter);
+}
+
+// ========== Badge Photo ==========
+if ($("openBadge")) $("openBadge").onclick = () => $("badgeModal").style.display = "";
+if ($("closeBadge")) $("closeBadge").onclick = () => $("badgeModal").style.display = "none";
+if ($("badgeFile")) $("badgeFile").onchange = e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => $("cropImg").src = ev.target.result;
+  reader.readAsDataURL(file);
+};
+if ($("saveBadgePhoto")) $("saveBadgePhoto").onclick = async () => {
+  const img = $("cropImg").src;
+  if (!img.startsWith("data:")) return;
+  try {
+    await fetch("/api/photo", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...(user.token ? { Authorization: "Bearer " + user.token } : {}) },
+      body: JSON.stringify({ photo_base64: img.split(",")[1] })
+    });
+    $("badgePhoto").src = img;
+    $("badgeModal").style.display = "none";
+  } catch {}
+};
+
+// ========== Quiz ==========
+if ($("quizGenerate")) $("quizGenerate").onclick = async () => {
+  const topic = $("quizTopic").value.trim();
+  const level = $("quizLevel").value;
+  try {
+    const res = await fetch("/api/quiz/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...(user.token ? { Authorization: "Bearer " + user.token } : {}) },
+      body: JSON.stringify({ topic, level })
+    });
+    const data = await res.json();
+    renderQuiz(data.questions || []);
+  } catch {}
+};
+function renderQuiz(questions) {
+  const list = $("quizList");
+  if (!list) return;
+  list.innerHTML = (questions||[]).map((q,i) =>
+    `<tr><td>${escapeHTML(q.q||"")}</td><td><input data-qi="${i}" class="input" placeholder="Your answer"/></td></tr>`
+  ).join("");
+  $("quizScore").textContent = `Score: 0 / ${questions.length}`;
+}
+if ($("quizGrade")) $("quizGrade").onclick = () => {
+  const rows = qa("#quizList input");
+  const answers = rows.map(r => r.value.trim());
+  // For demo, just count non-empty
+  const score = answers.filter(a => a).length;
+  $("quizScore").textContent = `Score: ${score} / ${rows.length}`;
+};
+
+// ========== File Storage ==========
+if ($("fsRefresh")) $("fsRefresh").onclick = async () => {
+  try {
+    const res = await fetch("/api/storage/list", { headers: user.token ? { Authorization: "Bearer " + user.token } : {} });
+    const data = await res.json();
+    $("fsTree").textContent = JSON.stringify(data.tree, null, 2);
+  } catch {}
+};
+
+// ========== Theme Toggle ==========
+if ($("themeToggle")) $("themeToggle").onclick = () => {
+  document.body.classList.toggle("yeti");
+};
