@@ -1,1102 +1,331 @@
-// ========================================
-// 🎓 BOTNOLOGY101 COURSE MANAGEMENT SYSTEM
-// ========================================
-
-// ───────────────────────────────────────
-// COURSE CATALOG DATA
-// ───────────────────────────────────────
-const COURSE_CATALOG = {
-  // ANATOMY COURSES
-  anatomy101: {
-anatomy101: {
-    id: 'anatomy101',
-    code: 'ANAT-101',
-    title: 'Human Anatomy Fundamentals',
-    icon: '🫀',
-    category: 'anatomy',
-    tier: 'associates',
-    credits: 4,
-    description: 'Introduction to human body systems, organs, and basic anatomical terminology. Perfect for beginning students.',
-    syllabus: [
-      { week: 1, topic: 'Introduction to Anatomical Terminology', status: 'pending' },
-      { week: 2, topic: 'Skeletal System', status: 'pending' },
-      { week: 3, topic: 'Muscular System', status: 'pending' },
-      { week: 4, topic: 'Cardiovascular System', status: 'pending' },
-      { week: 5, topic: 'Respiratory System', status: 'pending' },
-      { week: 6, topic: 'Nervous System Basics', status: 'pending' },
-      { week: 7, topic: 'Digestive System', status: 'pending' },
-      { week: 8, topic: 'Final Exam', status: 'pending' }
-    ],
-    assignments: [
-      { id: 1, title: 'Skeletal System Quiz', type: 'quiz', points: 100, due: '2026-02-15' },
-      { id: 2, title: 'Muscle Identification Lab', type: 'lab', points: 150, due: '2026-03-01' },
-      { id: 3, title: 'Cardiovascular Case Study', type: 'essay', points: 200, due: '2026-03-20' }
-    ]
-  },
-  anatomy201: {
-    id: 'anatomy201',
-    code: 'ANAT-201',
-    title: 'Advanced Human Anatomy',
-    icon: '🧠',
-    category: 'anatomy',
-    tier: 'bachelors',
-    credits: 4,
-    description: 'Deep dive into complex anatomical structures, physiological relationships, and clinical applications.',
-    syllabus: [
-      { week: 1, topic: 'Neuroanatomy: Brain Structures', status: 'pending' },
-      { week: 2, topic: 'Cardiac Anatomy & Physiology', status: 'pending' },
-      { week: 3, topic: 'Pulmonary System Details', status: 'pending' },
-      { week: 4, topic: 'Endocrine System', status: 'pending' },
-      { week: 5, topic: 'Renal System', status: 'pending' },
-      { week: 6, topic: 'Clinical Case Studies', status: 'pending' }
-    ],
-    assignments: [
-      { id: 1, title: 'Brain Mapping Project', type: 'project', points: 300, due: '2026-02-28' },
-      { id: 2, title: 'Cardiac Pathology Analysis', type: 'essay', points: 250, due: '2026-03-15' }
-    ]
-  },
-  anatomy301: {
-    id: 'anatomy301',
-    code: 'ANAT-301',
-    title: 'Clinical Anatomy & Research',
-    icon: '🔬',
-    category: 'anatomy',
-    tier: 'masters',
-    credits: 5,
-    description: 'Master-level anatomical research, surgical anatomy, and advanced medical applications.',
-    syllabus: [
-      { week: 1, topic: 'Research Methodologies in Anatomy', status: 'pending' },
-      { week: 2, topic: 'Surgical Anatomy Applications', status: 'pending' },
-      { week: 3, topic: 'Advanced Neuroanatomy', status: 'pending' },
-      { week: 4, topic: 'Thesis Development', status: 'pending' }
-    ],
-    assignments: [
-      { id: 1, title: 'Original Research Proposal', type: 'thesis', points: 500, due: '2026-04-01' },
-      { id: 2, title: 'Surgical Anatomy Presentation', type: 'presentation', points: 400, due: '2026-04-15' }
-    ]
-  },
-
-  // MATHEMATICS COURSES
-  calc1: {
-    id: 'calc1',
-    code: 'MATH-141',
-    title: 'Calculus I: Limits & Derivatives',
-    icon: '📐',
-    category: 'math',
-    tier: 'associates',
-    credits: 4,
-    description: 'Foundational calculus concepts including limits, continuity, derivatives, and applications.',
-    syllabus: [
-      { week: 1, topic: 'Limits and Continuity', status: 'pending' },
-      { week: 2, topic: 'Derivative Rules', status: 'pending' },
-      { week: 3, topic: 'Applications of Derivatives', status: 'pending' },
-      { week: 4, topic: 'Related Rates', status: 'pending' },
-      { week: 5, topic: 'Optimization Problems', status: 'pending' },
-      { week: 6, topic: 'Curve Sketching', status: 'pending' }
-    ],
-    assignments: [
-      { id: 1, title: 'Limits Problem Set', type: 'homework', points: 100, due: '2026-02-10' },
-      { id: 2, title: 'Derivative Applications Quiz', type: 'quiz', points: 150, due: '2026-03-05' },
-      { id: 3, title: 'Optimization Project', type: 'project', points: 200, due: '2026-03-25' }
-    ]
-  },
-  calc2: {
-    id: 'calc2',
-    code: 'MATH-142',
-    title: 'Calculus II: Integration & Series',
-    icon: '∫',
-    category: 'math',
-    tier: 'bachelors',
-    credits: 4,
-    description: 'Advanced integration techniques, sequences, series, and polar coordinates.',
-    syllabus: [
-      { week: 1, topic: 'Integration Techniques', status: 'pending' },
-      { week: 2, topic: 'Applications of Integration', status: 'pending' },
-      { week: 3, topic: 'Sequences and Series', status: 'pending' },
-      { week: 4, topic: 'Taylor and Maclaurin Series', status: 'pending' },
-      { week: 5, topic: 'Polar Coordinates', status: 'pending' }
-    ],
-    assignments: [
-      { id: 1, title: 'Integration Methods Quiz', type: 'quiz', points: 150, due: '2026-02-20' },
-      { id: 2, title: 'Series Convergence Problem Set', type: 'homework', points: 200, due: '2026-03-10' }
-    ]
-  },
-  calc3: {
-    id: 'calc3',
-    code: 'MATH-241',
-    title: 'Calculus III: Multivariable',
-    icon: '∇',
-    category: 'math',
-    tier: 'masters',
-    credits: 4,
-    description: 'Multivariable calculus, vector fields, line integrals, and Green\'s theorem.',
-    syllabus: [
-      { week: 1, topic: 'Vectors and 3D Space', status: 'pending' },
-      { week: 2, topic: 'Partial Derivatives', status: 'pending' },
-      { week: 3, topic: 'Multiple Integrals', status: 'pending' },
-      { week: 4, topic: 'Vector Calculus', status: 'pending' }
-    ],
-    assignments: [
-      { id: 1, title: 'Vector Field Analysis', type: 'project', points: 300, due: '2026-03-15' },
-      { id: 2, title: 'Line Integral Problem Set', type: 'homework', points: 250, due: '2026-04-01' }
-    ]
-  },
-
-  trig101: {
-    id: 'trig101',
-    code: 'MATH-110',
-    title: 'Trigonometry Fundamentals',
-    icon: '📊',
-    category: 'math',
-    tier: 'associates',
-    credits: 3,
-    description: 'Trigonometric functions, identities, equations, and applications.',
-    syllabus: [
-      { week: 1, topic: 'Unit Circle and Trig Functions', status: 'pending' },
-      { week: 2, topic: 'Trigonometric Identities', status: 'pending' },
-      { week: 3, topic: 'Solving Trig Equations', status: 'pending' },
-      { week: 4, topic: 'Law of Sines and Cosines', status: 'pending' },
-      { week: 5, topic: 'Applications', status: 'pending' }
-    ],
-    assignments: [
-      { id: 1, title: 'Unit Circle Mastery Quiz', type: 'quiz', points: 100, due: '2026-02-12' },
-      { id: 2, title: 'Identity Proofs', type: 'homework', points: 150, due: '2026-03-01' }
-    ]
-  },
-
-  // PHYSICS COURSES
-  physics101: {
-    id: 'physics101',
-    code: 'PHYS-101',
-    title: 'Physics I: Mechanics',
-    icon: '⚛️',
-    category: 'physics',
-    tier: 'associates',
-    credits: 4,
-    description: 'Classical mechanics including kinematics, dynamics, energy, and momentum.',
-    syllabus: [
-      { week: 1, topic: 'Kinematics in 1D and 2D', status: 'pending' },
-      { week: 2, topic: 'Newton\'s Laws of Motion', status: 'pending' },
-      { week: 3, topic: 'Work and Energy', status: 'pending' },
-      { week: 4, topic: 'Momentum and Collisions', status: 'pending' },
-      { week: 5, topic: 'Rotational Motion', status: 'pending' }
-    ],
-    assignments: [
-      { id: 1, title: 'Kinematics Problem Set', type: 'homework', points: 100, due: '2026-02-14' },
-      { id: 2, title: 'Energy Lab Report', type: 'lab', points: 200, due: '2026-03-07' }
-    ]
-  },
-  physics201: {
-    id: 'physics201',
-    code: 'PHYS-201',
-    title: 'Physics II: Electricity & Magnetism',
-    icon: '⚡',
-    category: 'physics',
-    tier: 'bachelors',
-    credits: 4,
-    description: 'Electromagnetic theory, circuits, fields, and Maxwell\'s equations.',
-    syllabus: [
-      { week: 1, topic: 'Electric Fields and Potential', status: 'pending' },
-      { week: 2, topic: 'Capacitance and Circuits', status: 'pending' },
-      { week: 3, topic: 'Magnetic Fields', status: 'pending' },
-      { week: 4, topic: 'Electromagnetic Induction', status: 'pending' }
-    ],
-    assignments: [
-      { id: 1, title: 'Circuit Analysis Quiz', type: 'quiz', points: 150, due: '2026-02-25' },
-      { id: 2, title: 'EM Field Project', type: 'project', points: 300, due: '2026-03-20' }
-    ]
-  },
-
-  // CHEMISTRY COURSES
-  chem101: {
-    id: 'chem101',
-    code: 'CHEM-101',
-    title: 'General Chemistry I',
-    icon: '🧪',
-    category: 'chemistry',
-    tier: 'associates',
-    credits: 4,
-    description: 'Fundamental chemistry principles, atomic structure, bonding, and reactions.',
-    syllabus: [
-      { week: 1, topic: 'Atomic Structure', status: 'pending' },
-      { week: 2, topic: 'Chemical Bonding', status: 'pending' },
-      { week: 3, topic: 'Stoichiometry', status: 'pending' },
-      { week: 4, topic: 'Chemical Reactions', status: 'pending' },
-      { week: 5, topic: 'Gas Laws', status: 'pending' }
-    ],
-    assignments: [
-      { id: 1, title: 'Bonding Quiz', type: 'quiz', points: 100, due: '2026-02-16' },
-      { id: 2, title: 'Stoichiometry Lab', type: 'lab', points: 150, due: '2026-03-03' }
-    ]
-  },
-  chem201: {
-    id: 'chem201',
-    code: 'CHEM-201',
-    title: 'Organic Chemistry I',
-    icon: '⚗️',
-    category: 'chemistry',
-    tier: 'bachelors',
-    credits: 4,
-    description: 'Organic compound structure, nomenclature, reactions, and mechanisms.',
-    syllabus: [
-      { week: 1, topic: 'Structure and Bonding', status: 'pending' },
-      { week: 2, topic: 'Functional Groups', status: 'pending' },
-      { week: 3, topic: 'Stereochemistry', status: 'pending' },
-      { week: 4, topic: 'Reaction Mechanisms', status: 'pending' }
-    ],
-    assignments: [
-      { id: 1, title: 'Mechanism Quiz', type: 'quiz', points: 150, due: '2026-02-22' },
-      { id: 2, title: 'Synthesis Project', type: 'project', points: 300, due: '2026-03-18' }
-    ]
-  },
-
-  // BIOLOGY COURSES
-  bio101: {
-    id: 'bio101',
-    code: 'BIOL-101',
-    title: 'Introduction to Biology',
-    icon: '🧬',
-    category: 'biology',
-    tier: 'associates',
-    credits: 4,
-    description: 'Cell biology, genetics, evolution, and ecology fundamentals.',
-    syllabus: [
-      { week: 1, topic: 'Cell Structure and Function', status: 'pending' },
-      { week: 2, topic: 'DNA and Genetics', status: 'pending' },
-      { week: 3, topic: 'Evolution', status: 'pending' },
-      { week: 4, topic: 'Ecology and Ecosystems', status: 'pending' }
-    ],
-    assignments: [
-      { id: 1, title: 'Cell Biology Quiz', type: 'quiz', points: 100, due: '2026-02-18' },
-      { id: 2, title: 'Genetics Lab Report', type: 'lab', points: 200, due: '2026-03-12' }
-    ]
-  }
-};
-
-// Achievement definitions
-const ACHIEVEMENTS = [
-  { id: 'first_enrollment', icon: '🎓', title: 'First Step', description: 'Enrolled in your first course', xp: 100 },
-  { id: 'quiz_master', icon: '📝', title: 'Quiz Master', description: 'Scored 100% on a quiz', xp: 250 },
-  { id: 'assignment_ace', icon: '✅', title: 'Assignment Ace', description: 'Completed 10 assignments', xp: 500 },
-  { id: 'perfect_week', icon: '⭐', title: 'Perfect Week', description: 'Completed all weekly assignments on time', xp: 300 },
-  { id: 'course_complete', icon: '🏆', title: 'Course Champion', description: 'Completed your first course', xp: 1000 },
-  { id: 'gpa_4', icon: '💎', title: 'Perfect GPA', description: 'Maintained a 4.0 GPA', xp: 2000 },
-  { id: 'study_streak', icon: '🔥', title: 'Dedicated Scholar', description: '7-day study streak', xp: 400 }
-];
-
-// ───────────────────────────────────────
-// STATE MANAGEMENT
-// ───────────────────────────────────────
-let currentUser = {
-  name: 'Guest',
-  email: '',
-  plan: 'associates',
-  id: 'guest'
-};
-
-let studentData = {
-  enrolledCourses: [],
-  completedAssignments: [],
-  grades: {},
-  achievements: [],
-  xp: 0,
-  level: 1
-};
-
-// ───────────────────────────────────────
-// INITIALIZATION
-// ───────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  loadUserData();
-  loadStudentData();
-  initializeTabs();
-  initializeFilters();
-  initializeStudentCard();
-  renderEnrolledCourses();
-  renderCourseCatalog();
-  renderAssignments();
-  renderGrades();
-  renderAchievements();
-  updateDashboardStats();
-  createGPAChart();
-});
-
-// ───────────────────────────────────────
-// USER AUTHENTICATION
-// ───────────────────────────────────────
-function loadUserData() {
-  const stored = localStorage.getItem('botnology_user');
-  if (stored) {
-    try {
-      currentUser = JSON.parse(stored);
-      document.getElementById('studentName').textContent = currentUser.name;
-      document.getElementById('planBadge').textContent = currentUser.plan.toUpperCase();
-      document.getElementById('studentId').textContent = 'BN-' + currentUser.id.slice(0, 6).toUpperCase();
-      
-      // Load student photo
-      loadStudentPhoto();
-    } catch (e) {
-      console.error('User data parse error:', e);
-    }
-  }
-}
-
-// ───────────────────────────────────────
-// STUDENT ID CARD WITH PHOTO UPLOAD
-// ───────────────────────────────────────
-function initializeStudentCard() {
-  const studentCard = document.getElementById('studentCard');
-  const photoUpload = document.getElementById('photoUpload');
-  const studentPhoto = document.getElementById('studentPhoto');
-  
-  // Click card to upload photo OR show ID card popup
-  studentCard?.addEventListener('click', (e) => {
-    // If user is signed in, show ID card popup
-    if (currentUser.id !== 'guest') {
-      showStudentIdCard();
-    } else {
-      // Guest user - prompt to upload photo
-      photoUpload?.click();
-    }
-  });
-  
-  // Handle photo upload
-  photoUpload?.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      alert('Please upload an image file (JPG, PNG, GIF, etc.)');
-      return;
-    }
-    
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Image size must be less than 5MB');
-      return;
-    }
-    
-    // Read and store image
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const imageData = event.target.result;
-      
-      // Save to localStorage
-      const key = `botnology_photo_${currentUser.id}`;
-      localStorage.setItem(key, imageData);
-      
-      // Update all displays
-      updateStudentPhoto(imageData);
-      
-      // Add animation
-      studentPhoto.style.transform = 'scale(1.05)';
-      setTimeout(() => {
-        studentPhoto.style.transform = 'scale(1)';
-      }, 300);
-      
-      // Show success message
-      showNotification('✅ Profile photo updated!');
-    };
-    
-    reader.onerror = () => {
-      alert('Error reading file. Please try again.');
-    };
-    
-    reader.readAsDataURL(file);
-  });
-  
-  // Close ID card modal
-  document.getElementById('closeIdCard')?.addEventListener('click', () => {
-    document.getElementById('studentIdModal').classList.remove('show');
-  });
-}
-
-function updateStudentPhoto(imageData) {
-  // Update main student photo
-  const studentPhoto = document.getElementById('studentPhoto');
-  if (studentPhoto) {
-    studentPhoto.src = imageData;
-  }
-  
-  // Update ID card photo
-  const idCardPhoto = document.getElementById('idCardPhoto');
-  if (idCardPhoto) {
-    idCardPhoto.src = imageData;
-  }
-}
-
-function showStudentIdCard() {
-  // Update ID card with current data
-  document.getElementById('idCardName').textContent = currentUser.name;
-  document.getElementById('idCardPlan').textContent = currentUser.plan.toUpperCase() + ' DEGREE';
-  document.getElementById('idCardStudentId').textContent = 'BN-' + currentUser.id.slice(0, 6).toUpperCase();
-  document.getElementById('idCardGpa').textContent = calculateGPA().toFixed(2);
-  document.getElementById('idCardEnrolled').textContent = studentData.enrolledCourses.length + ' Courses';
-  document.getElementById('idCardLevel').textContent = Math.floor(studentData.xp / 1000) + 1;
-  document.getElementById('idCardIssued').textContent = new Date().getFullYear();
-  
-  // Load photo
-  const key = `botnology_photo_${currentUser.id}`;
-  const stored = localStorage.getItem(key);
-  if (stored) {
-    document.getElementById('idCardPhoto').src = stored;
-  } else {
-    document.getElementById('idCardPhoto').src = '/dr-botonic.jpeg';
-  }
-  
-  // Show modal
-  document.getElementById('studentIdModal').classList.add('show');
-}
-
-function loadStudentPhoto() {
-  const key = `botnology_photo_${currentUser.id}`;
-  const stored = localStorage.getItem(key);
-  
-  if (stored) {
-    const studentPhoto = document.getElementById('studentPhoto');
-    if (studentPhoto) {
-      studentPhoto.src = stored;
-    }
-  }
-}
-
-function showNotification(message) {
-  // Create notification element
-  const notification = document.createElement('div');
-  notification.style.cssText = `
-    position: fixed;
-    top: 100px;
-    right: 20px;
-    padding: 16px 24px;
-    background: linear-gradient(135deg, var(--gold), rgba(255,215,0,.8));
-    color: var(--black);
-    border-radius: 12px;
-    font-weight: 700;
-    box-shadow: 0 8px 24px rgba(255,215,0,.3);
-    z-index: 10000;
-    animation: slideIn 0.3s ease;
-  `;
-  notification.textContent = message;
-  
-  document.body.appendChild(notification);
-  
-  // Remove after 3 seconds
-  setTimeout(() => {
-    notification.style.animation = 'slideOut 0.3s ease';
-    setTimeout(() => {
-      notification.remove();
-    }, 300);
-  }, 3000);
-}
-
-// Add animation styles
-if (!document.getElementById('notification-styles')) {
-  const style = document.createElement('style');
-  style.id = 'notification-styles';
-  style.textContent = `
-    @keyframes slideIn {
-      from {
-        transform: translateX(400px);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
-    }
-    @keyframes slideOut {
-      from {
-        transform: translateX(0);
-        opacity: 1;
-      }
-      to {
-        transform: translateX(400px);
-        opacity: 0;
-      }
-    }
-  `;
-  document.head.appendChild(style);
-}
-
-document.getElementById('openAuth')?.addEventListener('click', () => {
-  document.getElementById('authModal').classList.add('show');
-});
-
-document.getElementById('closeAuth')?.addEventListener('click', () => {
-  document.getElementById('authModal').classList.remove('show');
-});
-
-document.getElementById('doAuth')?.addEventListener('click', () => {
-  const name = document.getElementById('authName').value.trim();
-  const email = document.getElementById('authEmail').value.trim();
-  const plan = document.getElementById('authPlan').value;
-  
-  if (!name || !email) {
-    alert('Please enter your name and email');
-    return;
-  }
-  
-  currentUser = {
-    name,
-    email,
-    plan,
-    id: 'usr_' + Math.random().toString(36).substr(2, 9)
-  };
-  
-  localStorage.setItem('botnology_user', JSON.stringify(currentUser));
-  document.getElementById('authModal').classList.remove('show');
-  loadUserData();
-  renderCourseCatalog(); // Refresh to show tier-appropriate courses
-});
-
-// ───────────────────────────────────────
-// STUDENT DATA MANAGEMENT
-// ───────────────────────────────────────
-function loadStudentData() {
-  const key = `botnology_student_${currentUser.id}`;
-  const stored = localStorage.getItem(key);
-  if (stored) {
-    try {
-      studentData = JSON.parse(stored);
-    } catch (e) {
-      console.error('Student data parse error:', e);
-    }
-  }
-}
-
-function saveStudentData() {
-  const key = `botnology_student_${currentUser.id}`;
-  localStorage.setItem(key, JSON.stringify(studentData));
-}
-
-// ───────────────────────────────────────
-// TAB SYSTEM
-// ───────────────────────────────────────
-function initializeTabs() {
-  const tabs = document.querySelectorAll('.tab');
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      const targetTab = tab.getAttribute('data-tab');
-      switchTab(targetTab);
-      
-      tabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-    });
-  });
-}
-
-function switchTab(tabName) {
-  document.querySelectorAll('.tab-content').forEach(content => {
-    content.classList.remove('active');
-  });
-  
-  const selectedTab = document.getElementById(`tab-${tabName}`);
-  if (selectedTab) {
-    selectedTab.classList.add('active');
-  }
-}
-
-// ───────────────────────────────────────
-// FILTER SYSTEM
-// ───────────────────────────────────────
-function initializeFilters() {
-  const filters = document.querySelectorAll('.filter-btn');
-  filters.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const filter = btn.getAttribute('data-filter');
-      
-      filters.forEach(f => f.classList.remove('active'));
-      btn.classList.add('active');
-      
-      filterCatalog(filter);
-    });
-  });
-}
-
-function filterCatalog(category) {
-  const cards = document.querySelectorAll('#catalogCourses .course-card');
-  cards.forEach(card => {
-    const cardCategory = card.getAttribute('data-category');
-    if (category === 'all' || cardCategory === category) {
-      card.style.display = 'block';
-    } else {
-      card.style.display = 'none';
-    }
-  });
-}
-
-// ───────────────────────────────────────
-// COURSE RENDERING
-// ───────────────────────────────────────
-function renderEnrolledCourses() {
-  const container = document.getElementById('enrolledCourses');
-  const emptyState = document.getElementById('enrolledEmpty');
-  
-  if (studentData.enrolledCourses.length === 0) {
-    container.style.display = 'none';
-    emptyState.style.display = 'block';
-    return;
-  }
-  
-  container.style.display = 'grid';
-  emptyState.style.display = 'none';
-  container.innerHTML = '';
-  
-  studentData.enrolledCourses.forEach(courseId => {
-    const course = COURSE_CATALOG[courseId];
-    if (!course) return;
-    
-    const progress = calculateCourseProgress(courseId);
-    const grade = studentData.grades[courseId] || { current: 0, letter: 'N/A' };
-    
-    const card = createCourseCard(course, true, progress, grade);
-    container.appendChild(card);
-  });
-}
-
-function renderCourseCatalog() {
-  const container = document.getElementById('catalogCourses');
-  container.innerHTML = '';
-
-  Object.values(COURSE_CATALOG).forEach(course => {
-    // Filter by tier
-    const tierOrder = { associates: 1, bachelors: 2, masters: 3 };
-    const userTierLevel = tierOrder[currentUser.plan];
-    const courseTierLevel = tierOrder[course.tier];
-
-    if (courseTierLevel > userTierLevel) {
-      return; // Don't show courses above user's tier
-    }
-
-    const isEnrolled = studentData.enrolledCourses.includes(course.id);
-    const grade = studentData.grades[course.id] || { current: 0, letter: 'N/A' }; // Ensure grade object
-    const card = createCourseCard(course, isEnrolled, 0, grade);
-    container.appendChild(card);
-  });
-}
-
-function createCourseCard(course, isEnrolled = false, progress = 0, grade = null) {
-  const card = document.createElement('div');
-  card.className = `course-card ${isEnrolled ? 'enrolled' : ''}`;
-  card.setAttribute('data-category', course.category);
-  
-  card.innerHTML = `
-    <div class="course-header">
-      <div class="course-icon">${course.icon}</div>
-      <div style="flex:1">
-        <div class="course-title">${course.title}</div>
-        <div class="course-code">${course.code} • ${course.credits} Credits</div>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>My Courses • Botnology101</title>
+  <link rel="stylesheet" href="/style.css"/>
+  <script defer src="/script.js"></script>
+  <script defer src="/courses.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <style>
+    .course-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;margin:24px 0}
+    .course-card{border:2px solid rgba(255,255,255,.08);border-radius:20px;padding:24px;background:linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,.02));transition:all .3s;cursor:pointer;position:relative;overflow:hidden}
+    .course-card:hover{border-color:rgba(197,169,104,.40);transform:translateY(-4px);box-shadow:0 8px 24px rgba(197,169,104,.12)}
+    .course-card.enrolled{border-color:rgba(255,215,0,.3);background:linear-gradient(135deg, rgba(255,215,0,.08), rgba(255,215,0,.02))}
+    .course-header{display:flex;gap:16px;align-items:flex-start;margin-bottom:16px}
+    .course-icon{width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg, rgba(197,169,104,.18), rgba(197,169,104,.08));display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0;border:1px solid rgba(197,169,104,.20)}
+    .course-title{font-size:20px;font-weight:800;margin-bottom:6px;color:rgba(197,169,104,.90)}
+    .course-code{font-size:13px;color:rgba(232,243,238,.6);font-weight:600;letter-spacing:.8px}
+    .course-desc{font-size:14px;line-height:1.6;color:rgba(232,243,238,.8);margin:12px 0}
+    .course-meta{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,.08)}
+    .course-stat{display:flex;align-items:center;gap:6px;font-size:13px;color:rgba(232,243,238,.7)}
+    .progress-bar{width:100%;height:8px;background:rgba(255,255,255,.1);border-radius:10px;overflow:hidden;margin:12px 0}
+    .progress-fill{height:100%;background:linear-gradient(90deg, rgba(197,169,104,.70), rgba(197,169,104,.50));transition:width .5s}
+    .syllabus{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:24px;margin:20px 0}
+    .syllabus-item{padding:16px;border-left:3px solid rgba(255,255,255,.15);margin:12px 0;background:rgba(255,255,255,.02);border-radius:8px;transition:all .2s}
+    .syllabus-item:hover{border-left-color:rgba(197,169,104,.60);background:rgba(197,169,104,.06)}
+    .syllabus-item.completed{border-left-color:#10b981;opacity:.7}
+    .assignment-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:20px;margin:12px 0}
+    .grade-badge{display:inline-block;padding:8px 16px;border-radius:10px;font-weight:800;font-size:18px}
+    .grade-a{background:linear-gradient(135deg, rgba(168,213,195,.60), rgba(168,213,195,.45));color:#fff}
+    .grade-b{background:linear-gradient(135deg, rgba(125,195,220,.60), rgba(125,195,220,.45));color:#fff}
+    .grade-c{background:linear-gradient(135deg, rgba(197,169,104,.60), rgba(197,169,104,.45));color:#fff}
+    .grade-f{background:linear-gradient(135deg, #ef4444, #dc2626);color:#fff}
+    .instructor-card{display:flex;gap:20px;align-items:center;padding:24px;background:linear-gradient(135deg, rgba(255,215,0,.1), rgba(255,215,0,.02));border:2px solid rgba(255,215,0,.2);border-radius:18px;margin:20px 0}
+    .instructor-img{width:100px;height:100px;border-radius:50%;border:3px solid var(--gold);object-fit:cover}
+    .tab-group{display:flex;gap:8px;margin:20px 0;flex-wrap:wrap;position:sticky;top:80px;background:var(--black);padding:12px 0;z-index:50}
+    .tab{padding:12px 24px;border-radius:12px;background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);cursor:pointer;transition:all .2s;font-size:15px;font-weight:700}
+    .tab:hover{background:rgba(255,255,255,.08)}
+    .tab.active{background:rgba(197,169,104,.18);color:rgba(232,243,238,.90);border-color:rgba(197,169,104,.30)}
+    .tab-content{display:none}
+    .tab-content.active{display:block}
+    .catalog-filters{display:flex;gap:12px;flex-wrap:wrap;margin:20px 0;padding:16px;background:rgba(255,255,255,.03);border-radius:14px}
+    .filter-btn{padding:8px 16px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.02);cursor:pointer;transition:all .2s;font-size:14px;font-weight:600}
+    .filter-btn:hover{border-color:rgba(197,169,104,.35)}
+    .filter-btn.active{background:rgba(197,169,104,.18);color:rgba(232,243,238,.90);border-color:rgba(197,169,104,.30)}
+    .achievement-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;background:linear-gradient(135deg, rgba(197,169,104,.12), rgba(197,169,104,.04));border:2px solid rgba(197,169,104,.25);border-radius:12px;margin:6px;font-size:14px;font-weight:700;color:rgba(232,243,238,.75)}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- ========== PREMIER BLACK TOPBAR ========== -->
+    <div class="topbar" style="background:rgba(0,0,0,0.85);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(255,215,0,0.1)">
+      <div class="brand">
+        <img src="/dr-botonic.jpeg" alt="Dr. Botonic"/>
+        <div class="title">
+          <div style="font-weight:800;letter-spacing:.6px;font-size:16px">Botnology101</div>
+          <div style="font-size:12px;color:rgba(232,243,238,.7)">Course Management</div>
+        </div>
+      </div>
+      <div class="row" style="margin:0;gap:8px">
+        <a class="btn small" href="/index.html">Home</a>
+        <a class="btn small" href="/dashboard.html">Dashboard</a>
+        <a class="btn small gold" href="/courses.html">My Courses</a>
+        <a class="btn small" href="/study-hall.html">Study Hall</a>
+        <a class="btn small" href="/pricing.html">Pricing</a>
+        <button class="btn small" id="openAuth">Sign In</button>
+        <button class="btn small" id="themeToggle">Yeti Mode</button>
       </div>
     </div>
-    <div class="course-desc">${course.description}</div>
-    ${isEnrolled ? `
-      <div class="progress-bar">
-        <div class="progress-fill" style="width:${progress}%"></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:13px;margin-top:8px">
-        <span>Progress: ${progress}%</span>
-        <span>Grade: ${grade.letter}</span>
-      </div>
-    ` : ''}
-    <div class="course-meta">
-      <div class="course-stat">
-        <span>🎯</span>
-        <span>${course.tier.toUpperCase()}</span>
-      </div>
-      <div class="course-stat">
-        <span>📅</span>
-        <span>${course.syllabus.length} Weeks</span>
-      </div>
-      <div class="course-stat">
-        <span>📝</span>
-        <span>${course.assignments.length} Assignments</span>
-      </div>
-    </div>
-    <button class="btn ${isEnrolled ? '' : 'gold'}" style="width:100%;margin-top:16px;font-weight:700">
-      ${isEnrolled ? 'View Course' : 'Enroll Now'}
-    </button>
-  `;
-  
-  card.querySelector('button').addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (isEnrolled) {
-      showCourseDetail(course.id);
-    } else {
-      enrollInCourse(course.id);
-    }
-  });
-  
-  return card;
-}
 
-function calculateCourseProgress(courseId) {
-  const course = COURSE_CATALOG[courseId];
-  if (!course) return 0;
-  
-  const completed = studentData.completedAssignments.filter(a => 
-    a.courseId === courseId
-  ).length;
-  
-  return Math.round((completed / course.assignments.length) * 100);
-}
-
-// ───────────────────────────────────────
-// COURSE ENROLLMENT
-// ───────────────────────────────────────
-function enrollInCourse(courseId) {
-  const course = COURSE_CATALOG[courseId];
-  if (!course) return;
-  
-  if (studentData.enrolledCourses.includes(courseId)) {
-    alert('You are already enrolled in this course!');
-    return;
-  }
-  
-  studentData.enrolledCourses.push(courseId);
-  studentData.grades[courseId] = { current: 0, letter: 'N/A', assignments: [] };
-  
-  // Award achievement
-  if (studentData.enrolledCourses.length === 1) {
-    awardAchievement('first_enrollment');
-  }
-  
-  saveStudentData();
-  renderEnrolledCourses();
-  renderCourseCatalog();
-  updateDashboardStats();
-  
-  alert(`✅ Successfully enrolled in ${course.title}!`);
-}
-
-// ───────────────────────────────────────
-// COURSE DETAIL MODAL
-// ───────────────────────────────────────
-function showCourseDetail(courseId) {
-  const course = COURSE_CATALOG[courseId];
-  if (!course) return;
-  
-  document.getElementById('modalCourseIcon').textContent = course.icon;
-  document.getElementById('modalCourseTitle').textContent = course.title;
-  document.getElementById('modalCourseCode').textContent = course.code;
-  
-  const content = document.getElementById('modalCourseContent');
-  content.innerHTML = `
-    <div class="syllabus">
-      <div style="font-weight:700;font-size:16px;margin-bottom:16px">📚 Course Syllabus</div>
-      ${course.syllabus.map((item, i) => `
-        <div class="syllabus-item ${item.status === 'completed' ? 'completed' : ''}">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div>
-              <div style="font-weight:700;margin-bottom:4px">Week ${item.week}: ${item.topic}</div>
-            </div>
-            <div class="badge">${item.status === 'completed' ? '✓ Complete' : 'Pending'}</div>
-          </div>
-        </div>
-      `).join('')}
-    </div>
-    
-    <div style="margin-top:24px">
-      <div style="font-weight:700;font-size:16px;margin-bottom:16px">📝 Assignments</div>
-      ${course.assignments.map(a => `
-        <div class="assignment-card">
-          <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px">
-            <div style="font-weight:700">${a.title}</div>
-            <div class="badge gold">${a.points} pts</div>
-          </div>
-          <div style="font-size:13px;color:rgba(232,243,238,.6)">
-            Type: ${a.type.toUpperCase()} • Due: ${a.due}
-          </div>
-          <button class="btn small gold" style="margin-top:12px" onclick="window.location.href='/study-hall.html'">
-            Start Assignment
-          </button>
-        </div>
-      `).join('')}
-    </div>
-  `;
-  
-  document.getElementById('courseModal').classList.add('show');
-}
-
-document.getElementById('closeCourseModal')?.addEventListener('click', () => {
-  document.getElementById('courseModal').classList.remove('show');
-});
-
-// ───────────────────────────────────────
-// ASSIGNMENTS
-// ───────────────────────────────────────
-function renderAssignments() {
-  const container = document.getElementById('assignmentsList');
-  container.innerHTML = '';
-  
-  if (studentData.enrolledCourses.length === 0) {
-    container.innerHTML = `
-      <div style="text-align:center;padding:40px;color:rgba(232,243,238,.6)">
-        <div style="font-size:48px;margin-bottom:16px">📝</div>
-        <div>No assignments yet. Enroll in courses to see assignments.</div>
-      </div>
-    `;
-    return;
-  }
-  
-  studentData.enrolledCourses.forEach(courseId => {
-    const course = COURSE_CATALOG[courseId];
-    if (!course) return;
-    
-    course.assignments.forEach(assignment => {
-      const completed = studentData.completedAssignments.find(
-        a => a.courseId === courseId && a.assignmentId === assignment.id
-      );
-      
-      const card = document.createElement('div');
-      card.className = 'assignment-card';
-      card.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:start">
-          <div>
-            <div style="font-weight:700;font-size:16px;margin-bottom:4px">${assignment.title}</div>
-            <div style="font-size:13px;color:rgba(232,243,238,.6)">
-              ${course.code}: ${course.title}
-            </div>
-            <div style="font-size:13px;color:rgba(232,243,238,.6);margin-top:4px">
-              Due: ${assignment.due} • ${assignment.type.toUpperCase()}
-            </div>
-          </div>
-          <div>
-            <div class="badge gold" style="margin-bottom:8px">${assignment.points} pts</div>
-            ${completed ? `
-              <div class="badge" style="background:#10b981">✓ ${completed.score}/${assignment.points}</div>
-            ` : ''}
-          </div>
-        </div>
-        ${!completed ? `
-          <button class="btn gold" style="margin-top:16px;font-weight:700" onclick="window.location.href='/study-hall.html'">
-            Start Assignment
-          </button>
-        ` : ''}
-      `;
-      container.appendChild(card);
-    });
-  });
-}
-
-// ───────────────────────────────────────
-// GRADES & GPA
-// ───────────────────────────────────────
-function renderGrades() {
-  const container = document.getElementById('courseGrades');
-  container.innerHTML = '';
-  
-  if (studentData.enrolledCourses.length === 0) {
-    container.innerHTML = `
-      <div style="text-align:center;padding:40px;color:rgba(232,243,238,.6)">
-        No grades yet. Complete assignments to see your grades.
-      </div>
-    `;
-    return;
-  }
-  
-  studentData.enrolledCourses.forEach(courseId => {
-    const course = COURSE_CATALOG[courseId];
-    const gradeData = studentData.grades[courseId] || { current: 0, letter: 'N/A' };
-    
-    const gradeClass = gradeData.letter === 'A' ? 'grade-a' : 
-                       gradeData.letter === 'B' ? 'grade-b' :
-                       gradeData.letter === 'C' ? 'grade-c' : 'grade-f';
-    
-    const card = document.createElement('div');
-    card.className = 'assignment-card';
-    card.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div>
-          <div style="font-weight:700;font-size:16px">${course.title}</div>
-          <div style="font-size:13px;color:rgba(232,243,238,.6);margin-top:4px">${course.code}</div>
-        </div>
-        <div class="grade-badge ${gradeClass}">${gradeData.letter}</div>
-      </div>
-      <div class="progress-bar" style="margin-top:16px">
-        <div class="progress-fill" style="width:${gradeData.current}%"></div>
-      </div>
-      <div style="text-align:center;font-size:14px;margin-top:8px;color:rgba(232,243,238,.7)">
-        ${gradeData.current.toFixed(1)}%
-      </div>
-    `;
-    container.appendChild(card);
-  });
-  
-  updateProfessorComment();
-}
-
-function updateProfessorComment() {
-  const gpa = calculateGPA();
-  let comment = '';
-  
-  if (gpa >= 3.8) {
-    comment = "Outstanding work! You're mastering the material with exceptional dedication. Keep up this excellent momentum!";
-  } else if (gpa >= 3.5) {
-    comment = "Excellent progress! Your consistent effort is yielding strong results. Push for that perfect score!";
-  } else if (gpa >= 3.0) {
-    comment = "Good work! You're showing solid understanding. Focus on the challenging topics for even better results.";
-  } else if (gpa >= 2.5) {
-    comment = "You're making progress. I recommend more practice with the fundamentals and don't hesitate to ask questions!";
-  } else {
-    comment = "Let's work together to improve your understanding. Schedule extra study sessions and review the basics thoroughly.";
-  }
-  
-  document.getElementById('professorComment').textContent = comment;
-}
-
-function calculateGPA() {
-  if (studentData.enrolledCourses.length === 0) return 0;
-  
-  let totalPoints = 0;
-  let totalCredits = 0;
-  
-  studentData.enrolledCourses.forEach(courseId => {
-    const course = COURSE_CATALOG[courseId];
-    const gradeData = studentData.grades[courseId];
-    
-    if (gradeData && gradeData.current > 0) {
-      const gradePoint = percentageToGradePoint(gradeData.current);
-      totalPoints += gradePoint * course.credits;
-      totalCredits += course.credits;
-    }
-  });
-  
-  return totalCredits > 0 ? (totalPoints / totalCredits) : 0;
-}
-
-function percentageToGradePoint(percentage) {
-  if (percentage >= 93) return 4.0;
-  if (percentage >= 90) return 3.7;
-  if (percentage >= 87) return 3.3;
-  if (percentage >= 83) return 3.0;
-  if (percentage >= 80) return 2.7;
-  if (percentage >= 77) return 2.3;
-  if (percentage >= 73) return 2.0;
-  if (percentage >= 70) return 1.7;
-  if (percentage >= 67) return 1.3;
-  if (percentage >= 65) return 1.0;
-  return 0;
-}
-
-let gpaChart = null;
-
-function createGPAChart() {
-  const ctx = document.getElementById('gpaChart');
-  if (!ctx) return;
-  
-  gpaChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Current'],
-      datasets: [{
-        label: 'GPA',
-        data: [0, 0, 0, 0, calculateGPA()],
-        borderColor: 'rgba(59, 130, 246, 1)',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-        borderWidth: 3,
-        tension: 0.4,
-        fill: true
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: true,
-      plugins: {
-        legend: { display: false }
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          max: 4.0,
-          ticks: { color: 'rgba(232, 243, 238, 0.7)' },
-          grid: { color: 'rgba(255, 255, 255, 0.05)' }
-        },
-        x: {
-          ticks: { color: 'rgba(232, 243, 238, 0.7)' },
-          grid: { color: 'rgba(255, 255, 255, 0.05)' }
-        }
-      }
-    }
-  });
-}
-
-// ───────────────────────────────────────
-// ACHIEVEMENTS
-// ───────────────────────────────────────
-function renderAchievements() {
-  const container = document.getElementById('achievementBadges');
-  container.innerHTML = '';
-  
-  ACHIEVEMENTS.forEach(achievement => {
-    const earned = studentData.achievements.includes(achievement.id);
-    const badge = document.createElement('div');
-    badge.className = 'achievement-badge';
-    badge.style.opacity = earned ? '1' : '0.3';
-    badge.innerHTML = `
-      <span style="font-size:24px">${achievement.icon}</span>
+    <!-- ========== HERO SECTION ========== -->
+    <div class="hero">
       <div>
-        <div style="font-weight:700">${achievement.title}</div>
-        <div style="font-size:12px;color:rgba(232,243,238,.6)">${achievement.description}</div>
+        <div class="h-eyebrow">🎓 ADVANCED ACADEMIC SYSTEM</div>
+        <h1 class="h1" style="margin:12px 0">My Course Portal</h1>
+        <div class="sub" style="max-width:800px">Enroll in elite STEM courses, track your progress, complete assignments, and earn your degree with Dr. Botonic's guidance.</div>
+
+        <!-- ========== STUDENT INFO PANEL ========== -->
+        <div style="display:grid;grid-template-columns:1fr 2fr;gap:20px;margin:24px 0">
+          <div class="instructor-card" style="flex-direction:column;text-align:center;cursor:pointer;position:relative" id="studentCard" title="Click to upload profile photo">
+            <div style="position:relative;display:inline-block">
+              <img src="/dr-botonic.jpeg" alt="Student Photo" class="instructor-img" id="studentPhoto"/>
+              <div style="position:absolute;bottom:0;right:0;width:32px;height:32px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid var(--black);font-size:16px">📷</div>
+            </div>
+            <input type="file" id="photoUpload" accept="image/*" style="display:none"/>
+            <div>
+              <div style="font-weight:800;font-size:18px;margin-bottom:4px" id="studentName">Guest Student</div>
+              <div class="badge gold" id="planBadge">ASSOCIATES</div>
+              <div style="margin-top:12px;font-size:14px;color:rgba(232,243,238,.7)">Student ID: <span id="studentId">BN-000000</span></div>
+              <div style="margin-top:8px;font-size:12px;color:rgba(255,215,0,.8);font-weight:600">Click to upload photo</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+            <div style="padding:20px;border-radius:16px;background:linear-gradient(135deg, rgba(168,213,195,.12), rgba(168,213,195,.04));border:2px solid rgba(168,213,195,.20);text-align:center">
+              <div style="font-size:14px;color:rgba(232,243,238,.68);margin-bottom:8px">Enrolled Courses</div>
+              <div style="font-size:42px;font-weight:900;color:rgba(168,213,195,.85)" id="enrolledCount">0</div>
+            </div>
+            <div style="padding:20px;border-radius:16px;background:linear-gradient(135deg, rgba(125,195,220,.12), rgba(125,195,220,.04));border:2px solid rgba(125,195,220,.20);text-align:center">
+              <div style="font-size:14px;color:rgba(232,243,238,.68);margin-bottom:8px">Overall GPA</div>
+              <div style="font-size:42px;font-weight:900;color:rgba(125,195,220,.85)" id="overallGPA">0.0</div>
+            </div>
+            <div style="padding:20px;border-radius:16px;background:linear-gradient(135deg, rgba(197,169,104,.12), rgba(197,169,104,.04));border:2px solid rgba(197,169,104,.20);text-align:center">
+              <div style="font-size:14px;color:rgba(232,243,238,.68);margin-bottom:8px">Achievements</div>
+              <div style="font-size:42px;font-weight:900;color:rgba(197,169,104,.85)" id="achievementCount">0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========== TAB NAVIGATION ========== -->
+        <div class="tab-group">
+          <button class="tab active" data-tab="enrolled">📚 My Courses</button>
+          <button class="tab" data-tab="catalog">🔍 Course Catalog</button>
+          <button class="tab" data-tab="assignments">📝 Assignments</button>
+          <button class="tab" data-tab="grades">📊 Grades</button>
+          <button class="tab" data-tab="achievements">🏆 Achievements</button>
+        </div>
+
+        <!-- ========== TAB: ENROLLED COURSES ========== -->
+        <div class="tab-content active" id="tab-enrolled">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+            <div style="font-size:24px;font-weight:800">Currently Enrolled</div>
+            <button class="btn gold" onclick="document.querySelector('[data-tab=catalog]').click()">+ Add Course</button>
+          </div>
+          <div id="enrolledCourses" class="course-grid">
+            <!-- Enrolled courses will be rendered here -->
+          </div>
+          <div id="enrolledEmpty" style="text-align:center;padding:60px 20px;display:none">
+            <img src="/dr-botonic.jpeg" alt="Dr. Botonic" style="width:120px;height:120px;border-radius:50%;margin-bottom:20px;border:3px solid var(--gold)"/>
+            <div style="font-size:20px;font-weight:700;margin-bottom:12px">No Courses Enrolled Yet</div>
+            <div style="color:rgba(232,243,238,.7);margin-bottom:20px">Browse the course catalog and start your academic journey!</div>
+            <button class="btn gold" onclick="document.querySelector('[data-tab=catalog]').click()">Explore Course Catalog</button>
+          </div>
+        </div>
+
+        <!-- ========== TAB: COURSE CATALOG ========== -->
+        <div class="tab-content" id="tab-catalog">
+          <div style="font-size:24px;font-weight:800;margin-bottom:12px">Course Catalog</div>
+          <div style="color:rgba(232,243,238,.7);margin-bottom:20px">Choose courses that match your subscription tier and academic goals.</div>
+          
+          <div class="catalog-filters">
+            <div style="font-weight:600;margin-right:12px;display:flex;align-items:center">Filter:</div>
+            <button class="filter-btn active" data-filter="all">All Courses</button>
+            <button class="filter-btn" data-filter="anatomy">🫀 Anatomy</button>
+            <button class="filter-btn" data-filter="math">📐 Mathematics</button>
+            <button class="filter-btn" data-filter="physics">⚛️ Physics</button>
+            <button class="filter-btn" data-filter="chemistry">🧪 Chemistry</button>
+            <button class="filter-btn" data-filter="biology">🧬 Biology</button>
+          </div>
+
+          <div id="catalogCourses" class="course-grid">
+            <!-- Course catalog will be rendered here -->
+          </div>
+        </div>
+
+        <!-- ========== TAB: ASSIGNMENTS ========== -->
+        <div class="tab-content" id="tab-assignments">
+          <div style="font-size:24px;font-weight:800;margin-bottom:20px">Assignments & Assessments</div>
+          <div id="assignmentsList">
+            <!-- Assignments will be rendered here -->
+          </div>
+        </div>
+
+        <!-- ========== TAB: GRADES ========== -->
+        <div class="tab-content" id="tab-grades">
+          <div style="font-size:24px;font-weight:800;margin-bottom:20px">Academic Performance</div>
+          <div style="display:grid;grid-template-columns:2fr 1fr;gap:24px">
+            <div>
+              <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:24px;margin-bottom:20px">
+                <div style="font-weight:700;margin-bottom:16px">GPA Trend</div>
+                <canvas id="gpaChart" style="max-height:300px"></canvas>
+              </div>
+              <div id="courseGrades">
+                <!-- Course grades will be rendered here -->
+              </div>
+            </div>
+            <div>
+              <div style="background:linear-gradient(135deg, rgba(255,215,0,.1), rgba(255,215,0,.02));border:2px solid rgba(255,215,0,.2);border-radius:16px;padding:24px;text-align:center">
+                <img src="/dr-botonic.jpeg" alt="Dr. Botonic" style="width:100px;height:100px;border-radius:50%;margin-bottom:16px;border:3px solid var(--gold)"/>
+                <div style="font-weight:800;font-size:20px;margin-bottom:8px">Dr. Botonic Says:</div>
+                <div style="font-size:14px;line-height:1.6;color:rgba(232,243,238,.8)" id="professorComment">
+                  "Excellent progress! Keep up the outstanding work."
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========== TAB: ACHIEVEMENTS ========== -->
+        <div class="tab-content" id="tab-achievements">
+          <div style="font-size:24px;font-weight:800;margin-bottom:20px">Your Achievements</div>
+          <div style="display:grid;grid-template-columns:1fr 2fr;gap:24px">
+            <div style="text-align:center;padding:40px 20px;background:linear-gradient(135deg, rgba(255,215,0,.1), rgba(255,215,0,.02));border:2px solid rgba(255,215,0,.2);border-radius:16px">
+              <img src="/dr-botonic.jpeg" alt="Dr. Botonic" style="width:140px;height:140px;border-radius:50%;margin-bottom:20px;border:4px solid var(--gold)"/>
+              <div style="font-size:28px;font-weight:900;color:rgba(197,169,104,.85);margin-bottom:8px">Level <span id="studentLevel">1</span></div>
+              <div style="font-size:14px;color:rgba(232,243,238,.7);margin-bottom:16px">Academic Explorer</div>
+              <div class="progress-bar">
+                <div class="progress-fill" id="levelProgress" style="width:0%"></div>
+              </div>
+              <div style="font-size:13px;color:rgba(232,243,238,.6);margin-top:8px">
+                <span id="xpCurrent">0</span> / <span id="xpNext">1000</span> XP
+              </div>
+            </div>
+            <div>
+              <div style="font-weight:700;font-size:18px;margin-bottom:16px">Badges Earned</div>
+              <div id="achievementBadges" style="display:flex;flex-wrap:wrap;gap:12px">
+                <!-- Achievement badges will be rendered here -->
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
-    `;
-    container.appendChild(badge);
-  });
-  
-  // Update level display
-  const level = Math.floor(studentData.xp / 1000) + 1;
-  const xpInLevel = studentData.xp % 1000;
-  const xpToNext = 1000;
-  const progress = (xpInLevel / xpToNext) * 100;
-  
-  document.getElementById('studentLevel').textContent = level;
-  document.getElementById('levelProgress').style.width = progress + '%';
-  document.getElementById('xpCurrent').textContent = xpInLevel;
-  document.getElementById('xpNext').textContent = xpToNext;
-}
+    </div>
+  </div>
 
-function awardAchievement(achievementId) {
-  if (studentData.achievements.includes(achievementId)) return;
-  
-  const achievement = ACHIEVEMENTS.find(a => a.id === achievementId);
-  if (!achievement) return;
-  
-  studentData.achievements.push(achievementId);
-  studentData.xp += achievement.xp;
-  saveStudentData();
-  
-  alert(`🏆 Achievement Unlocked: ${achievement.title}!\n+${achievement.xp} XP`);
-  renderAchievements();
-}
+  <!-- ========== SIGN IN MODAL ========== -->
+  <div class="modal" id="authModal">
+    <div class="box">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:20px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <img src="/dr-botonic.jpeg" alt="Dr. Botonic" style="width:50px;height:50px;border-radius:50%;border:2px solid var(--gold)"/>
+          <b style="font-size:18px">Student Sign In</b>
+        </div>
+        <button class="btn small" id="closeAuth">Close</button>
+      </div>
+      <div class="field">
+        <label for="authName">Name</label>
+        <input id="authName" type="text" placeholder="Student Name"/>
+      </div>
+      <div class="field">
+        <label for="authEmail">Email</label>
+        <input id="authEmail" type="email" placeholder="you@email.com"/>
+      </div>
+      <div class="field">
+        <label for="authPlan">Subscription Tier</label>
+        <select id="authPlan">
+          <option value="associates">Associates Degree</option>
+          <option value="bachelors">Bachelors Degree</option>
+          <option value="masters">Masters Degree</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:20px">
+        <button class="btn gold" id="doAuth" style="flex:1;font-weight:700">Sign In</button>
+        <a class="btn" href="/pricing.html">See Tuition Plans</a>
+      </div>
+    </div>
+  </div>
 
-// ───────────────────────────────────────
-// DASHBOARD STATS
-// ───────────────────────────────────────
-function updateDashboardStats() {
-  document.getElementById('enrolledCount').textContent = studentData.enrolledCourses.length;
-  document.getElementById('overallGPA').textContent = calculateGPA().toFixed(2);
-  document.getElementById('achievementCount').textContent = studentData.achievements.length;
-}
+  <!-- ========== COURSE DETAIL MODAL ========== -->
+  <div class="modal" id="courseModal">
+    <div class="box" style="max-width:800px;max-height:85vh;overflow-y:auto">
+      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:20px">
+        <div style="display:flex;gap:16px;align-items:start">
+          <div class="course-icon" id="modalCourseIcon">📚</div>
+          <div>
+            <div class="course-title" id="modalCourseTitle">Course Title</div>
+            <div class="course-code" id="modalCourseCode">COURSE-101</div>
+          </div>
+        </div>
+        <button class="btn small" id="closeCourseModal">Close</button>
+      </div>
+      <div id="modalCourseContent"></div>
+    </div>
+  </div>
 
-// ───────────────────────────────────────
-// EXPORTS
-// ───────────────────────────────────────
-window.CourseSystem = {
-  enrollInCourse,
-  showCourseDetail,
-  awardAchievement,
-  studentData
-};
+  <!-- ========== STUDENT ID CARD POPUP ========== -->
+  <div class="modal" id="studentIdModal">
+    <div class="box" style="max-width:450px;background:linear-gradient(135deg, rgba(255,215,0,.15), rgba(0,0,0,.95));border:3px solid var(--gold)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+        <div style="font-weight:800;font-size:20px;color:rgba(197,169,104,.85)">🎓 Student ID Card</div>
+        <button class="btn small" id="closeIdCard">Close</button>
+      </div>
+      
+      <div style="background:linear-gradient(135deg, #1a1a1a, #0a0a0a);border:2px solid var(--gold);border-radius:16px;padding:32px;text-align:center;box-shadow:0 8px 32px rgba(255,215,0,.2)">
+        <!-- Logo Header -->
+        <div style="margin-bottom:20px">
+          <div style="font-size:24px;font-weight:900;color:rgba(197,169,104,.85);letter-spacing:1px">BOTNOLOGY101</div>
+          <div style="font-size:11px;color:rgba(232,243,238,.6);letter-spacing:2px;margin-top:4px">ELITE ACADEMIC INSTITUTION</div>
+        </div>
+        
+        <!-- Student Photo -->
+        <div style="position:relative;display:inline-block;margin-bottom:20px">
+          <img id="idCardPhoto" src="/dr-botonic.jpeg" alt="Student" style="width:140px;height:140px;border-radius:50%;border:4px solid var(--gold);object-fit:cover;box-shadow:0 4px 16px rgba(255,215,0,.3)"/>
+          <button class="btn small gold" style="position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);font-size:11px;padding:6px 12px" onclick="document.getElementById('photoUpload').click()">
+            📷 Change Photo
+          </button>
+        </div>
+        
+        <!-- Student Info -->
+        <div style="border-top:1px solid rgba(255,215,0,.3);padding-top:20px">
+          <div style="font-weight:800;font-size:22px;margin-bottom:8px;color:#fff" id="idCardName">Guest Student</div>
+          <div style="margin-bottom:16px">
+            <div class="badge gold" id="idCardPlan" style="font-size:13px;padding:8px 16px">ASSOCIATES DEGREE</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px;text-align:left">
+            <div>
+              <div style="font-size:11px;color:rgba(232,243,238,.5);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px">Student ID</div>
+              <div style="font-weight:700;color:rgba(197,169,104,.80);font-size:16px" id="idCardStudentId">BN-000000</div>
+            </div>
+            <div>
+              <div style="font-size:11px;color:rgba(232,243,238,.5);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px">GPA</div>
+              <div style="font-weight:700;color:rgba(197,169,104,.80);font-size:16px" id="idCardGpa">0.00</div>
+            </div>
+            <div>
+              <div style="font-size:11px;color:rgba(232,243,238,.5);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px">Enrolled</div>
+              <div style="font-weight:700;color:#fff;font-size:16px" id="idCardEnrolled">0 Courses</div>
+            </div>
+            <div>
+              <div style="font-size:11px;color:rgba(232,243,238,.5);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px">Level</div>
+              <div style="font-weight:700;color:#fff;font-size:16px" id="idCardLevel">1</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Footer -->
+        <div style="margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,215,0,.3)">
+          <div style="font-size:10px;color:rgba(232,243,238,.4);letter-spacing:1px">Issued: <span id="idCardIssued">2026</span></div>
+          <div style="font-size:10px;color:rgba(232,243,238,.4);margin-top:4px">Valid for current academic year</div>
+        </div>
+      </div>
+      
+      <div style="text-align:center;margin-top:20px">
+        <button class="btn gold" onclick="window.print()" style="font-weight:700">🖨️ Print ID Card</button>
+      </div>
+    </div>
+  </div>
 
-// Temporary script to log localStorage content
-console.log('botnology_user:', localStorage.getItem('botnology_user'));
-
-// Temporary simulation script to test loadUserData functionality
-localStorage.setItem('botnology_user', JSON.stringify({
-  name: 'Test User',
-  email: 'testuser@example.com',
-  plan: 'bachelors',
-  id: 'test123'
-}));
-loadUserData();
-console.log('Simulated currentUser:', currentUser);
+</body>
+</html>
