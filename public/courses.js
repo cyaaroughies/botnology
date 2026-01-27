@@ -1,5 +1,3 @@
-.json=COURSE_CATALOG
-{
   anatomy101: {
     id: 'anatomy101',
     code: 'ANAT-101',
