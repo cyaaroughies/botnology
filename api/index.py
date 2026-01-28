@@ -539,4 +539,5 @@ async def api_quiz_grade(req: Request):
 # Only mount static files if the directory exists (for local development)
 # In production (Vercel), static files are served automatically from public/
 if PUBLIC_DIR.exists():
+
     app.mount("/", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="static")
