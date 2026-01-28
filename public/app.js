@@ -1,6 +1,5 @@
 
 
-// Button Event Handlers
 document.getElementById("resumeBtn")?.addEventListener("click", () => {
     console.log("Resuming last session...");
     // Add functionality to resume session
