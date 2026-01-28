@@ -1,6 +1,5 @@
 
-document addEvent Listener'DOMContentLoaded'(() => {
-  // Example: update healthLine status
+document.addEvent Listener'DOMContentLoaded'(() => {
   const healthLine = document.getElementById('healthLine');
   if (healthLine) {
     healthLine.textContent = 'API: online';
