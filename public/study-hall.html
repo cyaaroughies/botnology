@@ -1,3 +1,4 @@
+<script>
 // Botnology101 Study Hall Script
 
 // ========== Utility ==========
@@ -55,6 +56,7 @@ if ($("doAuth")) $("doAuth").onclick = async () => {
     alert("Sign in failed.");
   }
 };
+</script>
 
 // ========== Whoami & Plan ==========
 async function fetchMe() {
@@ -215,13 +217,21 @@ if ($("reviewQuizBtn")) $("reviewQuizBtn").onclick = () => {
   const review = $("quizReview");
   if (!review) return;
   review.style.display = "";
-  review.innerHTML = quizData.questions.map((q, i) =>
-    `<div class="quiz-q">
+  review.innerHTML = quizData.questions.map((q, i) => {
+    const isCorrect = (quizData.answers[i]?.trim().toLowerCase() === (q.a||"").trim().toLowerCase());
+    const answerColor = isCorrect ? '#10b981' : '#ef4444';
+    return `<div class="quiz-q">
       <div style="font-weight:600">${i+1}. ${escapeHTML(q.q||"")}</div>
-      <div>Your answer: <span style="color:${quizData.answers[i]?.trim().toLowerCase() === (q.a||"").trim().toLowerCase() ? '#10b981':'#ef4444'}">${escapeHTML(quizData.answers[i]||"")}</span></div>
+      <div>Your answer: <span class="quiz-answer" data-idx="${i}">${escapeHTML(quizData.answers[i]||"")}</span></div>
       <div>Correct: <span style="color:#10b981">${escapeHTML(q.a||"")}</span></div>
-    </div>`
-  ).join("");
+    </div>`;
+  }).join("");
+  // Set answer color after rendering
+  qa('.quiz-answer').forEach(span => {
+    const idx = parseInt(span.getAttribute('data-idx'), 10);
+    const isCorrect = (quizData.answers[idx]?.trim().toLowerCase() === (quizData.questions[idx].a||"").trim().toLowerCase());
+    span.style.color = isCorrect ? '#10b981' : '#ef4444';
+  });
 };
 if ($("newQuizBtn")) $("newQuizBtn").onclick = () => {
   hide($("quizResults"));
