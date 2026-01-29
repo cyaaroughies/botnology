@@ -13,7 +13,6 @@ from fastapi.staticfiles import StaticFiles
 from openai import OpenAI
 import stripe
 
-<<<<<<< HEAD
 app = FastAPI()
 
 # ---------- CORS (tighten later) ----------
@@ -541,7 +540,6 @@ async def api_quiz_grade(req: Request):
 # In production (Vercel), static files are served automatically from public/
 if PUBLIC_DIR.exists():
     app.mount("/", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="static")
-=======
 app = FastAPI()
 
 # ---------- CORS (tighten later) ----------
@@ -1071,4 +1069,3 @@ if PUBLIC_DIR.exists():
 
     app.mount("/", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="static")
 
->>>>>>> 4e7deaad0fd640518467b370e68d98d4462dbd3a
