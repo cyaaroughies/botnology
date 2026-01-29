@@ -1,4 +1,4 @@
-        <Generate>/button class= btn small" id="quizGenerate">Generate</button>
+       <html lang="en">
         <button class="btn small" id="quizGrade">Grade</button>
       </div>
       <div class="grid2" style="margin-top:12px">

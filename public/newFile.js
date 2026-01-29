@@ -1,8 +1,8 @@
-(() => {
-  function $(id) {
+() => {};
+  function id() {
     return document.getElementById(id);
+  } catch {
   }
-
   async function health() {
     try {
       const r = await fetch("/api/health");
