@@ -45,10 +45,14 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY")) if OPENAI_ENABLED else None
 # Pydantic models for File operations
 class File(BaseModel):
     id: str
+    student_id: str
     name: str
     content: str
+    created_at: datetime
+    updated_at: datetime
 
 class FileCreate(BaseModel):
+    student_id: str
     name: str
     content: Optional[str] = ""
 
@@ -59,6 +63,7 @@ class QuizAttempt(BaseModel):
     quiz_id: str
     answers: dict
     score: Optional[float] = None
+    created_at: datetime
 
 class QuizAttemptCreate(BaseModel):
     student_id: str
@@ -567,8 +572,18 @@ async def api_quiz_grade(req: Request):
 @app.post("/api/files/", response_model=File, include_in_schema=False)
 async def create_file(file: FileCreate):
     file_id = str(uuid4())
-    new_file = File(id=file_id, name=file.name, content=file.content or "")
-    student_files[file_id] = new_file
+    now = datetime.utcnow()
+    
+    new_file = File(
+        id=file_id,
+        student_id=file.student_id,
+        name=file.name,
+        content=file.content or "",
+        created_at=now,
+        updated_at=now,
+    )
+    
+    student_files[file_id] = new_file.dict()
     return new_file
 
 @app.get("/api/files/{file_id}", response_model=File, include_in_schema=False)
@@ -583,8 +598,17 @@ async def update_file(file_id: str, file_update: FileCreate):
     file = student_files.get(file_id)
     if not file:
         raise HTTPException(status_code=404, detail="File not found")
-    updated_file = File(id=file_id, name=file_update.name, content=file_update.content or "")
-    student_files[file_id] = updated_file
+    
+    updated_file = File(
+        id=file_id,
+        student_id=file_update.student_id,
+        name=file_update.name,
+        content=file_update.content or "",
+        created_at=file["created_at"],
+        updated_at=datetime.utcnow(),
+    )
+    
+    student_files[file_id] = updated_file.dict()
     return updated_file
 
 @app.delete("/api/files/{file_id}", include_in_schema=False)
@@ -599,8 +623,17 @@ def delete_file(file_id: str):
 @app.post("/api/quiz-attempts/", response_model=QuizAttempt, include_in_schema=False)
 async def create_quiz_attempt(attempt: QuizAttemptCreate):
     attempt_id = str(uuid4())
-    new_attempt = QuizAttempt(id=attempt_id, student_id=attempt.student_id, quiz_id=attempt.quiz_id, answers=attempt.answers)
-    quiz_attempts[attempt_id] = new_attempt
+    now = datetime.utcnow()
+    
+    new_attempt = QuizAttempt(
+        id=attempt_id,
+        student_id=attempt.student_id,
+        quiz_id=attempt.quiz_id,
+        answers=attempt.answers,
+        created_at=now,
+    )
+    
+    quiz_attempts[attempt_id] = new_attempt.dict()
     return new_attempt
 
 @app.get("/api/quiz-attempts/{attempt_id}", response_model=QuizAttempt, include_in_schema=False)
@@ -615,8 +648,17 @@ async def update_quiz_attempt(attempt_id: str, attempt_update: QuizAttemptCreate
     attempt = quiz_attempts.get(attempt_id)
     if not attempt:
         raise HTTPException(status_code=404, detail="Quiz attempt not found")
-    updated_attempt = QuizAttempt(id=attempt_id, student_id=attempt_update.student_id, quiz_id=attempt_update.quiz_id, answers=attempt_update.answers)
-    quiz_attempts[attempt_id] = updated_attempt
+    
+    updated_attempt = QuizAttempt(
+        id=attempt_id,
+        student_id=attempt_update.student_id,
+        quiz_id=attempt_update.quiz_id,
+        answers=attempt_update.answers,
+        score=attempt.get("score"),
+        created_at=attempt["created_at"],
+    )
+    
+    quiz_attempts[attempt_id] = updated_attempt.dict()
     return updated_attempt
 
 @app.delete("/api/quiz-attempts/{attempt_id}", include_in_schema=False)
