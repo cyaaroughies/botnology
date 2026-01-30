@@ -14,6 +14,10 @@ from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from openai import OpenAI
 import stripe
+from dotenv import load_dotenv
+
+# Load environment variables from .env.local
+load_dotenv(dotenv_path=Path(__file__).resolve().parents[1] / ".env.local")
 
 app = FastAPI()
 
