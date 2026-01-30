@@ -53,7 +53,7 @@
     </div>
 
     <script>
-        // Example JavaScript to handle file creation and quiz/test buttons
+        // JavaScript to handle file creation and quiz/test buttons
         const fileList = document.getElementById('file-list');
         const newFileBtn = document.getElementById('new-file-btn');
         const startQuizBtn = document.getElementById('start-quiz-btn');
@@ -62,6 +62,15 @@
         const finalTestStatus = document.getElementById('final-test-status');
 
         let files = [];
+        
+        // Get student ID from localStorage or use a default
+        function getStudentId() {
+            const stored = localStorage.getItem('student_id');
+            if (stored) return stored;
+            const newId = 'student-' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('student_id', newId);
+            return newId;
+        }
 
         function renderFiles() {
             fileList.innerHTML = '';
@@ -83,29 +92,62 @@
                     li.style.background = 'transparent';
                 });
                 li.addEventListener('click', () => {
-                    alert(`Opening file: ${file.name}`);
+                    alert(`Opening file: ${file.name}\nCreated: ${file.created_at || 'N/A'}`);
                     // Here you could open a modal or editor for the file content
                 });
                 fileList.appendChild(li);
             });
         }
 
-        newFileBtn.addEventListener('click', () => {
+        newFileBtn.addEventListener('click', async () => {
             const fileName = prompt('Enter new file name:');
-            if (fileName) {
-                files.push({ name: fileName, content: '' });
+            if (!fileName) return;
+            
+            // Disable button and show loading state
+            newFileBtn.disabled = true;
+            newFileBtn.textContent = 'Creating...';
+            
+            try {
+                const res = await fetch("/api/files/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        student_id: getStudentId(),
+                        name: fileName,
+                        content: ""
+                    })
+                });
+                
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                
+                const data = await res.json();
+                files.push(data);
                 renderFiles();
+                
+                // Show success feedback
+                alert(`File "${fileName}" created successfully!`);
+            } catch (error) {
+                console.error('Error creating file:', error);
+                alert(`Failed to create file: ${error.message}\nPlease try again.`);
+            } finally {
+                // Re-enable button
+                newFileBtn.disabled = false;
+                newFileBtn.textContent = 'New File';
             }
         });
 
         startQuizBtn.addEventListener('click', () => {
             quizStatus.textContent = 'Quiz started! Good luck.';
-            // Implement quiz logic here
+            // Redirect to quiz module or implement quiz logic here
+            window.location.href = '/quiz-module.html';
         });
 
         startFinalTestBtn.addEventListener('click', () => {
             finalTestStatus.textContent = 'Final test started! Give it your best.';
             // Implement final test logic here
+            alert('Final test feature coming soon! Study well with Dr. Botonic.');
         });
 
         renderFiles();
