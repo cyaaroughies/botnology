@@ -111,9 +111,16 @@ async function startCheckout(plan, cadence) {
 
     console.log("Checkout session response:", data);
     if (data.url) {
-      console.log("Redirecting to Stripe checkout:", data.url);
-      window.location.href = data.url;
+      if (data.test_mode) {
+        console.log("⚠️ Test mode active - simulating redirect");
+      }
+      console.log("Redirecting to:", data.url);
+      // Add a small delay to ensure console logs are visible
+      setTimeout(() => {
+        window.location.href = data.url;
+      }, 100);
     } else {
+      console.error("No URL in response:", data);
       alert("Failed to create checkout session. " + (data.detail || "No URL returned"));
     }
   } catch (error) {
