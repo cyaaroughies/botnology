@@ -12,6 +12,7 @@ from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from openai import OpenAI
 import stripe
+from mangum import Mangum
 
 app = FastAPI()
 
@@ -198,7 +199,7 @@ async def api_stripe_checkout(req: Request):
     cancel_url = f"{base_url}/pricing.html?checkout=cancel"
 
     try:
-        session = stripe.checkout.Session.create(
+        return {"url": (stripe.checkout.Session.create(
             mode="subscription",
             line_items=[{"price": price_id, "quantity": 1}],
             success_url=success_url,
@@ -206,8 +207,7 @@ async def api_stripe_checkout(req: Request):
             customer_email=email,
             client_reference_id=student_id,
             metadata={"student_id": student_id, "plan": plan, "cadence": cadence},
-        )
-        return {"url": session.url}
+        )).url}
     except stripe.error.StripeError as e:
         raise HTTPException(status_code=400, detail=f"Stripe error: {getattr(e, 'user_message', str(e))}")
 
@@ -1065,11 +1065,9 @@ async def api_quiz_grade(req: Request):
 
 # Only mount static files if the directory exists (for local development)
 # In production (Vercel), static files are served automatically from public/
-if PUBLIC_DIR.exists():
-
+if PUBLIC_DIR.exists() and not os.getenv("VERCEL"):
     app.mount("/", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="static")
 
 # Vercel serverless function handler
-from mangum import Mangum
 handler = Mangum(app, lifespan="off")
 
