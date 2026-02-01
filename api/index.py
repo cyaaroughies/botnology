@@ -24,6 +24,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # ---------- Paths ----------
 try:
@@ -56,6 +61,11 @@ except Exception:
     client = None
 
 def _b64url(b: bytes) -> str:
+    return base64.urlsafe_b64encode(b).decode("utf-8").rstrip("=")
+
+def _b64url_dec(s: str) -> bytes:
+    pad = "=" * (-len(s) % 4)
+    return base64.urlsafe_b64decode((s + pad).encode("utf-8"))
     return base64.urlsafe_b64encode(b).decode("utf-8").rstrip("=")
 
 def _b64url_dec(s: str) -> bytes:
@@ -548,9 +558,11 @@ async def api_quiz_grade(req: Request):
             score += 1
     return {"score": score, "total": total}
 
-# Mount static files for Railway (not used in Vercel)
+# Vercel serverless function handler
+handler = Mangum(app, lifespan="off")
+
+# Mount static files LAST for Railway (after all API routes)
 if PUBLIC_DIR.exists() and not os.getenv("VERCEL"):
     app.mount("/", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="static")
 
-# Vercel serverless function handler
 handler = Mangum(app, lifespan="off")
