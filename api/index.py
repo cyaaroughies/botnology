@@ -9,7 +9,6 @@ from datetime import datetime
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
-from fastapi.staticfiles import StaticFiles
 from openai import OpenAI
 import stripe
 from mangum import Mangum
@@ -533,11 +532,6 @@ async def api_quiz_grade(req: Request):
         if gold and guess and (gold == guess or gold in guess or guess in gold):
             score += 1
     return {"score": score, "total": total}
-
-# Only mount static files if the directory exists (for local development)
-# In production (Vercel), static files are served automatically from public/
-if PUBLIC_DIR.exists():
-    app.mount("/", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="static")
 
 # Vercel serverless function handler
 handler = Mangum(app, lifespan="off")
