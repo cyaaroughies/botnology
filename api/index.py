@@ -25,20 +25,34 @@ app.add_middleware(
 )
 
 # ---------- Paths ----------
-ROOT_DIR = Path(__file__).resolve().parents[1]  # repo root on Vercel: /var/task
-PUBLIC_DIR = ROOT_DIR / "public"
-DATA_DIR = ROOT_DIR / "data"
-HISTORY_DIR = DATA_DIR / "history"
-SUBS_DIR = DATA_DIR / "subscriptions"
-PHOTOS_DIR = DATA_DIR / "photos"
-STORAGE_DIR = DATA_DIR / "storage"
-ANNOUNCEMENTS_FILE = DATA_DIR / "announcements.json"
+try:
+    ROOT_DIR = Path(__file__).resolve().parents[1]
+    PUBLIC_DIR = ROOT_DIR / "public"
+    DATA_DIR = ROOT_DIR / "data"
+    HISTORY_DIR = DATA_DIR / "history"
+    SUBS_DIR = DATA_DIR / "subscriptions"
+    PHOTOS_DIR = DATA_DIR / "photos"
+    STORAGE_DIR = DATA_DIR / "storage"
+    ANNOUNCEMENTS_FILE = DATA_DIR / "announcements.json"
+except Exception:
+    ROOT_DIR = Path("/tmp")
+    PUBLIC_DIR = Path("/tmp/public")
+    DATA_DIR = Path("/tmp/data")
+    HISTORY_DIR = DATA_DIR / "history"
+    SUBS_DIR = DATA_DIR / "subscriptions"
+    PHOTOS_DIR = DATA_DIR / "photos"
+    STORAGE_DIR = DATA_DIR / "storage"
+    ANNOUNCEMENTS_FILE = DATA_DIR / "announcements.json"
+    
 _app_secret_env = os.getenv("APP_SECRET") or os.getenv("JWT_SECRET")
 APP_SECRET = (_app_secret_env or "botnology-dev-secret").encode("utf-8")
 OPENAI_ENABLED = bool(os.getenv("OPENAI_API_KEY"))
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 TTS_MODEL = os.getenv("OPENAI_TTS_MODEL", "gpt-4o-mini-tts")
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY")) if OPENAI_ENABLED else None
+try:
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY")) if OPENAI_ENABLED else None
+except Exception:
+    client = None
 
 def _b64url(b: bytes) -> str:
     return base64.urlsafe_b64encode(b).decode("utf-8").rstrip("=")
