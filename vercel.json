@@ -3,7 +3,7 @@
   "outputDirectory": "public",
   "functions": {
     "api/index.py": {
-      "runtime": "python3.11"
+      "runtime": "python3.9"
     }
   },
   "rewrites": [
