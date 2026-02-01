@@ -1069,3 +1069,7 @@ if PUBLIC_DIR.exists():
 
     app.mount("/", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="static")
 
+# Vercel serverless function handler
+from mangum import Mangum
+handler = Mangum(app, lifespan="off")
+
