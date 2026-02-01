@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Botnology101 - Quiz Module</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #0a1811, #1b2a1b);
+            color: #d4af37;
+            min-height: 100vh;
+        }
+        #root {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(46, 61, 46, 0.9);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.5);
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            text-shadow: 0 0 8px rgba(212, 175, 55, 0.9);
+        }
+        h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+        button {
+            background: linear-gradient(45deg, #bfa243, #d4af37);
+            border: none;
+            padding: 12px 24px;
+            font-weight: 700;
+            color: #1b2a1b;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(212, 175, 55, 0.7);
+            transition: all 0.3s ease;
+            font-family: 'Georgia', serif;
+            font-size: 1rem;
+            margin: 5px;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(212, 175, 55, 0.9);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            margin: 10px 0;
+        }
+        .score-display {
+            font-size: 1.8rem;
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #1b2a1b;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        const sampleQuiz = {
+            id: 'quiz1',
+            questions: [
+                {
+                    id: 'q1',
+                    text: 'What is the capital of France?',
+                    options: ['Paris', 'London', 'Berlin', 'Madrid'],
+                    correct: 'Paris',
+                },
+                {
+                    id: 'q2',
+                    text: 'What is 2 + 2?',
+                    options: ['3', '4', '5', '6'],
+                    correct: '4',
+                },
+                {
+                    id: 'q3',
+                    text: 'Which planet is known as the Red Planet?',
+                    options: ['Venus', 'Mars', 'Jupiter', 'Saturn'],
+                    correct: 'Mars',
+                },
+            ],
+        };
+
+        function QuizModule() {
+            const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+            const [selectedAnswers, setSelectedAnswers] = useState({});
+            const [score, setScore] = useState(null);
+
+            const currentQuestion = sampleQuiz.questions[currentQuestionIndex];
+
+            function selectAnswer(answer) {
+                setSelectedAnswers({ ...selectedAnswers, [currentQuestion.id]: answer });
+            }
+
+            function nextQuestion() {
+                if (currentQuestionIndex < sampleQuiz.questions.length - 1) {
+                    setCurrentQuestionIndex(currentQuestionIndex + 1);
+                } else {
+                    // Calculate score
+                    let calculatedScore = 0;
+                    sampleQuiz.questions.forEach((q) => {
+                        if (selectedAnswers[q.id] === q.correct) {
+                            calculatedScore += 1;
+                        }
+                    });
+                    setScore(calculatedScore);
+                }
+            }
+
+            function restartQuiz() {
+                setCurrentQuestionIndex(0);
+                setSelectedAnswers({});
+                setScore(null);
+            }
+
+            if (score !== null) {
+                const percentage = Math.round((score / sampleQuiz.questions.length) * 100);
+                return (
+                    <div>
+                        <h1>Quiz Complete!</h1>
+                        <div className="score-display">
+                            Your score: {score} / {sampleQuiz.questions.length} ({percentage}%)
+                        </div>
+                        <div style={{ textAlign: 'center' }}>
+                            <button onClick={restartQuiz}>Restart Quiz</button>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div>
+                    <h1>Botnology101 Practice Quiz</h1>
+                    <p style={{ marginBottom: '20px' }}>
+                        Question {currentQuestionIndex + 1} of {sampleQuiz.questions.length}
+                    </p>
+                    <h3>{currentQuestion.text}</h3>
+                    <ul>
+                        {currentQuestion.options.map((option) => (
+                            <li key={option}>
+                                <button 
+                                    onClick={() => selectAnswer(option)}
+                                    style={{
+                                        width: '100%',
+                                        textAlign: 'left',
+                                        background: selectedAnswers[currentQuestion.id] === option 
+                                            ? 'linear-gradient(45deg, #8a7a33, #b4a047)'
+                                            : 'linear-gradient(45deg, #bfa243, #d4af37)'
+                                    }}
+                                >
+                                    {option}
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+                    <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                        <button 
+                            onClick={nextQuestion}
+                            disabled={!selectedAnswers[currentQuestion.id]}
+                            style={{
+                                opacity: selectedAnswers[currentQuestion.id] ? 1 : 0.5,
+                                cursor: selectedAnswers[currentQuestion.id] ? 'pointer' : 'not-allowed'
+                            }}
+                        >
+                            {currentQuestionIndex < sampleQuiz.questions.length - 1 ? 'Next' : 'Submit'}
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<QuizModule />);
+    </script>
+</body>
+</html>

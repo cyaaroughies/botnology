@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Botnology101 - Student Dashboard</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Georgia', serif;
+            background: #0a1811;
+            color: #d4af37;
+        }
+    </style>
+</head>
+<body>
+    <div style="background: linear-gradient(135deg, rgba(30, 45, 30, 0.85) 0%, rgba(46, 61, 46, 0.85) 100%), url('https://github.com/cyaaroughies/botnology/blob/main/dr-botonic-desk-bg.png?raw=true') no-repeat center center / cover; color: #d4af37; font-family: 'Georgia', serif; padding: 40px; border-radius: 12px; box-shadow: 0 0 30px rgba(212, 175, 55, 0.8); margin: 40px; backdrop-filter: blur(6px);">
+        <h2 style="font-size: 2.6rem; margin-bottom: 20px; font-weight: 700; text-shadow: 0 0 8px rgba(212, 175, 55, 0.9);">
+            Welcome, <span id="student-name">Student</span>
+        </h2>
+        <p style="font-size: 1.2rem; max-width: 700px; line-height: 1.7; text-shadow: 0 0 6px rgba(212, 175, 55, 0.7);">
+            This is your personal dashboard where you can manage your files, take notes, complete practice quizzes, and prepare for your final tests with Professor Dr. Botonic. Feel at home in your own intellectual space, surrounded by the wisdom and calm of a deep forest study.
+        </p>
+
+        <div style="display: flex; gap: 30px; margin-top: 30px; flex-wrap: wrap;">
+            <div style="flex: 1 1 300px; background: #2e3d2e; padding: 20px; border-radius: 12px; box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);">
+                <h3 style="font-weight: 700; margin-bottom: 15px;">My Files & Notes</h3>
+                <button id="new-file-btn" style="background: linear-gradient(45deg, #bfa243, #d4af37); border: none; padding: 10px 20px; font-weight: 700; color: #1b2a1b; border-radius: 30px; cursor: pointer; box-shadow: 0 4px 10px rgba(212, 175, 55, 0.7); transition: background 0.3s ease; margin-bottom: 15px;">
+                    New File
+                </button>
+                <ul id="file-list" style="list-style: none; padding-left: 0; max-height: 300px; overflow-y: auto; border: 1px solid #d4af37; border-radius: 8px; background: #1b2a1b; padding: 10px;">
+                    <!-- Files will be dynamically added here -->
+                </ul>
+            </div>
+
+            <div style="flex: 1 1 300px; background: #2e3d2e; padding: 20px; border-radius: 12px; box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);">
+                <h3 style="font-weight: 700; margin-bottom: 15px;">Practice Quizzes</h3>
+                <button id="start-quiz-btn" style="background: linear-gradient(45deg, #bfa243, #d4af37); border: none; padding: 10px 20px; font-weight: 700; color: #1b2a1b; border-radius: 30px; cursor: pointer; box-shadow: 0 4px 10px rgba(212, 175, 55, 0.7); transition: background 0.3s ease; margin-bottom: 15px;">
+                    Start Quiz
+                </button>
+                <div id="quiz-status" style="font-style: italic; font-size: 1rem;">No quiz in progress.</div>
+            </div>
+
+            <div style="flex: 1 1 300px; background: #2e3d2e; padding: 20px; border-radius: 12px; box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);">
+                <h3 style="font-weight: 700; margin-bottom: 15px;">Final Practice Test</h3>
+                <button id="start-final-test-btn" style="background: linear-gradient(45deg, #bfa243, #d4af37); border: none; padding: 10px 20px; font-weight: 700; color: #1b2a1b; border-radius: 30px; cursor: pointer; box-shadow: 0 4px 10px rgba(212, 175, 55, 0.7); transition: background 0.3s ease;">
+                    Start Final Test
+                </button>
+                <div id="final-test-status" style="font-style: italic; font-size: 1rem; margin-top: 10px;">Not started.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript to handle file creation and quiz/test buttons
+        const fileList = document.getElementById('file-list');
+        const newFileBtn = document.getElementById('new-file-btn');
+        const startQuizBtn = document.getElementById('start-quiz-btn');
+        const quizStatus = document.getElementById('quiz-status');
+        const startFinalTestBtn = document.getElementById('start-final-test-btn');
+        const finalTestStatus = document.getElementById('final-test-status');
+
+        let files = [];
+        
+        // Get student ID from localStorage or use a default
+        function getStudentId() {
+            const stored = localStorage.getItem('student_id');
+            if (stored) return stored;
+            const newId = 'student-' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('student_id', newId);
+            return newId;
+        }
+
+        function renderFiles() {
+            fileList.innerHTML = '';
+            if (files.length === 0) {
+                fileList.innerHTML = '<li style="padding: 8px; color: #8a9a8a; font-style: italic;">No files yet. Click "New File" to create one.</li>';
+                return;
+            }
+            files.forEach((file, index) => {
+                const li = document.createElement('li');
+                li.textContent = file.name;
+                li.style.cursor = 'pointer';
+                li.style.padding = '8px';
+                li.style.borderBottom = '1px solid #d4af37';
+                li.style.transition = 'background 0.2s ease';
+                li.addEventListener('mouseover', () => {
+                    li.style.background = '#3a4a3a';
+                });
+                li.addEventListener('mouseout', () => {
+                    li.style.background = 'transparent';
+                });
+                li.addEventListener('click', () => {
+                    alert(`Opening file: ${file.name}\nCreated: ${file.created_at || 'N/A'}`);
+                    // Here you could open a modal or editor for the file content
+                });
+                fileList.appendChild(li);
+            });
+        }
+
+        newFileBtn.addEventListener('click', async () => {
+            const fileName = prompt('Enter new file name:');
+            if (!fileName) return;
+            
+            // Disable button and show loading state
+            newFileBtn.disabled = true;
+            newFileBtn.textContent = 'Creating...';
+            
+            try {
+                const res = await fetch("/api/files/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        student_id: getStudentId(),
+                        name: fileName,
+                        content: ""
+                    })
+                });
+                
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                
+                const data = await res.json();
+                files.push(data);
+                renderFiles();
+                
+                // Show success feedback
+                alert(`File "${fileName}" created successfully!`);
+            } catch (error) {
+                console.error('Error creating file:', error);
+                alert(`Failed to create file: ${error.message}\nPlease try again.`);
+            } finally {
+                // Re-enable button
+                newFileBtn.disabled = false;
+                newFileBtn.textContent = 'New File';
+            }
+        });
+
+        startQuizBtn.addEventListener('click', () => {
+            quizStatus.textContent = 'Quiz started! Good luck.';
+            // Redirect to quiz module or implement quiz logic here
+            window.location.href = '/quiz-module.html';
+        });
+
+        startFinalTestBtn.addEventListener('click', () => {
+            finalTestStatus.textContent = 'Final test started! Give it your best.';
+            // Implement final test logic here
+            alert('Final test feature coming soon! Study well with Dr. Botonic.');
+        });
+
+        renderFiles();
+    </script>
+</body>
+</html>

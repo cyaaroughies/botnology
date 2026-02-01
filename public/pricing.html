@@ -74,6 +74,30 @@
       <div class="h-eyebrow"><span class="dot" id="healthDot"></span><span id="healthLine">API: checking…</span></div>
     </div>
   </div>
+  
+  <script>
+    // Check for checkout status in URL
+    window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const checkoutStatus = urlParams.get('checkout');
+      const plan = urlParams.get('plan');
+      const isTest = urlParams.get('test');
+      
+      if (checkoutStatus === 'success') {
+        let message = `✅ Checkout successful for ${plan || 'selected'} plan!`;
+        if (isTest === 'true') {
+          message += '\n\n⚠️ Note: This is test mode. In production, you would have been redirected to Stripe and this would be a real payment confirmation.';
+        }
+        alert(message);
+        // Clean up URL
+        window.history.replaceState({}, document.title, '/pricing.html');
+      } else if (checkoutStatus === 'cancel') {
+        alert('❌ Checkout was cancelled. You can try again anytime!');
+        window.history.replaceState({}, document.title, '/pricing.html');
+      }
+    });
+  </script>
+  
   <!-- Sign In modal to ensure pricing page Sign In works -->
   <div class="modal" id="authModal">
     <div class="box">
