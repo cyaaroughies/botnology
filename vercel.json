@@ -1,4 +1,6 @@
 {
+  "buildCommand": "pip install -r requirements.txt",
+  "outputDirectory": "public",
   "builds": [
     {
       "src": "api/index.py",
@@ -6,7 +8,6 @@
     }
   ],
   "routes": [
-    { "src": "/api/(.*)", "dest": "api/index.py" },
-    { "src": "/(.*)", "dest": "/public/$1" }
+    { "src": "/api/(.*)", "dest": "api/index.py" }
   ]
 }
