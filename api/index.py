@@ -554,11 +554,9 @@ async def api_quiz_grade(req: Request):
             score += 1
     return {"score": score, "total": total}
 
-# Vercel serverless function handler
-handler = Mangum(app, lifespan="off")
-
 # Mount static files LAST for Railway (after all API routes)
 if PUBLIC_DIR.exists() and not os.getenv("VERCEL"):
     app.mount("/", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="static")
 
+# Vercel serverless function handler
 handler = Mangum(app, lifespan="off")
