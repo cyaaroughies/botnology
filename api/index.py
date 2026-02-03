@@ -4,7 +4,7 @@ import base64
 import hmac
 import hashlib
 from pathlib import Path
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, Optional, List, cast
 from datetime import datetime
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -173,7 +173,7 @@ async def api_chat(req: Request):
                 messages.append({"role": m["role"], "content": m["content"]})
     messages.append({"role": "user", "content": msg})
     try:
-        out = client.chat.completions.create(model=OPENAI_MODEL, messages=messages, temperature=0.7)
+        out = client.chat.completions.create(model=OPENAI_MODEL, messages=cast(Any, messages), temperature=0.7)
         txt = (out.choices[0].message.content or "").strip()
         return {"reply": txt, "plan": plan}
     except Exception as e:
@@ -487,46 +487,6 @@ def _safe_path(student_id: str, rel: str) -> Path:
     return p
 
 @app.get("/api/storage/list", include_in_schema=False)
-def api_storage_list(req: Request):
-    _ensure_dirs()
-    p = bearer_payload(req)
-    if not p:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    root = _storage_root(p.get("student_id") or "BN-UNKNOWN")
-    root.mkdir(parents=True, exist_ok=True)
-    out: List[Dict[str, Any]] = []
-    for r, ds, fs in os.walk(root):
-        rel = os.path.relpath(r, root)
-        out.append({"path": "/" if rel == "." else rel, "dirs": ds, "files": fs})
-    return {"tree": out}
-
-@app.post("/api/tts", include_in_schema=False)
-async def api_tts(req: Request):
-    body = await req.json()
-    text = (body.get("text") or "").strip()
-    voice = (body.get("voice") or "alloy").strip()
-    if not text:
-        raise HTTPException(status_code=400, detail="Missing text")
-    if not OPENAI_ENABLED or client is None:
-        return {"audio_base64": None}
-    try:
-        resp = client.audio.speech.create(model=TTS_MODEL, voice=voice, input=text)
-        data = resp.read()
-        return {"audio_base64": base64.b64encode(data).decode("utf-8")}
-    except Exception:
-        return {"audio_base64": None}
-
-@app.post("/api/quiz/generate", include_in_schema=False)
-async def api_quiz_generate(req: Request):
-    body = await req.json()
-    topic = (body.get("topic") or "General").strip()
-    level = (body.get("level") or "bachelors").strip().lower()
-    if not OPENAI_ENABLED or client is None:
-        return {"questions": [
-            {"q": "Define entropy in thermodynamics.", "a": "Entropy quantifies disorder and energy dispersal in a system."},
-            {"q": "State the chain rule in calculus.", "a": "d/dx f(g(x)) = f'(g(x))·g'(x)."},
-            {"q": "Explain Big-O of binary search.", "a": "O(log n) due to halving the search space each step."}
-        ]}
     prompt = (
         "Create 5 rigorous study questions with concise ideal answers for topic: "
         + topic + ". Depth level: " + level + ". Return JSON array with keys 'q' and 'a'."
