@@ -70,11 +70,6 @@ def _b64url(b: bytes) -> str:
 def _b64url_dec(s: str) -> bytes:
     pad = "=" * (-len(s) % 4)
     return base64.urlsafe_b64decode((s + pad).encode("utf-8"))
-    return base64.urlsafe_b64encode(b).decode("utf-8").rstrip("=")
-
-def _b64url_dec(s: str) -> bytes:
-    pad = "=" * (-len(s) % 4)
-    return base64.urlsafe_b64decode((s + pad).encode("utf-8"))
 
 def sign_token(payload: Dict[str, Any]) -> str:
     raw = json.dumps(payload, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
@@ -171,7 +166,7 @@ async def api_chat(req: Request):
         "Adapt depth to the student's plan: Associates = foundational guidance, Bachelors = deeper explanations and structured steps, Masters = elite coaching with advanced insights, references, and study strategies. "
         "Subject: " + subject
     )
-    messages: List[Dict[str, str]] = [{"role": "system", "content": sys_prompt}]
+    messages: List[Dict[str, Any]] = [{"role": "system", "content": sys_prompt}]
     if isinstance(hist, list):
         for m in hist[-16:]:
             if isinstance(m, dict) and m.get("role") in ("user", "assistant") and isinstance(m.get("content"), str):
