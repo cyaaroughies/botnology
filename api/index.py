@@ -558,5 +558,32 @@ async def api_quiz_grade(req: Request):
 if PUBLIC_DIR.exists() and not os.getenv("VERCEL"):
     app.mount("/", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="static")
 
+# Static file serving for Vercel (must be last)
+@app.get("/", include_in_schema=False)
+async def serve_root():
+    index_path = PUBLIC_DIR / "index.html"
+    if index_path.exists():
+        return FileResponse(index_path, media_type="text/html")
+    return {"message": "Botnology API", "public_exists": PUBLIC_DIR.exists()}
+
+@app.get("/{file_path:path}", include_in_schema=False)
+async def serve_static_files(file_path: str):
+    # Don't serve API routes through static handler
+    if file_path.startswith("api"):
+        raise HTTPException(status_code=404, detail="Not Found")
+    
+    # Handle specific file extensions
+    file = PUBLIC_DIR / file_path
+    if file.exists() and file.is_file():
+        return FileResponse(file)
+    
+    # Fallback to index.html for SPA routing
+    if not file_path or "/" in file_path:
+        index_path = PUBLIC_DIR / "index.html"
+        if index_path.exists():
+            return FileResponse(index_path, media_type="text/html")
+    
+    raise HTTPException(status_code=404, detail="Not Found")
+
 # Vercel serverless function handler
 handler = Mangum(app, lifespan="off")
