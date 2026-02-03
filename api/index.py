@@ -90,6 +90,14 @@ def bearer_payload(req: Request) -> Optional[Dict[str, Any]]:
         return None
     token = auth.split(" ", 1)[1].strip()
     return verify_token(token)
+
+@app.get("/", include_in_schema=False)
+def root():
+    index_file = PUBLIC_DIR / "index.html"
+    if index_file.exists():
+        return FileResponse(index_file)
+    return {"message": "Botnology API"}
+
 @app.get("/api/health", include_in_schema=False)
 def api_health():
     # no imports that can crash here
