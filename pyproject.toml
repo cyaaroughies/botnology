@@ -1,0 +1,6 @@
+[project]
+name = "botnology"
+version = "1.0.0"
+
+[tool.vercel]
+app = "api.index:app"
