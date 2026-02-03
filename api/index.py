@@ -44,6 +44,15 @@ except Exception:
     PHOTOS_DIR = DATA_DIR / "photos"
     STORAGE_DIR = DATA_DIR / "storage"
     ANNOUNCEMENTS_FILE = DATA_DIR / "announcements.json"
+
+# For Vercel, also check alternative path
+if os.getenv("VERCEL") and not PUBLIC_DIR.exists():
+    alt_public = Path("/var/task/public")
+    if alt_public.exists():
+        PUBLIC_DIR = alt_public
+    else:
+        # Try relative to current file
+        PUBLIC_DIR = Path(__file__).parent.parent / "public"
     
 _app_secret_env = os.getenv("APP_SECRET") or os.getenv("JWT_SECRET")
 APP_SECRET = (_app_secret_env or "botnology-dev-secret").encode("utf-8")
@@ -561,29 +570,42 @@ if PUBLIC_DIR.exists() and not os.getenv("VERCEL"):
 # Static file serving for Vercel (must be last)
 @app.get("/", include_in_schema=False)
 async def serve_root():
-    index_path = PUBLIC_DIR / "index.html"
-    if index_path.exists():
-        return FileResponse(index_path, media_type="text/html")
-    return {"message": "Botnology API", "public_exists": PUBLIC_DIR.exists()}
-
-@app.get("/{file_path:path}", include_in_schema=False)
-async def serve_static_files(file_path: str):
-    # Don't serve API routes through static handler
-    if file_path.startswith("api"):
-        raise HTTPException(status_code=404, detail="Not Found")
-    
-    # Handle specific file extensions
-    file = PUBLIC_DIR / file_path
-    if file.exists() and file.is_file():
-        return FileResponse(file)
-    
-    # Fallback to index.html for SPA routing
-    if not file_path or "/" in file_path:
+    try:
         index_path = PUBLIC_DIR / "index.html"
         if index_path.exists():
             return FileResponse(index_path, media_type="text/html")
-    
-    raise HTTPException(status_code=404, detail="Not Found")
+        return {
+            "message": "Botnology API", 
+            "public_dir": str(PUBLIC_DIR),
+            "public_exists": PUBLIC_DIR.exists(),
+            "index_exists": index_path.exists()
+        }
+    except Exception as e:
+        return {"error": str(e), "public_dir": str(PUBLIC_DIR)}
+
+@app.get("/{file_path:path}", include_in_schema=False)
+async def serve_static_files(file_path: str):
+    try:
+        # Don't serve API routes through static handler
+        if file_path.startswith("api"):
+            raise HTTPException(status_code=404, detail="Not Found")
+        
+        # Handle specific file extensions
+        file = PUBLIC_DIR / file_path
+        if file.exists() and file.is_file():
+            return FileResponse(file)
+        
+        # Fallback to index.html for SPA routing
+        if not file_path or "/" in file_path:
+            index_path = PUBLIC_DIR / "index.html"
+            if index_path.exists():
+                return FileResponse(index_path, media_type="text/html")
+        
+        raise HTTPException(status_code=404, detail="Not Found")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
 # Vercel serverless function handler
 handler = Mangum(app, lifespan="off")
