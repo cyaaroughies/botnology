@@ -217,6 +217,24 @@ function updateSyncUI(enabled) {
   }
 }
 
+function initAdminReset() {
+  const buttons = document.querySelectorAll("#adminResetBtn");
+  if (!buttons.length) return;
+
+  const params = new URLSearchParams(window.location.search);
+  const isAdmin = localStorage.getItem("botnology_admin") === "true" || params.get("admin") === "1";
+
+  if (!isAdmin) return;
+
+  buttons.forEach((button) => {
+    button.style.display = "inline-flex";
+    button.addEventListener("click", () => {
+      localStorage.setItem(FREE_CHAT_COUNT_KEY, "0");
+      showNotice("Free chats reset", "Free interactions have been reset for this browser.");
+    });
+  });
+}
+
 async function fetchCloudHistory() {
   const token = getAuthToken();
   if (!token) return [];
@@ -752,6 +770,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initAuthModal();
   initProfileUI();
   initChat();
+  initAdminReset();
   checkHealth();
   
   // Check for checkout success/cancel
