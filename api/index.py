@@ -10,9 +10,20 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
-from openai import OpenAI
-import stripe
-from mangum import Mangum
+try:
+    from openai import OpenAI
+except Exception:
+    OpenAI = None
+
+try:
+    import stripe
+except Exception:
+    stripe = None
+
+try:
+    from mangum import Mangum
+except Exception:
+    Mangum = None
 
 app = FastAPI()
 
@@ -56,11 +67,11 @@ if os.getenv("VERCEL") and not PUBLIC_DIR.exists():
     
 _app_secret_env = os.getenv("APP_SECRET") or os.getenv("JWT_SECRET")
 APP_SECRET = (_app_secret_env or "botnology-dev-secret").encode("utf-8")
-OPENAI_ENABLED = bool(os.getenv("OPENAI_API_KEY"))
+OPENAI_ENABLED = bool(os.getenv("OPENAI_API_KEY")) and OpenAI is not None
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 TTS_MODEL = os.getenv("OPENAI_TTS_MODEL", "gpt-4o-mini-tts")
 try:
-    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY")) if OPENAI_ENABLED else None
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY")) if OPENAI_ENABLED and OpenAI is not None else None
 except Exception:
     client = None
 
@@ -216,6 +227,9 @@ async def api_stripe_checkout(req: Request):
     cadence = (body.get("cadence") or "monthly").strip().lower()
     student_id = (body.get("student_id") or "BN-UNKNOWN").strip()
     email = (body.get("email") or "").strip() or None
+
+    if stripe is None:
+        raise HTTPException(status_code=500, detail="Stripe library not available in this deployment.")
 
     secret = os.getenv("STRIPE_SECRET_KEY")
     if not secret:
@@ -392,6 +406,9 @@ def api_subscription(req: Request):
 @app.post("/api/stripe/webhook", include_in_schema=False)
 async def api_stripe_webhook(req: Request):
     _ensure_dirs()
+    if stripe is None:
+        raise HTTPException(status_code=500, detail="Stripe library not available in this deployment.")
+
     secret = os.getenv("STRIPE_WEBHOOK_SECRET")
     if not secret:
         raise HTTPException(status_code=400, detail="Missing STRIPE_WEBHOOK_SECRET")
@@ -658,4 +675,4 @@ async def serve_static_files(file_path: str):
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
 # Vercel serverless function handler
-handler = Mangum(app, lifespan="off")
+handler = Mangum(app, lifespan="off") if Mangum is not None else None

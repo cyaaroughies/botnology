@@ -1,5 +1,6 @@
 {
     "scripts": {
+        "sync:requirements": "python scripts/sync_requirements.py",
         "start": "node index.js",
         "dev": "nodemon index.js",
         "test": "jest",

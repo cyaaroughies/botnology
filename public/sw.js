@@ -20,6 +20,13 @@ self.addEventListener("activate", (e) => {
 
 self.addEventListener("fetch", (e) => {
   const req = e.request;
+  const url = new URL(req.url);
+
+  if (url.pathname.startsWith("/api/")) {
+    e.respondWith(fetch(req));
+    return;
+  }
+
   e.respondWith(
     caches.match(req).then(hit => hit || fetch(req).then(res => {
       const copy = res.clone();

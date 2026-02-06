@@ -84,6 +84,10 @@ For local emulation:
 vercel dev
 ```
 
+### Vercel Python Dependencies
+
+Vercel's Python builder installs dependencies from `api/requirements.txt` for serverless functions. Keep this file in sync with the root `requirements.txt`.
+
 ## Stripe Webhooks
 
 Configure your Stripe webhook endpoint to `/api/stripe/webhook` and use the signing secret in `STRIPE_WEBHOOK_SECRET`.

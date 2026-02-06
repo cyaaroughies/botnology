@@ -7,6 +7,10 @@
    ```
 2. Update the `.env` file with your API keys and secrets.
 
+## Vercel Python Dependencies
+
+Vercel installs function dependencies from `api/requirements.txt`. Keep it aligned with the root `requirements.txt` to avoid import errors in serverless functions.
+
 ## Mock Stripe API
 1. Install dependencies:
    ```bash

@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "buildCommand": "python scripts/sync_requirements.py",
   "builds": [
     {
       "src": "api/index.py",
