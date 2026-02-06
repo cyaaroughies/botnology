@@ -158,17 +158,10 @@ def api_me(req: Request):
     return {"logged_in": True, **p}
 
 
-@app.post("/api/chat", include_in_schema=False)
-async def api_chat(req: Request):
-    body = await req.json()
-    msg = (body.get("message") or "").strip()
-    if not msg:
-        raise HTTPException(status_code=400, detail="Missing message")
-    hist = body.get("history") or []
-    subject = (body.get("subject") or "General").strip()
-    plan = (body.get("plan") or "associates").strip().lower()
+def _build_chat_reply(msg: str, hist: Any, subject: str, plan: str) -> Dict[str, Any]:
     if not OPENAI_ENABLED or client is None:
         return {"reply": f"(Demo) Dr. Botonic heard: {msg}", "plan": plan}
+
     sys_prompt = (
         "You are Dr. Botonic, a 72-year-old sophisticated Harvard graduate yeti professor. "
         "You speak calm, soft English with a subtle accent. "
@@ -183,6 +176,7 @@ async def api_chat(req: Request):
             if isinstance(m, dict) and m.get("role") in ("user", "assistant") and isinstance(m.get("content"), str):
                 messages.append({"role": m["role"], "content": m["content"]})
     messages.append({"role": "user", "content": msg})
+
     try:
         out = client.chat.completions.create(model=OPENAI_MODEL, messages=cast(Any, messages), temperature=0.7)
         txt = (out.choices[0].message.content or "").strip()
@@ -194,6 +188,24 @@ async def api_chat(req: Request):
             "plan": plan,
             "error": err
         }
+
+@app.post("/api/chat", include_in_schema=False)
+async def api_chat(req: Request):
+    body = await req.json()
+    msg = (body.get("message") or "").strip()
+    if not msg:
+        raise HTTPException(status_code=400, detail="Missing message")
+    hist = body.get("history") or []
+    subject = (body.get("subject") or "General").strip()
+    plan = (body.get("plan") or "associates").strip().lower()
+    return _build_chat_reply(msg, hist, subject, plan)
+
+@app.get("/api/chat", include_in_schema=False)
+async def api_chat_get(req: Request, message: str = "", subject: str = "General", plan: str = "associates"):
+    msg = (message or "").strip()
+    if not msg:
+        raise HTTPException(status_code=400, detail="Missing message")
+    return _build_chat_reply(msg, [], (subject or "General").strip(), (plan or "associates").strip().lower())
 
 @app.post("/api/chat/stream", include_in_schema=False)
 async def api_chat_stream(req: Request):
