@@ -29,3 +29,8 @@
   font-size: 16px;
   color: var(--text);
 }
+
+/* Solid modal background for sign-in */
+.modal {background: rgba(0, 0, 0, 0.72)}
+.modal .box {background: #0b1a12}
+body.yeti-theme .modal .box {background: #0a1620}
