@@ -675,4 +675,7 @@ async def serve_static_files(file_path: str):
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
 # Vercel serverless function handler
-handler = Mangum(app, lifespan="off") if Mangum is not None else None
+try:
+    handler = Mangum(app, lifespan="off") if Mangum is not None else None
+except Exception:
+    handler = None
