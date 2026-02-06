@@ -674,8 +674,4 @@ async def serve_static_files(file_path: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
-# Vercel serverless function handler
-try:
-    handler = Mangum(app, lifespan="off") if Mangum is not None else None
-except Exception:
-    handler = None
+# Vercel uses the ASGI app object directly; no Mangum handler needed.
