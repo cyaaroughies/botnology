@@ -49,6 +49,7 @@ async function apiFetchJson(path, options) {
 const FREE_CHAT_LIMIT = 7;
 const FREE_CHAT_COUNT_KEY = "botnology_free_chat_count";
 const CHAT_HISTORY_KEY = "botnology_chat_history";
+const SYNC_ENABLED_KEY = "botnology_sync_enabled";
 let cachedProfile = null;
 
 function getFreeChatCount() {
@@ -101,12 +102,84 @@ function saveChatHistory(history) {
   localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(history));
 }
 
+function getSyncEnabled() {
+  return localStorage.getItem(SYNC_ENABLED_KEY) === "true";
+}
+
+function setSyncEnabled(enabled) {
+  localStorage.setItem(SYNC_ENABLED_KEY, enabled ? "true" : "false");
+}
+
+function getAuthToken() {
+  return localStorage.getItem("botnology_token") || "";
+}
+
 function appendMessage(messagesEl, role, content) {
   const bubble = document.createElement("div");
   bubble.className = `msg ${role === "user" ? "user" : "assistant"}`;
   bubble.textContent = content;
   messagesEl.appendChild(bubble);
   messagesEl.scrollTop = messagesEl.scrollHeight;
+  return bubble;
+}
+
+function renderHistory(messagesEl, history) {
+  messagesEl.innerHTML = "";
+  history.forEach(item => {
+    if (item && item.role && item.content) {
+      appendMessage(messagesEl, item.role, item.content);
+    }
+  });
+}
+
+async function streamChatReply(payload, onDelta) {
+  const token = getAuthToken();
+  const response = await fetch(apiUrl("/api/chat/stream"), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok || !response.body) {
+    throw new Error(`HTTP ${response.status}`);
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder("utf-8");
+  let buffer = "";
+
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+
+    let boundary = buffer.indexOf("\n\n");
+    while (boundary !== -1) {
+      const chunk = buffer.slice(0, boundary).trim();
+      buffer = buffer.slice(boundary + 2);
+      if (chunk.startsWith("data:")) {
+        const jsonText = chunk.replace(/^data:\s*/, "");
+        try {
+          const data = JSON.parse(jsonText);
+          if (data.delta) {
+            onDelta(String(data.delta));
+          }
+          if (data.error) {
+            throw new Error(data.error);
+          }
+          if (data.done) {
+            return;
+          }
+        } catch (error) {
+          throw error;
+        }
+      }
+      boundary = buffer.indexOf("\n\n");
+    }
+  }
 }
 
 function showNotice(title, message) {
@@ -133,6 +206,83 @@ function redirectToCheckout() {
   window.location.href = "/pricing.html";
 }
 
+function updateSyncUI(enabled) {
+  const syncDot = document.getElementById("syncDot");
+  const syncStatus = document.getElementById("syncStatus");
+  if (syncDot) {
+    syncDot.style.background = enabled ? "#4ade80" : "#ef4444";
+  }
+  if (syncStatus) {
+    syncStatus.textContent = enabled ? "ON" : "OFF";
+  }
+}
+
+async function fetchCloudHistory() {
+  const token = getAuthToken();
+  if (!token) return [];
+  try {
+    const data = await apiFetchJson("/api/history", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return Array.isArray(data?.history) ? data.history : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+async function syncHistoryToCloud(history) {
+  const token = getAuthToken();
+  if (!token) return false;
+  try {
+    await apiFetchJson("/api/history", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ history })
+    });
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+async function initProfileUI() {
+  const planBadge = document.getElementById("planBadge");
+  const whoami = document.getElementById("whoami");
+  const subBadge = document.getElementById("subBadge");
+
+  const profile = await getProfile();
+  const plan = String(profile?.plan || "associates").toUpperCase();
+
+  if (planBadge) {
+    planBadge.textContent = plan;
+  }
+  if (whoami) {
+    if (profile?.logged_in) {
+      const name = String(profile?.name || "Student");
+      const studentId = String(profile?.student_id || "BN-...");
+      whoami.textContent = `${name} • ${studentId}`;
+    } else {
+      whoami.textContent = "Guest • BN-...";
+    }
+  }
+
+  if (subBadge && profile?.logged_in) {
+    try {
+      const token = getAuthToken();
+      const data = await apiFetchJson("/api/subscription", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const status = String(data?.status || "none").toUpperCase();
+      subBadge.textContent = `SUBSCRIPTION: ${status}`;
+    } catch (error) {
+      subBadge.textContent = "SUBSCRIPTION: NONE";
+    }
+  }
+}
+
 async function canUseChat() {
   const profile = await getProfile();
   if (profile?.logged_in && isPaidPlan(String(profile.plan || "").toLowerCase())) {
@@ -156,18 +306,26 @@ function initChat() {
 
   if (!messagesEl || !inputEl || !sendBtn) return;
 
-  const history = loadChatHistory();
-  history.forEach(item => {
-    if (item && item.role && item.content) {
-      appendMessage(messagesEl, item.role, item.content);
-    }
-  });
+  let history = loadChatHistory();
+  renderHistory(messagesEl, history);
 
   if (subjectSelect && subjectLabel) {
     subjectLabel.textContent = subjectSelect.value || "General";
     subjectSelect.addEventListener("change", () => {
       subjectLabel.textContent = subjectSelect.value || "General";
     });
+  }
+
+  async function refreshFromCloud() {
+    if (!getSyncEnabled()) return;
+    const profile = await getProfile();
+    if (!profile?.logged_in) return;
+    const cloudHistory = await fetchCloudHistory();
+    if (cloudHistory.length) {
+      history = cloudHistory;
+      saveChatHistory(history);
+      renderHistory(messagesEl, history);
+    }
   }
 
   async function sendMessage() {
@@ -195,28 +353,141 @@ function initChat() {
 
     const subject = subjectSelect?.value || "General";
     const plan = String(profile?.plan || "associates").toLowerCase();
-    const token = localStorage.getItem("botnology_token") || "";
+    const token = getAuthToken();
+
+    const assistantBubble = appendMessage(messagesEl, "assistant", "");
+    const typingIndicator = document.createElement("span");
+    typingIndicator.className = "typing-indicator";
+    typingIndicator.setAttribute("aria-live", "polite");
+    typingIndicator.innerHTML =
+      "Typing <span class=\"dots\"><span class=\"dot\"></span><span class=\"dot\"></span><span class=\"dot\"></span></span>";
+    assistantBubble.appendChild(typingIndicator);
+    let assistantText = "";
 
     try {
-      const data = await apiFetchJson("/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {})
-        },
-        body: JSON.stringify({ message: text, history, subject, plan })
-      });
+      await streamChatReply(
+        { message: text, history, subject, plan },
+        (delta) => {
+          assistantText += delta;
+          assistantBubble.textContent = assistantText;
+          assistantBubble.appendChild(typingIndicator);
+          messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+      );
 
-      const reply = String(data?.reply || "").trim();
-      if (reply) {
-        appendMessage(messagesEl, "assistant", reply);
-        history.push({ role: "assistant", content: reply });
+      if (assistantText.trim()) {
+        typingIndicator.remove();
+        history.push({ role: "assistant", content: assistantText });
         saveChatHistory(history);
+        if (getSyncEnabled()) {
+          await syncHistoryToCloud(history);
+        }
+      } else {
+        typingIndicator.remove();
+        assistantBubble.textContent = "Sorry, I couldn't respond just now. Please try again.";
       }
     } catch (error) {
-      appendMessage(messagesEl, "assistant", "Sorry, I couldn't respond just now. Please try again.");
+      typingIndicator.remove();
+      assistantBubble.textContent = "Sorry, I couldn't respond just now. Please try again.";
     }
   }
+
+  const resumeBtn = document.getElementById("resumeBtn");
+  if (resumeBtn) {
+    resumeBtn.addEventListener("click", async () => {
+      await refreshFromCloud();
+      if (!history.length) {
+        showNotice("No saved chat", "Start a conversation to build your chat history.");
+      }
+    });
+  }
+
+  const exportBtn = document.getElementById("exportBtn");
+  if (exportBtn) {
+    exportBtn.addEventListener("click", () => {
+      const blob = new Blob([JSON.stringify(history, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "botnology-chat.json";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    });
+  }
+
+  const importBtn = document.getElementById("importBtn");
+  const importFile = document.getElementById("importFile");
+  if (importBtn && importFile) {
+    importBtn.addEventListener("click", () => importFile.click());
+    importFile.addEventListener("change", async (event) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const parsed = JSON.parse(text);
+        if (Array.isArray(parsed)) {
+          history = parsed;
+          saveChatHistory(history);
+          renderHistory(messagesEl, history);
+          if (getSyncEnabled()) {
+            await syncHistoryToCloud(history);
+          }
+        } else {
+          showNotice("Import failed", "That file does not look like a chat export.");
+        }
+      } catch (error) {
+        showNotice("Import failed", "Could not read that file.");
+      } finally {
+        importFile.value = "";
+      }
+    });
+  }
+
+  const syncNow = document.getElementById("syncNow");
+  const syncDot = document.getElementById("syncDot");
+  const syncStatus = document.getElementById("syncStatus");
+
+  updateSyncUI(getSyncEnabled());
+
+  const toggleSync = async () => {
+    const profile = await getProfile();
+    if (!profile?.logged_in) {
+      showNotice("Sign in required", "Sign in to enable cloud sync.");
+      return;
+    }
+    const next = !getSyncEnabled();
+    setSyncEnabled(next);
+    updateSyncUI(next);
+    if (next) {
+      await refreshFromCloud();
+      await syncHistoryToCloud(history);
+    }
+  };
+
+  if (syncDot) {
+    syncDot.addEventListener("click", toggleSync);
+  }
+  if (syncStatus) {
+    syncStatus.addEventListener("click", toggleSync);
+  }
+  if (syncNow) {
+    syncNow.addEventListener("click", async () => {
+      const profile = await getProfile();
+      if (!profile?.logged_in) {
+        showNotice("Sign in required", "Sign in to enable cloud sync.");
+        return;
+      }
+      setSyncEnabled(true);
+      updateSyncUI(true);
+      await refreshFromCloud();
+      await syncHistoryToCloud(history);
+      showNotice("Cloud sync", "Your chat is synced.");
+    });
+  }
+
+  refreshFromCloud();
 
   sendBtn.addEventListener("click", sendMessage);
   inputEl.addEventListener("keydown", (event) => {
@@ -259,10 +530,34 @@ function initVoiceButton() {
   const voiceButton = document.getElementById("voice-button");
   if (!voiceButton) return;
 
+  const selectTutorVoice = () => {
+    const voices = speechSynthesis.getVoices();
+    const preferred = voices.find(voice => {
+      const name = (voice.name || "").toLowerCase();
+      const lang = (voice.lang || "").toLowerCase();
+      return lang.startsWith("en-gb") && (name.includes("male") || name.includes("english") || name.includes("uk"));
+    });
+    if (preferred) return preferred;
+
+    const enGb = voices.find(voice => (voice.lang || "").toLowerCase().startsWith("en-gb"));
+    if (enGb) return enGb;
+
+    return voices.find(voice => (voice.lang || "").toLowerCase().startsWith("en")) || voices[0];
+  };
+
+  let tutorVoice = selectTutorVoice();
+  if (typeof speechSynthesis !== "undefined") {
+    speechSynthesis.addEventListener("voiceschanged", () => {
+      tutorVoice = selectTutorVoice();
+    });
+  }
+
   voiceButton.addEventListener("click", () => {
     const text = "Hello! I am Professor Botonic, your premium AI tutor. Let's learn together!";
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.voice = speechSynthesis.getVoices().find(voice => voice.name.includes("English"));
+    utterance.voice = tutorVoice || selectTutorVoice();
+    utterance.rate = 0.9;
+    utterance.pitch = 0.8;
     speechSynthesis.speak(utterance);
   });
 }
@@ -442,6 +737,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initThemeToggle();
   initVoiceButton();
   initAuthModal();
+  initProfileUI();
   initChat();
   checkHealth();
   

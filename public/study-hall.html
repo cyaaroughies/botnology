@@ -108,11 +108,13 @@
 
     <div class="field">
       <label for="authPlan">Plan</label>
-      <select id="authPlan">
+      <select id="authPlan" disabled>
         <option value="associates">Associates</option>
-        <option value="bachelors">Bachelors</option>
-        <option value="masters">Masters</option>
       </select>
+      <div class="smallmuted">Upgrade on the Tuition Plans page after sign-in.</div>
+      <div style="margin-top:6px">
+        <a class="btn small" href="/pricing.html">View Tuition Plans</a>
+      </div>
     </div>
     <div style="display:flex;gap:10px;margin-top:12px">
       <button class="btn gold" id="doAuth">Sign In</button>

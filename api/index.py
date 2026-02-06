@@ -8,7 +8,7 @@ from typing import Any, Dict, Optional, List, cast
 from datetime import datetime
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, FileResponse
+from fastapi.responses import JSONResponse, FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 try:
     from openai import OpenAI
@@ -189,6 +189,61 @@ async def api_chat(req: Request):
         return {"reply": txt, "plan": plan}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(getattr(e, "message", e)))
+
+@app.post("/api/chat/stream", include_in_schema=False)
+async def api_chat_stream(req: Request):
+    body = await req.json()
+    msg = (body.get("message") or "").strip()
+    if not msg:
+        raise HTTPException(status_code=400, detail="Missing message")
+    hist = body.get("history") or []
+    subject = (body.get("subject") or "General").strip()
+    plan = (body.get("plan") or "associates").strip().lower()
+
+    sys_prompt = (
+        "You are Dr. Botonic, a 72-year-old sophisticated Harvard graduate yeti professor. "
+        "You speak calm, soft English with a subtle accent. "
+        "You are the smartest AI tutor in the industry. "
+        "Be concise yet deeply insightful, use earthy, scholarly tone, and optionally a tasteful gentle joke. "
+        "Adapt depth to the student's plan: Associates = foundational guidance, Bachelors = deeper explanations and structured steps, Masters = elite coaching with advanced insights, references, and study strategies. "
+        "Subject: " + subject
+    )
+
+    messages: List[Dict[str, Any]] = [{"role": "system", "content": sys_prompt}]
+    if isinstance(hist, list):
+        for m in hist[-16:]:
+            if isinstance(m, dict) and m.get("role") in ("user", "assistant") and isinstance(m.get("content"), str):
+                messages.append({"role": m["role"], "content": m["content"]})
+    messages.append({"role": "user", "content": msg})
+
+    async def event_stream():
+        if not OPENAI_ENABLED or client is None:
+            demo = f"(Demo) Dr. Botonic heard: {msg}"
+            yield f"data: {json.dumps({'delta': demo})}\n\n"
+            yield f"data: {json.dumps({'done': True, 'plan': plan})}\n\n"
+            return
+
+        try:
+            stream = client.chat.completions.create(
+                model=OPENAI_MODEL,
+                messages=cast(Any, messages),
+                temperature=0.7,
+                stream=True,
+            )
+            for chunk in stream:
+                try:
+                    delta = chunk.choices[0].delta.content
+                except Exception:
+                    delta = None
+                if delta:
+                    yield f"data: {json.dumps({'delta': delta})}\n\n"
+            yield f"data: {json.dumps({'done': True, 'plan': plan})}\n\n"
+        except Exception as e:
+            err = str(getattr(e, "message", e))
+            yield f"data: {json.dumps({'error': err})}\n\n"
+            yield f"data: {json.dumps({'done': True, 'plan': plan})}\n\n"
+
+    return StreamingResponse(event_stream(), media_type="text/event-stream")
 
 def _get_base_url(req: Request) -> str:
     origin = req.headers.get("origin") or ""
