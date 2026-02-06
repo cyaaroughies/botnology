@@ -4,7 +4,10 @@
   "builds": [
     {
       "src": "api/index.py",
-      "use": "@vercel/python"
+      "use": "@vercel/python",
+      "config": {
+        "requirementsFile": "api/requirements.txt"
+      }
     },
     {
       "src": "public/**",
