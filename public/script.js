@@ -375,20 +375,33 @@ function initChat() {
         }
       );
 
-      if (assistantText.trim()) {
-        typingIndicator.remove();
-        history.push({ role: "assistant", content: assistantText });
-        saveChatHistory(history);
-        if (getSyncEnabled()) {
-          await syncHistoryToCloud(history);
-        }
-      } else {
-        typingIndicator.remove();
-        assistantBubble.textContent = "Sorry, I couldn't respond just now. Please try again.";
+      if (!assistantText.trim()) {
+        throw new Error("Empty stream response");
       }
     } catch (error) {
-      typingIndicator.remove();
-      assistantBubble.textContent = "Sorry, I couldn't respond just now. Please try again.";
+      try {
+        const data = await apiFetchJson("/api/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {})
+          },
+          body: JSON.stringify({ message: text, history, subject, plan })
+        });
+        assistantText = String(data?.reply || "").trim();
+        assistantBubble.textContent = assistantText;
+      } catch (fallbackError) {
+        assistantBubble.textContent = "Sorry, I couldn't respond just now. Please try again.";
+      }
+    }
+
+    typingIndicator.remove();
+    if (assistantText.trim()) {
+      history.push({ role: "assistant", content: assistantText });
+      saveChatHistory(history);
+      if (getSyncEnabled()) {
+        await syncHistoryToCloud(history);
+      }
     }
   }
 
