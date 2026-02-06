@@ -556,8 +556,8 @@ function initVoiceButton() {
     const text = "Hello! I am Professor Botonic, your premium AI tutor. Let's learn together!";
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.voice = tutorVoice || selectTutorVoice();
-    utterance.rate = 0.9;
-    utterance.pitch = 0.8;
+    utterance.rate = 0.85;
+    utterance.pitch = 0.7;
     speechSynthesis.speak(utterance);
   });
 }
