@@ -160,11 +160,11 @@ def api_me(req: Request):
 
 def _build_chat_reply(msg: str, hist: Any, subject: str, plan: str) -> Dict[str, Any]:
     if not OPENAI_ENABLED or client is None:
-        return {"reply": f"(Demo) Dr. Botonic heard: {msg}", "plan": plan}
+        return {"reply": f"(Demo) Dr. Botnotic heard: {msg}", "plan": plan}
 
     sys_prompt = (
-        "You are Dr. Botonic, a 72-year-old sophisticated Harvard graduate yeti professor. "
-        "You speak calm, soft English with a subtle accent. "
+        "You are Dr. Botnotic, a 72-year-old sophisticated Harvard graduate yeti professor. "
+        "You speak calm, soft English with a deep London accent. "
         "You are the smartest AI tutor in the industry. "
         "Be concise yet deeply insightful, use earthy, scholarly tone, and optionally a tasteful gentle joke. "
         "Adapt depth to the student's plan: Associates = foundational guidance, Bachelors = deeper explanations and structured steps, Masters = elite coaching with advanced insights, references, and study strategies. "
@@ -184,7 +184,7 @@ def _build_chat_reply(msg: str, hist: Any, subject: str, plan: str) -> Dict[str,
     except Exception as e:
         err = str(getattr(e, "message", e))
         return {
-            "reply": f"(Demo) Dr. Botonic heard: {msg}",
+            "reply": f"(Demo) Dr. Botnotic heard: {msg}",
             "plan": plan,
             "error": err
         }
@@ -235,7 +235,7 @@ async def api_chat_stream(req: Request):
 
     async def event_stream():
         if not OPENAI_ENABLED or client is None:
-            demo = f"(Demo) Dr. Botonic heard: {msg}"
+            demo = f"(Demo) Dr. Botnotic heard: {msg}"
             yield f"data: {json.dumps({'delta': demo})}\n\n"
             yield f"data: {json.dumps({'done': True, 'plan': plan})}\n\n"
             return
@@ -354,7 +354,7 @@ def api_announcements():
             items = data if isinstance(data, list) else data.get("items") or []
         else:
             items = [
-                {"text": "Welcome to Botnoloy101 — your premium AI tutor."},
+                {"text": "Welcome to Botnology101 — your premium AI tutor."},
                 {"text": "Forest-green chat panes are now live across the site."},
                 {"text": "Study Hall notes now have a lighter pane for readability."}
             ]

@@ -572,7 +572,7 @@ function initVoiceButton() {
     const preferred = voices.find(voice => {
       const name = (voice.name || "").toLowerCase();
       const lang = (voice.lang || "").toLowerCase();
-      return lang.startsWith("en-gb") && (name.includes("male") || name.includes("english") || name.includes("uk"));
+      return lang.startsWith("en-gb") && (name.includes("male") || name.includes("london") || name.includes("british") || name.includes("english") || name.includes("uk"));
     });
     if (preferred) return preferred;
 
@@ -590,7 +590,7 @@ function initVoiceButton() {
   }
 
   voiceButton.addEventListener("click", () => {
-    const text = "Hello! I am Professor Botonic, your premium AI tutor. Let's learn together!";
+    const text = "Hello! I am Dr. Botnotic, your premium AI tutor. Let's learn together!";
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.voice = tutorVoice || selectTutorVoice();
     utterance.rate = 0.85;
