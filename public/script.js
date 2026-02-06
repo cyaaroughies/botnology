@@ -1,4 +1,49 @@
 // ==========================================
+// API BASE URL
+// ==========================================
+function getApiBaseUrl() {
+  const fromWindow = (window.BOTNOLOGY_API_BASE_URL || "").trim();
+  const meta = document.querySelector('meta[name="botnology-api-base"]');
+  const fromMeta = (meta?.getAttribute("content") || "").trim();
+  const fromStorage = (localStorage.getItem("botnology_api_base") || "").trim();
+  const base = fromWindow || fromMeta || fromStorage || "";
+  return base.replace(/\/$/, "");
+}
+
+const API_BASE_URL = getApiBaseUrl();
+
+function apiUrl(path) {
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
+  return API_BASE_URL ? `${API_BASE_URL}${cleanPath}` : cleanPath;
+}
+
+async function apiFetchJson(path, options) {
+  const response = await fetch(apiUrl(path), options);
+  const contentType = response.headers.get("Content-Type") || "";
+  const bodyText = await response.text();
+  let parsed;
+  if (contentType.includes("application/json")) {
+    try {
+      parsed = JSON.parse(bodyText);
+    } catch (error) {
+      parsed = { detail: bodyText };
+    }
+  } else {
+    parsed = { detail: bodyText };
+  }
+
+  if (!response.ok) {
+    const message = parsed?.detail || `HTTP ${response.status}`;
+    const error = new Error(message);
+    error.status = response.status;
+    error.payload = parsed;
+    throw error;
+  }
+
+  return parsed;
+}
+
+// ==========================================
 // THEME TOGGLE
 // ==========================================
 function initThemeToggle() {
@@ -78,36 +123,13 @@ async function startCheckout(plan, cadence) {
   console.log("Sending request to /api/stripe/create-checkout-session:", requestBody);
 
   try {
-    const fetchResponse = await fetch("/api/stripe/create-checkout-session", {
+    const data = await apiFetchJson("/api/stripe/create-checkout-session", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(requestBody),
     });
-
-    console.log(`Received response with status: ${fetchResponse.status}`);
-
-    if (!fetchResponse.ok) {
-      const contentType = fetchResponse.headers.get("Content-Type") || "";
-      let errorBody;
-      if (contentType.includes("application/json")) {
-        errorBody = await fetchResponse.json();
-      } else {
-        errorBody = await fetchResponse.text();
-      }
-      console.error("Error response from server:", errorBody);
-      throw new Error(errorBody.detail || errorBody || `HTTP ${fetchResponse.status}`);
-    }
-
-    const textResponse = await fetchResponse.text();
-    let data;
-    try {
-      data = JSON.parse(textResponse);
-    } catch (e) {
-      console.warn("Response is not valid JSON, returning as plain text.");
-      data = { detail: textResponse };
-    }
 
     console.log("Checkout session response:", data);
     if (data.url) {
@@ -155,17 +177,11 @@ function initAuthModal() {
       }
 
       try {
-        const response = await fetch("/api/auth", {
+        const data = await apiFetchJson("/api/auth", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name, email, plan })
         });
-
-        if (!response.ok) {
-          throw new Error("Authentication failed");
-        }
-
-        const data = await response.json();
         localStorage.setItem("botnology_token", data.token);
         console.log("Auth successful:", data);
         alert(`Welcome, ${data.name}! You're signed in with ${data.plan} plan.`);
@@ -195,8 +211,7 @@ async function checkHealth() {
   if (!healthLine) return;
 
   try {
-    const response = await fetch("/api/health");
-    const data = await response.json();
+    const data = await apiFetchJson("/api/health");
     
     if (data.status === "ok") {
       if (healthDot) healthDot.style.background = "#4ade80";

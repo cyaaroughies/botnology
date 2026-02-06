@@ -190,6 +190,14 @@ def _get_base_url(req: Request) -> str:
 def _get_price_id(plan: str, cadence: str) -> Optional[str]:
     plan = (plan or "associates").strip().lower()
     cadence = (cadence or "monthly").strip().lower()
+    default_price_ids = {
+        "STRIPE_PRICE_ASSOCIATES_MONTHLY": "price_1Sq35RK6UhzkJnxUOJOqVUxU",
+        "STRIPE_PRICE_ASSOCIATES_ANNUAL": "price_1Sq35RK6UhzkJnxUDrjqCFmD",
+        "STRIPE_PRICE_BACHELORS_MONTHLY": "price_1Sq38sK6UhzkJnxUOajgkvKV",
+        "STRIPE_PRICE_BACHELORS_ANNUAL": "price_1Sq3BGK6UhzkJnxUEUOZwOgc",
+        "STRIPE_PRICE_MASTERS_MONTHLY": "price_1Sq3FhK6UhzkJnxUFZEYdlQD",
+        "STRIPE_PRICE_MASTERS_ANNUAL": "price_1Sq3HwK6UhzkJnxUGZ0Gr02O",
+    }
     env_key = None
     if plan == "associates" and cadence == "monthly": env_key = "STRIPE_PRICE_ASSOCIATES_MONTHLY"
     elif plan == "associates" and cadence == "annual": env_key = "STRIPE_PRICE_ASSOCIATES_ANNUAL"
@@ -199,7 +207,7 @@ def _get_price_id(plan: str, cadence: str) -> Optional[str]:
     elif plan == "masters" and cadence == "annual": env_key = "STRIPE_PRICE_MASTERS_ANNUAL"
     if not env_key:
         return None
-    return os.getenv(env_key) or None
+    return os.getenv(env_key) or default_price_ids.get(env_key)
 
 @app.post("/api/stripe/create-checkout-session", include_in_schema=False)
 async def api_stripe_checkout(req: Request):
@@ -215,7 +223,10 @@ async def api_stripe_checkout(req: Request):
 
     price_id = _get_price_id(plan, cadence)
     if not price_id:
-        raise HTTPException(status_code=400, detail="Missing Stripe price id env var for selected plan/cadence.")
+        raise HTTPException(
+            status_code=400,
+            detail="Missing Stripe price id env var for selected plan/cadence."
+        )
 
     stripe.api_key = secret
     base_url = _get_base_url(req)
@@ -487,12 +498,95 @@ def _safe_path(student_id: str, rel: str) -> Path:
     return p
 
 @app.get("/api/storage/list", include_in_schema=False)
-prompt = (
+def api_storage_list(req: Request):
+    _ensure_dirs()
+    p = bearer_payload(req)
+    if not p:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    root = _storage_root(p.get("student_id") or "BN-UNKNOWN")
+    if not root.exists():
+        return {"files": []}
+    try:
+        files = [str(f.relative_to(root)) for f in root.rglob("*") if f.is_file()]
+        return {"files": files}
+    except Exception:
+        return {"files": []}
+
+@app.get("/api/storage/read", include_in_schema=False)
+def api_storage_read(req: Request, path: str = ""):
+    _ensure_dirs()
+    p = bearer_payload(req)
+    if not p:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    fp = _safe_path(p.get("student_id") or "BN-UNKNOWN", path)
+    if not fp.exists():
+        raise HTTPException(status_code=404, detail="Not found")
+    try:
+        return {"content": fp.read_text("utf-8")}
+    except Exception:
+        raise HTTPException(status_code=400, detail="Cannot read file")
+
+@app.post("/api/storage/write", include_in_schema=False)
+async def api_storage_write(req: Request):
+    _ensure_dirs()
+    p = bearer_payload(req)
+    if not p:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    body = await req.json()
+    path = (body.get("path") or "").strip()
+    content = body.get("content") or ""
+    if not path:
+        raise HTTPException(status_code=400, detail="Missing path")
+    fp = _safe_path(p.get("student_id") or "BN-UNKNOWN", path)
+    try:
+        fp.parent.mkdir(parents=True, exist_ok=True)
+        fp.write_text(str(content), "utf-8")
+        return {"saved": True}
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to write")
+
+@app.delete("/api/storage/delete", include_in_schema=False)
+async def api_storage_delete(req: Request, path: str = ""):
+    _ensure_dirs()
+    p = bearer_payload(req)
+    if not p:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    fp = _safe_path(p.get("student_id") or "BN-UNKNOWN", path)
+    if not fp.exists():
+        raise HTTPException(status_code=404, detail="Not found")
+    try:
+        fp.unlink()
+        return {"deleted": True}
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to delete")
+
+@app.post("/api/tts", include_in_schema=False)
+async def api_tts(req: Request):
+    body = await req.json()
+    text = (body.get("text") or "").strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="Missing text")
+    if not OPENAI_ENABLED or client is None:
+        return {"audio_base64": None, "demo": True}
+    try:
+        response = client.audio.speech.create(model=TTS_MODEL, voice="alloy", input=text)
+        audio_bytes = response.content
+        return {"audio_base64": base64.b64encode(audio_bytes).decode("utf-8")}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/api/quiz/generate", include_in_schema=False)
+async def api_quiz_generate(req: Request):
+    body = await req.json()
+    topic = (body.get("topic") or "General Knowledge").strip()
+    level = (body.get("level") or "intermediate").strip()
+    if not OPENAI_ENABLED or client is None:
+        return {"questions": []}
+    prompt = (
         "Create 5 rigorous study questions with concise ideal answers for topic: "
         + topic + ". Depth level: " + level + ". Return JSON array with keys 'q' and 'a'."
     )
-    
-try:
+    try:
         out = client.chat.completions.create(model=OPENAI_MODEL, messages=[{"role": "system", "content": "You produce only valid JSON."}, {"role": "user", "content": prompt}], temperature=0.2)
         txt = (out.choices[0].message.content or "[]").strip()
         data = json.loads(txt)
