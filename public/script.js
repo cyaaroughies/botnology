@@ -44,6 +44,190 @@ async function apiFetchJson(path, options) {
 }
 
 // ==========================================
+// FREE CHAT LIMIT
+// ==========================================
+const FREE_CHAT_LIMIT = 7;
+const FREE_CHAT_COUNT_KEY = "botnology_free_chat_count";
+const CHAT_HISTORY_KEY = "botnology_chat_history";
+let cachedProfile = null;
+
+function getFreeChatCount() {
+  const raw = localStorage.getItem(FREE_CHAT_COUNT_KEY);
+  const parsed = Number.parseInt(raw || "0", 10);
+  return Number.isNaN(parsed) ? 0 : parsed;
+}
+
+function incrementFreeChatCount() {
+  const next = getFreeChatCount() + 1;
+  localStorage.setItem(FREE_CHAT_COUNT_KEY, String(next));
+  return next;
+}
+
+function isPaidPlan(plan) {
+  return plan === "bachelors" || plan === "masters";
+}
+
+async function getProfile() {
+  if (cachedProfile) return cachedProfile;
+  const token = localStorage.getItem("botnology_token") || "";
+  if (!token) {
+    cachedProfile = { logged_in: false, plan: "associates" };
+    return cachedProfile;
+  }
+
+  try {
+    const data = await apiFetchJson("/api/me", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    cachedProfile = data;
+  } catch (error) {
+    cachedProfile = { logged_in: false, plan: "associates" };
+  }
+
+  return cachedProfile;
+}
+
+function loadChatHistory() {
+  try {
+    const raw = localStorage.getItem(CHAT_HISTORY_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function saveChatHistory(history) {
+  localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(history));
+}
+
+function appendMessage(messagesEl, role, content) {
+  const bubble = document.createElement("div");
+  bubble.className = `msg ${role === "user" ? "user" : "assistant"}`;
+  bubble.textContent = content;
+  messagesEl.appendChild(bubble);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function showNotice(title, message) {
+  const toast = document.getElementById("toast");
+  const toastTitle = document.getElementById("toastTitle");
+  const toastMsg = document.getElementById("toastMsg");
+
+  if (toast && toastTitle && toastMsg) {
+    toastTitle.textContent = title;
+    toastMsg.innerHTML = message;
+    toast.style.display = "block";
+    return;
+  }
+
+  alert(`${title}\n\n${message.replace(/<[^>]*>/g, "")}`);
+}
+
+function redirectToCheckout() {
+  if (typeof window.startCheckout === "function") {
+    window.startCheckout("associates", "monthly");
+    return;
+  }
+
+  window.location.href = "/pricing.html";
+}
+
+async function canUseChat() {
+  const profile = await getProfile();
+  if (profile?.logged_in && isPaidPlan(String(profile.plan || "").toLowerCase())) {
+    return { allowed: true, isFree: false, profile };
+  }
+
+  const used = getFreeChatCount();
+  if (used >= FREE_CHAT_LIMIT) {
+    return { allowed: false, isFree: true, profile };
+  }
+
+  return { allowed: true, isFree: true, profile };
+}
+
+function initChat() {
+  const messagesEl = document.getElementById("messages");
+  const inputEl = document.getElementById("chatInput");
+  const sendBtn = document.getElementById("sendBtn");
+  const subjectSelect = document.getElementById("subjectSelect");
+  const subjectLabel = document.getElementById("subjectLabel");
+
+  if (!messagesEl || !inputEl || !sendBtn) return;
+
+  const history = loadChatHistory();
+  history.forEach(item => {
+    if (item && item.role && item.content) {
+      appendMessage(messagesEl, item.role, item.content);
+    }
+  });
+
+  if (subjectSelect && subjectLabel) {
+    subjectLabel.textContent = subjectSelect.value || "General";
+    subjectSelect.addEventListener("change", () => {
+      subjectLabel.textContent = subjectSelect.value || "General";
+    });
+  }
+
+  async function sendMessage() {
+    const text = inputEl.value.trim();
+    if (!text) return;
+
+    const { allowed, isFree, profile } = await canUseChat();
+    if (!allowed) {
+      showNotice(
+        "Free limit reached",
+        "You have used all 7 free interactions. <a href=\"/pricing.html\">Upgrade to continue</a>."
+      );
+      redirectToCheckout();
+      return;
+    }
+
+    inputEl.value = "";
+    appendMessage(messagesEl, "user", text);
+    history.push({ role: "user", content: text });
+    saveChatHistory(history);
+
+    if (isFree) {
+      incrementFreeChatCount();
+    }
+
+    const subject = subjectSelect?.value || "General";
+    const plan = String(profile?.plan || "associates").toLowerCase();
+    const token = localStorage.getItem("botnology_token") || "";
+
+    try {
+      const data = await apiFetchJson("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({ message: text, history, subject, plan })
+      });
+
+      const reply = String(data?.reply || "").trim();
+      if (reply) {
+        appendMessage(messagesEl, "assistant", reply);
+        history.push({ role: "assistant", content: reply });
+        saveChatHistory(history);
+      }
+    } catch (error) {
+      appendMessage(messagesEl, "assistant", "Sorry, I couldn't respond just now. Please try again.");
+    }
+  }
+
+  sendBtn.addEventListener("click", sendMessage);
+  inputEl.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      sendMessage();
+    }
+  });
+}
+
+// ==========================================
 // THEME TOGGLE
 // ==========================================
 function initThemeToggle() {
@@ -169,7 +353,7 @@ function initAuthModal() {
     doAuth.addEventListener("click", async () => {
       const name = document.getElementById("authName")?.value.trim() || "Student";
       const email = document.getElementById("authEmail")?.value.trim() || "";
-      const plan = document.getElementById("authPlan")?.value || "associates";
+      const plan = "associates";
 
       if (!email || !email.includes("@")) {
         alert("Please enter a valid email address.");
@@ -183,9 +367,21 @@ function initAuthModal() {
           body: JSON.stringify({ name, email, plan })
         });
         localStorage.setItem("botnology_token", data.token);
+        cachedProfile = null;
         console.log("Auth successful:", data);
-        alert(`Welcome, ${data.name}! You're signed in with ${data.plan} plan.`);
         authModal.style.display = "none";
+
+        const toast = document.getElementById("toast");
+        const toastTitle = document.getElementById("toastTitle");
+        const toastMsg = document.getElementById("toastMsg");
+        if (toast && toastTitle && toastMsg) {
+          toastTitle.textContent = "Signed in successfully";
+          toastMsg.innerHTML = `Welcome, ${data.name}! You're on the ${data.plan} plan. <a href="/pricing.html">Upgrade your plan</a> anytime.`;
+          toast.style.display = "block";
+          setTimeout(() => {
+            toast.style.display = "none";
+          }, 7000);
+        }
         
         // Update UI to show signed-in state
         if (openAuth) {
@@ -233,11 +429,20 @@ async function checkHealth() {
 // ==========================================
 document.addEventListener("DOMContentLoaded", () => {
   console.log("Botnology 101 initializing...");
+
+  const closeToast = document.getElementById("closeToast");
+  const toast = document.getElementById("toast");
+  if (closeToast && toast) {
+    closeToast.addEventListener("click", () => {
+      toast.style.display = "none";
+    });
+  }
   
   // Initialize all features
   initThemeToggle();
   initVoiceButton();
   initAuthModal();
+  initChat();
   checkHealth();
   
   // Check for checkout success/cancel
