@@ -487,11 +487,12 @@ def _safe_path(student_id: str, rel: str) -> Path:
     return p
 
 @app.get("/api/storage/list", include_in_schema=False)
-    prompt = (
+prompt = (
         "Create 5 rigorous study questions with concise ideal answers for topic: "
         + topic + ". Depth level: " + level + ". Return JSON array with keys 'q' and 'a'."
     )
-    try:
+    
+try:
         out = client.chat.completions.create(model=OPENAI_MODEL, messages=[{"role": "system", "content": "You produce only valid JSON."}, {"role": "user", "content": prompt}], temperature=0.2)
         txt = (out.choices[0].message.content or "[]").strip()
         data = json.loads(txt)
