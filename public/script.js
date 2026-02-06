@@ -50,6 +50,7 @@ const FREE_CHAT_LIMIT = 7;
 const FREE_CHAT_COUNT_KEY = "botnology_free_chat_count";
 const CHAT_HISTORY_KEY = "botnology_chat_history";
 const SYNC_ENABLED_KEY = "botnology_sync_enabled";
+const ADMIN_PASSPHRASE = "Soxy2026";
 let cachedProfile = null;
 
 function getFreeChatCount() {
@@ -221,14 +222,19 @@ function initAdminReset() {
   const buttons = document.querySelectorAll("#adminResetBtn");
   if (!buttons.length) return;
 
-  const params = new URLSearchParams(window.location.search);
-  const isAdmin = localStorage.getItem("botnology_admin") === "true" || params.get("admin") === "1";
-
-  if (!isAdmin) return;
-
   buttons.forEach((button) => {
     button.style.display = "inline-flex";
     button.addEventListener("click", () => {
+      const isAdmin = localStorage.getItem("botnology_admin") === "true";
+      if (!isAdmin) {
+        const entered = window.prompt("Admin passphrase:", "");
+        if (!entered || entered !== ADMIN_PASSPHRASE) {
+          showNotice("Access denied", "Admin passphrase required.");
+          return;
+        }
+        localStorage.setItem("botnology_admin", "true");
+      }
+
       localStorage.setItem(FREE_CHAT_COUNT_KEY, "0");
       showNotice("Free chats reset", "Free interactions have been reset for this browser.");
     });
