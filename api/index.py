@@ -188,7 +188,12 @@ async def api_chat(req: Request):
         txt = (out.choices[0].message.content or "").strip()
         return {"reply": txt, "plan": plan}
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(getattr(e, "message", e)))
+        err = str(getattr(e, "message", e))
+        return {
+            "reply": f"(Demo) Dr. Botonic heard: {msg}",
+            "plan": plan,
+            "error": err
+        }
 
 @app.post("/api/chat/stream", include_in_schema=False)
 async def api_chat_stream(req: Request):
