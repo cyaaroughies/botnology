@@ -293,16 +293,46 @@ async function initProfileUI() {
     }
   }
 
-  if (subBadge && profile?.logged_in) {
-    try {
-      const token = getAuthToken();
-      const data = await apiFetchJson("/api/subscription", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const status = String(data?.status || "none").toUpperCase();
-      subBadge.textContent = `SUBSCRIPTION: ${status}`;
-    } catch (error) {
+  if (subBadge) {
+    if (profile?.logged_in) {
+      try {
+        const token = getAuthToken();
+        const data = await apiFetchJson("/api/subscription", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const status = String(data?.status || "none").toUpperCase();
+        subBadge.textContent = `SUBSCRIPTION: ${status}`;
+        
+        // Update badge styling based on status
+        subBadge.className = "badge";
+        if (status === "ACTIVE") {
+          subBadge.classList.add("badge-active");
+        } else if (status === "TRIALING") {
+          subBadge.classList.add("badge-trialing");
+        } else {
+          subBadge.classList.add("badge-none");
+        }
+        
+        // Make it clickable if no subscription
+        if (status === "NONE") {
+          subBadge.style.cursor = "pointer";
+          subBadge.title = "Click to view subscription plans";
+          subBadge.onclick = () => window.location.href = "/pricing.html";
+        }
+      } catch (error) {
+        console.error("Failed to fetch subscription status:", error);
+        subBadge.textContent = "SUBSCRIPTION: NONE";
+        subBadge.className = "badge badge-none";
+        subBadge.style.cursor = "pointer";
+        subBadge.title = "Click to view subscription plans";
+        subBadge.onclick = () => window.location.href = "/pricing.html";
+      }
+    } else {
       subBadge.textContent = "SUBSCRIPTION: NONE";
+      subBadge.className = "badge badge-none";
+      subBadge.style.cursor = "pointer";
+      subBadge.title = "Sign in and subscribe to upgrade";
+      subBadge.onclick = () => window.location.href = "/pricing.html";
     }
   }
 }
