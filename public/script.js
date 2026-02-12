@@ -661,6 +661,269 @@ async function startCheckout(plan, cadence) {
 }
 
 // ==========================================
+// BADGE MODAL (ID PHOTO)
+// ==========================================
+function initBadgeModal() {
+  const badgeModal = document.getElementById("badgeModal");
+  const openBadge = document.getElementById("openBadge");
+  const closeBadge = document.getElementById("closeBadge");
+  const badgeFile = document.getElementById("badgeFile");
+  const cropBox = document.getElementById("cropBox");
+  const cropImg = document.getElementById("cropImg");
+  const cropZoom = document.getElementById("cropZoom");
+  const cropReset = document.getElementById("cropReset");
+  const shapeCircle = document.getElementById("shapeCircle");
+  const shapeSquare = document.getElementById("shapeSquare");
+  const saveBadgePhoto = document.getElementById("saveBadgePhoto");
+  const badgePhoto = document.getElementById("badgePhoto");
+  const cropFormat = document.getElementById("cropFormat");
+  const cropQuality = document.getElementById("cropQuality");
+  const cropSize = document.getElementById("cropSize");
+  const exportPreview = document.getElementById("exportPreview");
+
+  if (!badgeModal || !openBadge) return;
+
+  let dragState = { isDragging: false, startX: 0, startY: 0, currentX: 0, currentY: 0 };
+  let currentZoom = 1;
+  let currentShape = "circle";
+  let uploadedImageSrc = null;
+
+  // Update export preview text
+  function updateExportPreview() {
+    if (!exportPreview) return;
+    const format = cropFormat?.value || "jpeg";
+    const size = cropSize?.value || "1024";
+    const quality = Math.round((parseFloat(cropQuality?.value || "0.90")) * 100);
+    exportPreview.textContent = `Output: ${size}×${size} ${format.toUpperCase()}${format === "jpeg" ? ` (${quality}%)` : ""}`;
+  }
+
+  // Open modal
+  openBadge.addEventListener("click", () => {
+    badgeModal.style.display = "flex";
+  });
+
+  // Close modal
+  if (closeBadge) {
+    closeBadge.addEventListener("click", () => {
+      badgeModal.style.display = "none";
+    });
+  }
+
+  // Close on background click
+  badgeModal.addEventListener("click", (e) => {
+    if (e.target === badgeModal) {
+      badgeModal.style.display = "none";
+    }
+  });
+
+  // Shape toggle
+  if (shapeCircle && shapeSquare) {
+    shapeCircle.classList.add("active");
+    
+    shapeCircle.addEventListener("click", () => {
+      currentShape = "circle";
+      cropBox.style.borderRadius = "999px";
+      shapeCircle.classList.add("active");
+      shapeSquare.classList.remove("active");
+    });
+
+    shapeSquare.addEventListener("click", () => {
+      currentShape = "square";
+      cropBox.style.borderRadius = "12px";
+      shapeSquare.classList.add("active");
+      shapeCircle.classList.remove("active");
+    });
+  }
+
+  // File upload
+  if (badgeFile) {
+    badgeFile.addEventListener("change", (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        uploadedImageSrc = event.target.result;
+        cropImg.src = uploadedImageSrc;
+        dragState.currentX = 0;
+        dragState.currentY = 0;
+        currentZoom = 1;
+        if (cropZoom) cropZoom.value = "1";
+        updateTransform();
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // Zoom control
+  if (cropZoom) {
+    cropZoom.addEventListener("input", (e) => {
+      currentZoom = parseFloat(e.target.value);
+      updateTransform();
+    });
+  }
+
+  // Export preview updates
+  if (cropFormat) {
+    cropFormat.addEventListener("change", updateExportPreview);
+  }
+  if (cropQuality) {
+    cropQuality.addEventListener("input", updateExportPreview);
+  }
+  if (cropSize) {
+    cropSize.addEventListener("change", updateExportPreview);
+  }
+
+  // Drag functionality
+  if (cropBox && cropImg) {
+    cropBox.addEventListener("mousedown", (e) => {
+      dragState.isDragging = true;
+      dragState.startX = e.clientX - dragState.currentX;
+      dragState.startY = e.clientY - dragState.currentY;
+      cropBox.classList.add("drag");
+      e.preventDefault();
+    });
+
+    document.addEventListener("mousemove", (e) => {
+      if (!dragState.isDragging) return;
+      dragState.currentX = e.clientX - dragState.startX;
+      dragState.currentY = e.clientY - dragState.startY;
+      updateTransform();
+    });
+
+    document.addEventListener("mouseup", () => {
+      if (dragState.isDragging) {
+        dragState.isDragging = false;
+        cropBox.classList.remove("drag");
+      }
+    });
+
+    // Touch support
+    cropBox.addEventListener("touchstart", (e) => {
+      const touch = e.touches[0];
+      dragState.isDragging = true;
+      dragState.startX = touch.clientX - dragState.currentX;
+      dragState.startY = touch.clientY - dragState.currentY;
+      cropBox.classList.add("drag");
+      e.preventDefault();
+    });
+
+    document.addEventListener("touchmove", (e) => {
+      if (!dragState.isDragging) return;
+      const touch = e.touches[0];
+      dragState.currentX = touch.clientX - dragState.startX;
+      dragState.currentY = touch.clientY - dragState.startY;
+      updateTransform();
+    });
+
+    document.addEventListener("touchend", () => {
+      if (dragState.isDragging) {
+        dragState.isDragging = false;
+        cropBox.classList.remove("drag");
+      }
+    });
+  }
+
+  function updateTransform() {
+    if (!cropImg) return;
+    cropImg.style.transform = `translate(calc(-50% + ${dragState.currentX}px), calc(-50% + ${dragState.currentY}px)) scale(${currentZoom})`;
+  }
+
+  // Reset
+  if (cropReset) {
+    cropReset.addEventListener("click", () => {
+      dragState.currentX = 0;
+      dragState.currentY = 0;
+      currentZoom = 1;
+      if (cropZoom) cropZoom.value = "1";
+      updateTransform();
+    });
+  }
+
+  // Save photo
+  if (saveBadgePhoto) {
+    saveBadgePhoto.addEventListener("click", () => {
+      const size = parseInt(cropSize?.value || "1024");
+      const format = cropFormat?.value || "jpeg";
+      const quality = parseFloat(cropQuality?.value || "0.90");
+
+      // Create canvas
+      const canvas = document.createElement("canvas");
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext("2d");
+
+      // Get crop box dimensions
+      const boxRect = cropBox.getBoundingClientRect();
+      const imgRect = cropImg.getBoundingClientRect();
+
+      // Calculate scale factor
+      const scaleFactor = size / boxRect.width;
+
+      // Calculate image position relative to crop box
+      const offsetX = (imgRect.left - boxRect.left) * scaleFactor;
+      const offsetY = (imgRect.top - boxRect.top) * scaleFactor;
+      const imgWidth = imgRect.width * scaleFactor;
+      const imgHeight = imgRect.height * scaleFactor;
+
+      // Draw image
+      const img = new Image();
+      img.onload = () => {
+        // Clear canvas with transparency
+        ctx.clearRect(0, 0, size, size);
+        
+        // Draw image
+        ctx.drawImage(img, offsetX, offsetY, imgWidth, imgHeight);
+
+        // Convert to data URL
+        const dataUrl = canvas.toDataURL(`image/${format}`, quality);
+
+        // Update badge photo
+        if (badgePhoto) {
+          badgePhoto.src = dataUrl;
+          // Match shape
+          if (currentShape === "square") {
+            badgePhoto.style.borderRadius = "12px";
+          } else {
+            badgePhoto.style.borderRadius = "999px";
+          }
+        }
+
+        // Save to localStorage
+        try {
+          localStorage.setItem("botnology_badge_photo", dataUrl);
+          localStorage.setItem("botnology_badge_shape", currentShape);
+        } catch (e) {
+          console.warn("Failed to save photo to localStorage:", e);
+        }
+
+        // Close modal
+        badgeModal.style.display = "none";
+        alert("✅ Badge photo updated!");
+      };
+      img.src = cropImg.src;
+    });
+  }
+
+  // Load saved photo on init
+  try {
+    const savedPhoto = localStorage.getItem("botnology_badge_photo");
+    const savedShape = localStorage.getItem("botnology_badge_shape");
+    if (savedPhoto && badgePhoto) {
+      badgePhoto.src = savedPhoto;
+      if (savedShape === "square") {
+        badgePhoto.style.borderRadius = "12px";
+      }
+    }
+  } catch (e) {
+    console.warn("Failed to load saved photo:", e);
+  }
+
+  // Initialize export preview
+  updateExportPreview();
+}
+
+// ==========================================
 // AUTH MODAL
 // ==========================================
 function initAuthModal() {
@@ -773,6 +1036,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize all features
   initThemeToggle();
   initVoiceButton();
+  initBadgeModal();
   initAuthModal();
   initProfileUI();
   initChat();
