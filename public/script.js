@@ -1020,6 +1020,417 @@ async function checkHealth() {
 }
 
 // ==========================================
+// STUDENT FILE SYSTEM
+// ==========================================
+function initFileSystem() {
+  const fsTree = document.getElementById("fsTree");
+  const fsPath = document.getElementById("fsPath");
+  const fsEditor = document.getElementById("fsEditor");
+  const fsRefresh = document.getElementById("fsRefresh");
+  const fsSave = document.getElementById("fsSave");
+  const fsNewFile = document.getElementById("fsNewFile");
+  const fsNewFolder = document.getElementById("fsNewFolder");
+  const fsDelete = document.getElementById("fsDelete");
+  const fsDownload = document.getElementById("fsDownload");
+  const fsSearch = document.getElementById("fsSearch");
+
+  if (!fsTree) return;
+
+  // Get file system from localStorage
+  function getFileSystem() {
+    try {
+      const fs = localStorage.getItem("botnology_filesystem");
+      return fs ? JSON.parse(fs) : {
+        "notes/": { type: "folder" },
+        "notes/welcome.txt": { type: "file", content: "Welcome to your Student Desktop!\n\nUse this space to organize your study materials, notes, and assignments.\n\nTips:\n- Create folders to organize your files\n- Click any file to edit it\n- All changes are saved automatically" },
+        "assignments/": { type: "folder" },
+        "assignments/todo.txt": { type: "file", content: "My Assignments:\n\n[ ] Complete reading for Chapter 3\n[ ] Practice problems 1-10\n[ ] Review lecture notes" }
+      };
+    } catch (e) {
+      console.error("Error loading file system:", e);
+      return {};
+    }
+  }
+
+  // Save file system to localStorage
+  function saveFileSystem(fs) {
+    try {
+      localStorage.setItem("botnology_filesystem", JSON.stringify(fs));
+    } catch (e) {
+      console.error("Error saving file system:", e);
+      alert("⚠️ Error saving file system. Storage may be full.");
+    }
+  }
+
+  // Render file tree
+  function renderTree(searchTerm = "") {
+    const fs = getFileSystem();
+    const paths = Object.keys(fs).sort();
+    
+    let html = '<div style="font-family:monospace;font-size:13px;line-height:1.8">';
+    
+    // Group by folders
+    const folders = paths.filter(p => p.endsWith("/"));
+    const files = paths.filter(p => !p.endsWith("/"));
+    
+    if (folders.length === 0 && files.length === 0) {
+      html += '<div style="color:var(--muted);padding:8px">No files yet. Click "New File" to start.</div>';
+    } else {
+      // Show folders
+      folders.forEach(folder => {
+        if (searchTerm && !folder.toLowerCase().includes(searchTerm.toLowerCase())) return;
+        html += `<div style="padding:4px 8px;cursor:pointer;border-radius:6px;display:flex;align-items:center;gap:6px" 
+                      onmouseover="this.style.background='rgba(255,255,255,0.08)'" 
+                      onmouseout="this.style.background='transparent'"
+                      onclick="document.getElementById('fsPath').value='${folder.replace(/'/g, "\\'")}'; document.getElementById('fsEditor').value=''; document.getElementById('fsPath').focus();">
+          <span style="color:var(--calm-gold)">📁</span> ${folder}
+        </div>`;
+      });
+      
+      // Show files
+      files.forEach(file => {
+        if (searchTerm && !file.toLowerCase().includes(searchTerm.toLowerCase())) return;
+        const icon = file.endsWith(".txt") ? "📄" : file.endsWith(".md") ? "📝" : "📋";
+        html += `<div style="padding:4px 8px;cursor:pointer;border-radius:6px;display:flex;align-items:center;gap:6px" 
+                      onmouseover="this.style.background='rgba(255,255,255,0.08)'" 
+                      onmouseout="this.style.background='transparent'"
+                      onclick="loadFile('${file.replace(/'/g, "\\'")}')">
+          <span>${icon}</span> ${file}
+        </div>`;
+      });
+    }
+    
+    html += '</div>';
+    fsTree.innerHTML = html;
+  }
+
+  // Load file into editor
+  window.loadFile = function(path) {
+    const fs = getFileSystem();
+    if (fs[path] && fs[path].type === "file") {
+      fsPath.value = path;
+      fsEditor.value = fs[path].content || "";
+      fsEditor.focus();
+    }
+  };
+
+  // Save file
+  if (fsSave) {
+    fsSave.addEventListener("click", () => {
+      const path = fsPath.value.trim();
+      if (!path) {
+        alert("⚠️ Please enter a file path");
+        return;
+      }
+      if (path.endsWith("/")) {
+        alert("⚠️ Cannot save a folder. Remove the trailing slash to save as a file.");
+        return;
+      }
+
+      const fs = getFileSystem();
+      fs[path] = { type: "file", content: fsEditor.value };
+      saveFileSystem(fs);
+      renderTree();
+      alert("✅ File saved: " + path);
+    });
+  }
+
+  // New file
+  if (fsNewFile) {
+    fsNewFile.addEventListener("click", () => {
+      const filename = prompt("Enter file name (e.g., notes.txt or homework/essay.md):");
+      if (!filename) return;
+      
+      const path = filename.trim();
+      if (path.endsWith("/")) {
+        alert("⚠️ File names cannot end with /");
+        return;
+      }
+
+      const fs = getFileSystem();
+      fs[path] = { type: "file", content: "" };
+      saveFileSystem(fs);
+      renderTree();
+      loadFile(path);
+    });
+  }
+
+  // New folder
+  if (fsNewFolder) {
+    fsNewFolder.addEventListener("click", () => {
+      let foldername = prompt("Enter folder name (e.g., homework/):");
+      if (!foldername) return;
+      
+      foldername = foldername.trim();
+      if (!foldername.endsWith("/")) foldername += "/";
+
+      const fs = getFileSystem();
+      fs[foldername] = { type: "folder" };
+      saveFileSystem(fs);
+      renderTree();
+      alert("✅ Folder created: " + foldername);
+    });
+  }
+
+  // Delete file/folder
+  if (fsDelete) {
+    fsDelete.addEventListener("click", () => {
+      const path = fsPath.value.trim();
+      if (!path) {
+        alert("⚠️ Please enter a file or folder path to delete");
+        return;
+      }
+
+      if (!confirm(`Delete "${path}"?`)) return;
+
+      const fs = getFileSystem();
+      
+      // If deleting folder, also delete all files inside
+      if (path.endsWith("/")) {
+        Object.keys(fs).forEach(key => {
+          if (key.startsWith(path)) {
+            delete fs[key];
+          }
+        });
+      } else {
+        delete fs[path];
+      }
+      
+      saveFileSystem(fs);
+      renderTree();
+      fsPath.value = "";
+      fsEditor.value = "";
+      alert("✅ Deleted: " + path);
+    });
+  }
+
+  // Download file
+  if (fsDownload) {
+    fsDownload.addEventListener("click", () => {
+      const path = fsPath.value.trim();
+      if (!path || path.endsWith("/")) {
+        alert("⚠️ Please select a file to download");
+        return;
+      }
+
+      const fs = getFileSystem();
+      if (!fs[path] || fs[path].type !== "file") {
+        alert("⚠️ File not found");
+        return;
+      }
+
+      const content = fs[path].content || "";
+      const blob = new Blob([content], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = path.split("/").pop();
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  }
+
+  // Search/filter
+  if (fsSearch) {
+    fsSearch.addEventListener("input", (e) => {
+      renderTree(e.target.value);
+    });
+  }
+
+  // Refresh
+  if (fsRefresh) {
+    fsRefresh.addEventListener("click", () => {
+      renderTree();
+      alert("✅ File list refreshed");
+    });
+  }
+
+  // Initial render
+  renderTree();
+}
+
+// ==========================================
+// QUIZ GENERATION
+// ==========================================
+function initQuizzes() {
+  const quizGenerate = document.getElementById("quizGenerate");
+  const quizGrade = document.getElementById("quizGrade");
+  const quizTopic = document.getElementById("quizTopic");
+  const quizLevel = document.getElementById("quizLevel");
+  const quizCount = document.getElementById("quizCount");
+  const quizMode = document.getElementById("quizMode");
+  const quizList = document.getElementById("quizList");
+  const quizScore = document.getElementById("quizScore");
+  const quizSave = document.getElementById("quizSave");
+  const quizLoadLast = document.getElementById("quizLoadLast");
+
+  if (!quizGenerate) return;
+
+  let currentQuiz = [];
+
+  // Generate quiz
+  quizGenerate.addEventListener("click", async () => {
+    const topic = quizTopic?.value.trim();
+    if (!topic) {
+      alert("⚠️ Please enter a topic for the quiz");
+      return;
+    }
+
+    const level = quizLevel?.value || "bachelors";
+    const count = parseInt(quizCount?.value || "5");
+    const mode = quizMode?.value || "short";
+
+    quizGenerate.disabled = true;
+    quizGenerate.textContent = "Generating...";
+
+    try {
+      // Use the chat API to generate questions
+      const profile = JSON.parse(localStorage.getItem("botnology_profile") || "{}");
+      const API_URL = window.location.hostname === "localhost" ? "http://localhost:3000" : "";
+      
+      const prompt = mode === "mc" 
+        ? `Generate ${count} multiple choice questions about ${topic} at ${level} level. Format each as: Q: [question]\nA) [option]\nB) [option]\nC) [option]\nD) [option]\nCorrect: [letter]`
+        : `Generate ${count} short answer questions about ${topic} at ${level} level. Format each as: Q: [question]\nA: [sample answer]`;
+
+      const response = await fetch(`${API_URL}/api/index?action=chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: profile.user_id || "guest",
+          message: prompt,
+          plan: profile.plan || "associates"
+        })
+      });
+
+      if (!response.ok) throw new Error("Failed to generate quiz");
+
+      const data = await response.json();
+      const content = data.reply || "";
+
+      // Parse the questions
+      currentQuiz = [];
+      const lines = content.split("\n");
+      let currentQ = null;
+
+      lines.forEach(line => {
+        line = line.trim();
+        if (line.startsWith("Q:")) {
+          if (currentQ) currentQuiz.push(currentQ);
+          currentQ = { question: line.substring(2).trim(), answer: "", userAnswer: "" };
+        } else if (line.startsWith("A:") && currentQ) {
+          currentQ.answer = line.substring(2).trim();
+        } else if (line.startsWith("Correct:") && currentQ) {
+          currentQ.correct = line.substring(8).trim();
+        } else if (currentQ && (line.startsWith("A)") || line.startsWith("B)") || line.startsWith("C)") || line.startsWith("D)"))) {
+          if (!currentQ.options) currentQ.options = [];
+          currentQ.options.push(line);
+        }
+      });
+      if (currentQ) currentQuiz.push(currentQ);
+
+      renderQuiz();
+      alert(`✅ Generated ${currentQuiz.length} questions!`);
+
+    } catch (error) {
+      console.error("Quiz generation error:", error);
+      alert("⚠️ Failed to generate quiz. Please try again.");
+    } finally {
+      quizGenerate.disabled = false;
+      quizGenerate.textContent = "Generate";
+    }
+  });
+
+  // Render quiz
+  function renderQuiz() {
+    if (!quizList) return;
+    
+    let html = "";
+    currentQuiz.forEach((q, i) => {
+      html += `<tr>
+        <td style="vertical-align:top">${i + 1}. ${q.question}</td>
+        <td><input type="text" class="input" id="quizAnswer${i}" placeholder="Your answer..." value="${q.userAnswer || ""}" style="width:100%;padding:6px 8px"/></td>
+      </tr>`;
+    });
+    
+    quizList.innerHTML = html || '<tr><td colspan="2" style="text-align:center;color:var(--muted)">No questions yet. Click "Generate" to create a quiz.</td></tr>';
+  }
+
+  // Grade quiz
+  if (quizGrade) {
+    quizGrade.addEventListener("click", () => {
+      if (currentQuiz.length === 0) {
+        alert("⚠️ Generate a quiz first!");
+        return;
+      }
+
+      let correct = 0;
+      currentQuiz.forEach((q, i) => {
+        const input = document.getElementById(`quizAnswer${i}`);
+        if (input) {
+          q.userAnswer = input.value.trim();
+          // Simple grading - check if answer contains key words from correct answer
+          const userWords = q.userAnswer.toLowerCase().split(/\s+/);
+          const answerWords = q.answer.toLowerCase().split(/\s+/);
+          const matches = userWords.filter(w => answerWords.includes(w) && w.length > 3);
+          if (matches.length >= Math.min(2, answerWords.length / 2)) {
+            correct++;
+          }
+        }
+      });
+
+      const score = Math.round((correct / currentQuiz.length) * 100);
+      if (quizScore) {
+        quizScore.textContent = `Score: ${correct} / ${currentQuiz.length} (${score}%)`;
+        quizScore.style.color = score >= 70 ? "var(--calm-green)" : score >= 50 ? "var(--calm-gold)" : "#ff6b6b";
+      }
+
+      alert(`📊 Quiz Result:\n\n${correct} / ${currentQuiz.length} correct (${score}%)\n\n${score >= 70 ? "Great job! 🎉" : score >= 50 ? "Good effort! Keep studying. 📚" : "Keep practicing! You'll get there. 💪"}`);
+    });
+  }
+
+  // Save quiz
+  if (quizSave) {
+    quizSave.addEventListener("click", () => {
+      if (currentQuiz.length === 0) {
+        alert("⚠️ No quiz to save!");
+        return;
+      }
+
+      try {
+        localStorage.setItem("botnology_last_quiz", JSON.stringify(currentQuiz));
+        alert("✅ Quiz saved! Use 'Load Last Set' to restore it.");
+      } catch (e) {
+        console.error("Error saving quiz:", e);
+        alert("⚠️ Failed to save quiz");
+      }
+    });
+  }
+
+  // Load last quiz
+  if (quizLoadLast) {
+    quizLoadLast.addEventListener("click", () => {
+      try {
+        const saved = localStorage.getItem("botnology_last_quiz");
+        if (!saved) {
+          alert("⚠️ No saved quiz found");
+          return;
+        }
+
+        currentQuiz = JSON.parse(saved);
+        renderQuiz();
+        alert(`✅ Loaded quiz with ${currentQuiz.length} questions`);
+      } catch (e) {
+        console.error("Error loading quiz:", e);
+        alert("⚠️ Failed to load quiz");
+      }
+    });
+  }
+
+  // Initial render
+  renderQuiz();
+}
+
+// ==========================================
 // INITIALIZATION
 // ==========================================
 document.addEventListener("DOMContentLoaded", () => {
@@ -1040,6 +1451,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initAuthModal();
   initProfileUI();
   initChat();
+  initFileSystem();
+  initQuizzes();
   initAdminReset();
   checkHealth();
   

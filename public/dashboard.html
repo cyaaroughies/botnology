@@ -137,29 +137,32 @@
         <a href="https://open.spotify.com" target="_blank" class="btn small">Spotify</a>
         <a href="https://music.apple.com" target="_blank" class="btn small">Apple Music</a>
       </div>
+      <div class="smallmuted" style="margin-top:8px">📁 Manage your study files and folders - all saved in your browser</div>
       <div class="grid2" style="margin-top:12px">
         <div class="card">
+          <div style="font-weight:600;margin-bottom:8px;color:var(--calm-gold)">📂 Files & Folders</div>
           <div class="row" style="align-items:center;gap:8px">
-            <input class="input" id="fsSearch" placeholder="Filter files"/>
-            <button class="btn small" id="fsRefresh">Refresh</button>
+            <input class="input" id="fsSearch" placeholder="Search files..." style="font-size:13px"/>
+            <button class="btn small" id="fsRefresh">↻ Refresh</button>
           </div>
-          <div id="fsTree" style="margin-top:10px; max-height:320px; overflow:auto"></div>
+          <div id="fsTree" style="margin-top:10px; max-height:320px; overflow:auto; border:1px solid var(--stroke); border-radius:8px; padding:8px; background:rgba(0,0,0,0.2)"></div>
         </div>
         <div class="card">
+          <div style="font-weight:600;margin-bottom:8px;color:var(--calm-gold)">✏️ File Editor</div>
           <div class="field">
-            <label>Path</label>
-            <input id="fsPath" placeholder="folder/file.txt"/>
+            <label>File Path</label>
+            <input id="fsPath" placeholder="e.g., notes/chapter1.txt or homework/essay.md"/>
           </div>
           <div class="field" style="margin-top:10px">
             <label>Content</label>
-            <textarea id="fsEditor" rows="12" placeholder="Start writing your report..."></textarea>
+            <textarea id="fsEditor" rows="11" placeholder="Click a file from the list or create a new one..." style="font-family:monospace;font-size:13px"></textarea>
           </div>
-          <div class="row" style="margin-top:10px">
-            <button class="btn" id="fsNewFile">New File</button>
-            <button class="btn" id="fsNewFolder">New Folder</button>
-            <button class="btn gold" id="fsSave">Save</button>
-            <button class="btn" id="fsDelete">Delete</button>
-            <button class="btn" id="fsDownload">Download</button>
+          <div class="row" style="margin-top:10px;gap:8px">
+            <button class="btn gold" id="fsSave">💾 Save</button>
+            <button class="btn" id="fsNewFile">📄 New File</button>
+            <button class="btn" id="fsNewFolder">📁 New Folder</button>
+            <button class="btn" id="fsDelete">🗑️ Delete</button>
+            <button class="btn" id="fsDownload">⬇️ Download</button>
           </div>
         </div>
       </div>
@@ -169,17 +172,19 @@
       <div class="row" style="align-items:center;gap:12px">
         <div class="h-eyebrow">Practice Quizzes</div>
         <div style="flex:1"></div>
-        <button class="btn small" id="quizGenerate">Generate</button>
-        <button class="btn small" id="quizGrade">Grade</button>
+        <button class="btn small gold" id="quizGenerate">✨ Generate Quiz</button>
+        <button class="btn small" id="quizGrade">📊 Grade Answers</button>
       </div>
+      <div class="smallmuted" style="margin-top:8px">🤖 AI-powered quiz generation on any topic</div>
       <div class="grid2" style="margin-top:12px">
         <div class="card">
+          <div style="font-weight:600;margin-bottom:8px;color:var(--calm-gold)">⚙️ Quiz Settings</div>
           <div class="field">
             <label>Topic</label>
-            <input id="quizTopic" placeholder="e.g., Linear Algebra, Organic Chemistry"/>
+            <input id="quizTopic" placeholder="e.g., Linear Algebra, Organic Chemistry, World History"/>
           </div>
           <div class="field" style="margin-top:10px">
-            <label>Level</label>
+            <label>Difficulty Level</label>
             <select id="quizLevel">
               <option value="associates">Associates</option>
               <option value="bachelors" selected>Bachelors</option>
@@ -190,30 +195,33 @@
             <div class="field">
               <label>Question Count</label>
               <select id="quizCount">
-                <option value="5" selected>5</option>
-                <option value="10">10</option>
-                <option value="15">15</option>
+                <option value="5" selected>5 Questions</option>
+                <option value="10">10 Questions</option>
+                <option value="15">15 Questions</option>
               </select>
             </div>
             <div class="field">
-              <label>Mode</label>
+              <label>Question Type</label>
               <select id="quizMode">
-                <option value="short" selected>Short Answer</option>
+                <option value="short" selected">Short Answer</option>
                 <option value="mc">Multiple Choice</option>
               </select>
             </div>
           </div>
+          <div class="row" style="margin-top:12px;gap:8px">
+            <button class="btn" id="quizSave">💾 Save Set</button>
+            <button class="btn" id="quizLoadLast">📥 Load Last</button>
+          </div>
         </div>
         <div class="card">
-          <table class="table" id="quizTable">
-            <thead><tr><th style="width:55%">Question</th><th>Answer</th></tr></thead>
-            <tbody id="quizList"></tbody>
-          </table>
-          <div class="smallmuted" id="quizScore" style="margin-top:8px">Score: 0 / 0</div>
-          <div class="row" style="margin-top:10px">
-            <button class="btn" id="quizSave">Save Set</button>
-            <button class="btn" id="quizLoadLast">Load Last Set</button>
+          <div style="font-weight:600;margin-bottom:8px;color:var(--calm-gold)">📝 Questions & Answers</div>
+          <div style="max-height:360px;overflow:auto;border:1px solid var(--stroke);border-radius:8px">
+            <table class="table" id="quizTable">
+              <thead><tr><th style="width:50%">Question</th><th>Your Answer</th></tr></thead>
+              <tbody id="quizList"></tbody>
+            </table>
           </div>
+          <div class="smallmuted" id="quizScore" style="margin-top:10px;padding:8px;background:rgba(0,0,0,0.2);border-radius:6px;text-align:center">Score: 0 / 0</div>
         </div>
       </div>
     </div>
