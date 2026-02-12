@@ -1284,28 +1284,59 @@ function initQuizzes() {
     quizGenerate.textContent = "Generating...";
 
     try {
-      // Use the chat API to generate questions
+      // Get profile for plan info
       const profile = JSON.parse(localStorage.getItem("botnology_profile") || "{}");
-      const API_URL = window.location.hostname === "localhost" ? "http://localhost:3000" : "";
+      const userPlan = profile.plan || "associates";
       
       const prompt = mode === "mc" 
-        ? `Generate ${count} multiple choice questions about ${topic} at ${level} level. Format each as: Q: [question]\nA) [option]\nB) [option]\nC) [option]\nD) [option]\nCorrect: [letter]`
-        : `Generate ${count} short answer questions about ${topic} at ${level} level. Format each as: Q: [question]\nA: [sample answer]`;
+        ? `Generate exactly ${count} multiple choice questions about ${topic} at ${level} level. Format each question like this:
 
-      const response = await fetch(`${API_URL}/api/index?action=chat`, {
+Q: What is the question text here?
+A) First option
+B) Second option
+C) Third option
+D) Fourth option
+Correct: A
+
+Make sure each question follows this exact format.`
+        : `Generate exactly ${count} short answer questions about ${topic} at ${level} level. Format each question like this:
+
+Q: What is the question text here?
+A: Brief sample answer here
+
+Make sure each question follows this exact format with Q: and A: on separate lines.`;
+
+      console.log("Requesting quiz from API...", { topic, level, count, mode });
+
+      const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_id: profile.user_id || "guest",
           message: prompt,
-          plan: profile.plan || "associates"
+          subject: topic,
+          plan: userPlan,
+          history: []
         })
       });
 
-      if (!response.ok) throw new Error("Failed to generate quiz");
+      console.log("Quiz API response status:", response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Quiz API error:", errorText);
+        throw new Error(`API error: ${response.status} - ${errorText}`);
+      }
 
       const data = await response.json();
+      console.log("Quiz API response data:", data);
+      
       const content = data.reply || "";
+      
+      // Check if we got demo mode response
+      if (content.includes("(Demo)")) {
+        alert("⚠️ Quiz generation requires OpenAI API to be configured.\n\nDemo mode detected - AI is not available.\n\nPlease contact the administrator to enable AI features.");
+        return;
+      }
 
       // Parse the questions
       currentQuiz = [];
@@ -1314,9 +1345,11 @@ function initQuizzes() {
 
       lines.forEach(line => {
         line = line.trim();
-        if (line.startsWith("Q:")) {
+        if (line.startsWith("Q:") || line.match(/^\d+\./)) {
           if (currentQ) currentQuiz.push(currentQ);
-          currentQ = { question: line.substring(2).trim(), answer: "", userAnswer: "" };
+          // Handle "Q:" or numbered questions like "1."
+          const questionText = line.replace(/^(Q:|^\d+\.)\s*/, "").trim();
+          currentQ = { question: questionText, answer: "", userAnswer: "" };
         } else if (line.startsWith("A:") && currentQ) {
           currentQ.answer = line.substring(2).trim();
         } else if (line.startsWith("Correct:") && currentQ) {
@@ -1328,15 +1361,23 @@ function initQuizzes() {
       });
       if (currentQ) currentQuiz.push(currentQ);
 
+      console.log("Parsed questions:", currentQuiz.length);
+
+      if (currentQuiz.length === 0) {
+        alert("⚠️ Failed to parse questions from AI response.\n\nTry again or adjust your topic.");
+        console.log("AI response that failed to parse:", content);
+        return;
+      }
+
       renderQuiz();
       alert(`✅ Generated ${currentQuiz.length} questions!`);
 
     } catch (error) {
       console.error("Quiz generation error:", error);
-      alert("⚠️ Failed to generate quiz. Please try again.");
+      alert(`⚠️ Failed to generate quiz.\n\nError: ${error.message}\n\nCheck the console for details or try again.`);
     } finally {
       quizGenerate.disabled = false;
-      quizGenerate.textContent = "Generate";
+      quizGenerate.textContent = "✨ Generate Quiz";
     }
   });
 
