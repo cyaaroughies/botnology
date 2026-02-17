@@ -113,6 +113,7 @@ def api_health():
     return {
             "status": "ok",
             "openai": OPENAI_ENABLED,
+            "openai_model": OPENAI_MODEL,
             "stripe": bool(os.getenv("STRIPE_SECRET_KEY")),
             "public_dir_exists": PUBLIC_DIR.exists(),
             "public_dir": str(PUBLIC_DIR),
