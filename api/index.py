@@ -68,7 +68,8 @@ if os.getenv("VERCEL") and not PUBLIC_DIR.exists():
 _app_secret_env = os.getenv("APP_SECRET") or os.getenv("JWT_SECRET")
 APP_SECRET = (_app_secret_env or "botnology-dev-secret").encode("utf-8")
 OPENAI_ENABLED = bool(os.getenv("OPENAI_API_KEY")) and OpenAI is not None
-OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+_openai_model_raw = (os.getenv("OPENAI_MODEL") or "gpt-4o-mini").strip()
+OPENAI_MODEL = "gpt-4o-mini" if _openai_model_raw.lower().startswith("sk-") else _openai_model_raw
 TTS_MODEL = os.getenv("OPENAI_TTS_MODEL", "gpt-4o-mini-tts")
 try:
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY")) if OPENAI_ENABLED and OpenAI is not None else None
@@ -182,11 +183,11 @@ def _build_chat_reply(msg: str, hist: Any, subject: str, plan: str) -> Dict[str,
         txt = (out.choices[0].message.content or "").strip()
         return {"reply": txt, "plan": plan}
     except Exception as e:
-        err = str(getattr(e, "message", e))
+        print(f"OpenAI chat request failed: {e}")
         return {
             "reply": f"(Demo) Dr. Botnotic heard: {msg}",
             "plan": plan,
-            "error": err
+            "error": "openai_request_failed"
         }
 
 @app.post("/api/chat", include_in_schema=False)
@@ -256,8 +257,8 @@ async def api_chat_stream(req: Request):
                     yield f"data: {json.dumps({'delta': delta})}\n\n"
             yield f"data: {json.dumps({'done': True, 'plan': plan})}\n\n"
         except Exception as e:
-            err = str(getattr(e, "message", e))
-            yield f"data: {json.dumps({'error': err})}\n\n"
+            print(f"OpenAI stream request failed: {e}")
+            yield f"data: {json.dumps({'error': 'openai_request_failed'})}\n\n"
             yield f"data: {json.dumps({'done': True, 'plan': plan})}\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
