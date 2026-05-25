@@ -1,109 +1,70 @@
 import { Button } from "@/components/ui/button";
 
-<Button className="mt-6">Test ShadCN</Button>
-
 export default function Page() {
   return (
-    <main
-      style={{
-        padding: "60px 40px",
-        maxWidth: "900px",
-        margin: "0 auto",
-        fontFamily: "system-ui, sans-serif",
-        lineHeight: 1.6,
-      }}
-    >
-      <h1
-        style={{
-          fontSize: "3rem",
-          fontWeight: 700,
-          marginBottom: "20px",
-        }}
-      >
-        Botnology101
-      </h1>
+    <main className="min-h-screen bg-background text-foreground">
+      {/* Hero Section */}
+      <section className="max-w-5xl mx-auto px-6 pt-24 pb-32 text-center">
+        <h1 className="text-5xl font-bold tracking-tight">
+          Botnology101
+        </h1>
 
-      <p
-        style={{
-          fontSize: "1.3rem",
-          opacity: 0.85,
-          marginBottom: "40px",
-        }}
-      >
-        Your AI tutoring platform — built for elite learners who want clarity,
-        speed, and mastery. Powered by Dr. Botonic, your 24/7 personal academic
-        mentor.
-      </p>
+        <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto">
+          Your AI tutoring platform — built for elite learners who want clarity,
+          speed, and mastery. Powered by Dr. Botonic, your 24/7 personal academic
+          mentor.
+        </p>
 
-      <div
-        style={{
-          display: "flex",
-          gap: "20px",
-          marginBottom: "60px",
-        }}
-      >
-        <a
-          href="/dashboard"
-          style={{
-            padding: "14px 26px",
-            background: "black",
-            color: "white",
-            borderRadius: "8px",
-            textDecoration: "none",
-            fontWeight: 600,
-          }}
-        >
-          Enter Dashboard
-        </a>
+        <div className="mt-10 flex justify-center gap-4">
+          <Button size="lg" className="px-8">
+            Enter Dashboard
+          </Button>
 
-        <a
-          href="/learn-more"
-          style={{
-            padding: "14px 26px",
-            background: "#f2f2f2",
-            color: "black",
-            borderRadius: "8px",
-            textDecoration: "none",
-            fontWeight: 600,
-          }}
-        >
-          Learn More
-        </a>
-      </div>
-
-      <section style={{ marginBottom: "60px" }}>
-        <h2 style={{ fontSize: "2rem", marginBottom: "20px" }}>
-          Why Botnology101?
-        </h2>
-        <ul style={{ fontSize: "1.1rem", opacity: 0.9 }}>
-          <li>Instant explanations for any topic</li>
-          <li>Personalized study plans</li>
-          <li>Exam prep with adaptive difficulty</li>
-          <li>Upload notes, PDFs, and assignments</li>
-          <li>Chat with Dr. Botonic — your AI professor</li>
-        </ul>
+          <Button size="lg" variant="outline" className="px-8">
+            Learn More
+          </Button>
+        </div>
       </section>
 
-      <section style={{ marginBottom: "60px" }}>
-        <h2 style={{ fontSize: "2rem", marginBottom: "20px" }}>
+      {/* Features Section */}
+      <section className="max-w-5xl mx-auto px-6 py-20">
+        <h2 className="text-3xl font-semibold text-center mb-12">
+          Why Botnology101?
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 text-lg text-muted-foreground">
+          <div className="p-6 rounded-xl border bg-card">
+            Instant explanations for any topic
+          </div>
+          <div className="p-6 rounded-xl border bg-card">
+            Personalized study plans
+          </div>
+          <div className="p-6 rounded-xl border bg-card">
+            Exam prep with adaptive difficulty
+          </div>
+          <div className="p-6 rounded-xl border bg-card">
+            Upload notes, PDFs, and assignments
+          </div>
+          <div className="p-6 rounded-xl border bg-card">
+            Chat with Dr. Botonic — your AI professor
+          </div>
+        </div>
+      </section>
+
+      {/* Audience Section */}
+      <section className="max-w-4xl mx-auto px-6 py-20 text-center">
+        <h2 className="text-3xl font-semibold mb-6">
           Built for Ambitious Students
         </h2>
-        <p style={{ fontSize: "1.1rem", opacity: 0.9 }}>
+        <p className="text-lg text-muted-foreground">
           Whether you're studying at Harvard, Yale, or grinding through late‑night
           problem sets at home, Botnology101 gives you the clarity and confidence
           to master any subject.
         </p>
       </section>
 
-      <footer
-        style={{
-          marginTop: "80px",
-          paddingTop: "40px",
-          borderTop: "1px solid #e5e5e5",
-          opacity: 0.7,
-          fontSize: "0.9rem",
-        }}
-      >
+      {/* Footer */}
+      <footer className="border-t py-10 text-center text-sm text-muted-foreground">
         © {new Date().getFullYear()} Botnology101 — All Rights Reserved.
       </footer>
     </main>
