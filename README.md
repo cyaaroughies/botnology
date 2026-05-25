@@ -1,5 +1,5 @@
 # Botnology 101
- 
+  
 Premium AI tutor web app with FastAPI backend and static frontend, deployable on Vercel.
 
 ## Quick Start (Local)
