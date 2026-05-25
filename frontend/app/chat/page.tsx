@@ -12,21 +12,26 @@ export default function ChatPage() {
 
   const [input, setInput] = useState("");
 
-  async function sendMessage() {
-    if (!input.trim()) return;
+async function sendMessage() {
+  if (!input.trim()) return;
 
-    // Add user message
-    const newMessages = [...messages, { role: "user", content: input }];
-    setMessages(newMessages);
+  const newMessages = [...messages, { role: "user", content: input }];
+  setMessages(newMessages);
+  setInput("");
 
-    // Clear input
-    setInput("");
+  const res = await fetch("/api/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ messages: newMessages }),
+  });
 
-    // TODO: Replace with FastAPI call
-    const fakeResponse = "This is where your FastAPI response will appear.";
+  const data = await res.json();
 
-    setMessages([...newMessages, { role: "assistant", content: fakeResponse }]);
-  }
+  setMessages([
+    ...newMessages,
+    { role: "assistant", content: data.reply },
+  ]);
+}
 
   return (
     <div className="flex flex-col h-screen bg-background text-foreground">
