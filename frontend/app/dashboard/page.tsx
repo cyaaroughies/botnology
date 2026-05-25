@@ -83,6 +83,10 @@ export default async function DashboardPage() {
             <Button>Upload</Button>
           </div>
 
+<Button asChild>
+  <a href="/chat">Start Chat</a>
+</Button>
+
           <div className="p-6 border rounded-xl bg-card">
             <h3 className="text-xl font-semibold mb-2">Practice Quizzes</h3>
             <p className="text-muted-foreground mb-4">
