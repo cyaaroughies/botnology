@@ -15,15 +15,20 @@ export default function Page() {
           mentor.
         </p>
 
-        <div className="mt-10 flex justify-center gap-4">
-          <Button size="lg" className="px-8">
-            Enter Dashboard
-          </Button>
+     <div className="mt-10 flex justify-center gap-4">
+  <a href="/dashboard">
+    <Button size="lg" className="px-8">
+      Enter Dashboard
+    </Button>
+  </a>
 
-          <Button size="lg" variant="outline" className="px-8">
-            Learn More
-          </Button>
-        </div>
+  <a href="/learn-more">
+    <Button size="lg" variant="outline" className="px-8">
+      Learn More
+    </Button>
+  </a>
+</div>
+
       </section>
 
       {/* Features Section */}
