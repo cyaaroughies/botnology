@@ -1,3 +1,7 @@
+import { Button } from "@/components/ui/button";
+
+<Button className="mt-6">Test ShadCN</Button>
+
 export default function Page() {
   return (
     <main
