@@ -1,77 +1,105 @@
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
-export default function Page() {
+export default function Home() {
   return (
-    <main className="min-h-screen bg-background text-foreground">
-      {/* Hero Section */}
-      <section className="max-w-5xl mx-auto px-6 pt-24 pb-32 text-center">
-        <h1 className="text-5xl font-bold tracking-tight">
-          Botnology101
-        </h1>
+    <div className="container">
 
-        <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto">
-          Your AI tutoring platform — built for elite learners who want clarity,
-          speed, and mastery. Powered by Dr. Botonic, your 24/7 personal academic
-          mentor.
-        </p>
-
-     <div className="mt-10 flex justify-center gap-4">
-  <a href="/dashboard">
-    <Button size="lg" className="px-8">
-      Enter Dashboard
-    </Button>
-  </a>
-
-  <a href="/learn-more">
-    <Button size="lg" variant="outline" className="px-8">
-      Learn More
-    </Button>
-  </a>
-</div>
-
-      </section>
-
-      {/* Features Section */}
-      <section className="max-w-5xl mx-auto px-6 py-20">
-        <h2 className="text-3xl font-semibold text-center mb-12">
-          Why Botnology101?
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 text-lg text-muted-foreground">
-          <div className="p-6 rounded-xl border bg-card">
-            Instant explanations for any topic
-          </div>
-          <div className="p-6 rounded-xl border bg-card">
-            Personalized study plans
-          </div>
-          <div className="p-6 rounded-xl border bg-card">
-            Exam prep with adaptive difficulty
-          </div>
-          <div className="p-6 rounded-xl border bg-card">
-            Upload notes, PDFs, and assignments
-          </div>
-          <div className="p-6 rounded-xl border bg-card">
-            Chat with Dr. Botonic — your AI professor
+      {/* ── Top Navigation Bar ── */}
+      <div className="topbar">
+        <div className="brand">
+          <img src="/logo.png" alt="Botnology101" />
+          <div className="title">
+            <b>Botnology101</b>
+            <span>AI Tutoring Platform</span>
           </div>
         </div>
-      </section>
+        <nav className="nav">
+          <Link href="/dashboard"  className="btn small">Dashboard</Link>
+          <Link href="/courses"    className="btn small">Courses</Link>
+          <Link href="/study-hall" className="btn small">Study Hall</Link>
+          <Link href="/tutor"      className="btn small">AI Tutor</Link>
+          <Link href="/chat"       className="btn small">Chat</Link>
+          <Link href="/login"      className="btn gold small">Sign In</Link>
+        </nav>
+      </div>
 
-      {/* Audience Section */}
-      <section className="max-w-4xl mx-auto px-6 py-20 text-center">
-        <h2 className="text-3xl font-semibold mb-6">
-          Built for Ambitious Students
-        </h2>
-        <p className="text-lg text-muted-foreground">
-          Whether you're studying at Harvard, Yale, or grinding through late‑night
-          problem sets at home, Botnology101 gives you the clarity and confidence
-          to master any subject.
+      {/* ── Hero ── */}
+      <div className="hero">
+        <div>
+          <span className="h-eyebrow">🤖 Powered by Advanced AI</span>
+          <h1 className="h1">Learn Smarter.<br />Achieve More.</h1>
+          <p className="sub">
+            Botnology101 is your personal AI tutoring platform — built for elite learners
+            who want real results. Get instant answers, personalized study plans, and 24/7
+            AI-powered support across every subject.
+          </p>
+          <div style={{ display:"flex", gap:"10px", marginTop:"20px", flexWrap:"wrap" }}>
+            <Link href="/dashboard" className="btn gold">Enter Dashboard →</Link>
+            <Link href="/courses"   className="btn">Browse Courses</Link>
+          </div>
+          <div className="hr" style={{ marginTop:"24px" }} />
+          <div className="grid2" style={{ marginTop:"16px" }}>
+            <div className="kpi"><b>10,000+</b><span>Students enrolled across all courses</span></div>
+            <div className="kpi"><b>98%</b><span>Pass rate among daily AI tutor users</span></div>
+            <div className="kpi"><b>24 / 7</b><span>Always-on AI support, any subject</span></div>
+            <div className="kpi"><b>50+ Courses</b><span>From beginner to advanced mastery</span></div>
+          </div>
+        </div>
+
+        <div>
+          <div id="dr-botonic-photo">
+            <h2>Meet Dr. Botonic</h2>
+            <p className="sub">
+              Your AI professor — always on, always ready to help you master any subject
+              with personalized explanations, instant feedback, and adaptive quizzing.
+            </p>
+            <div style={{ marginTop:"16px" }}>
+              <span className="badge"><span className="dot" />Online Now</span>
+            </div>
+            <div style={{ display:"flex", gap:"8px", marginTop:"16px", flexWrap:"wrap" }}>
+              <Link href="/tutor" className="btn gold small">Start Tutoring →</Link>
+              <Link href="/chat"  className="btn small">Open Chat</Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Features ── */}
+      <div id="exciting-features">
+        <h2>Why Botnology101?</h2>
+        <div className="grid2" style={{ marginTop:"16px" }}>
+          <div className="card"><b>🧠 Adaptive AI Tutor</b><p className="sub" style={{ marginTop:"8px" }}>Our AI adjusts explanations, pacing, and difficulty in real time to fit your unique learning style.</p></div>
+          <div className="card"><b>📚 Curated Course Catalog</b><p className="sub" style={{ marginTop:"8px" }}>50+ expert-built courses across math, science, coding, and more — with projects, assignments, and graded assessments.</p></div>
+          <div className="card"><b>📊 Real-Time Progress Tracking</b><p className="sub" style={{ marginTop:"8px" }}>Watch your grades, streaks, and mastery scores update live. Always know where you stand.</p></div>
+          <div className="card"><b>🏆 Achievements &amp; Rewards</b><p className="sub" style={{ marginTop:"8px" }}>Earn badges, climb leaderboards, and celebrate every milestone. Learning is designed to feel like winning.</p></div>
+        </div>
+      </div>
+
+      {/* ── CTA ── */}
+      <div className="hero-black" style={{ textAlign:"center" }}>
+        <h2 className="h1" style={{ fontSize:"28px" }}>Built for Ambitious Students</h2>
+        <p className="sub" style={{ maxWidth:"52ch", margin:"12px auto 0" }}>
+          Whether you&apos;re studying for finals, learning to code, or mastering advanced theory —
+          Botnology101 gives you the AI edge that top students rely on.
         </p>
-      </section>
+        <div style={{ display:"flex", gap:"10px", marginTop:"24px", justifyContent:"center", flexWrap:"wrap" }}>
+          <Link href="/login"   className="btn gold">Get Started Free →</Link>
+          <Link href="/courses" className="btn">Explore Courses</Link>
+        </div>
+      </div>
 
-      {/* Footer */}
-      <footer className="border-t py-10 text-center text-sm text-muted-foreground">
-        © {new Date().getFullYear()} Botnology101 — All Rights Reserved.
-      </footer>
-    </main>
+      {/* ── Footer ── */}
+      <div className="hr" style={{ marginTop:"48px" }} />
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"16px 0", flexWrap:"wrap", gap:"12px" }}>
+        <span className="smallmuted">© 2026 Botnology101 · All rights reserved</span>
+        <div style={{ display:"flex", gap:"16px" }}>
+          <Link href="/courses"   style={{ color:"var(--mint)", fontSize:"13px" }}>Courses</Link>
+          <Link href="/dashboard" style={{ color:"var(--mint)", fontSize:"13px" }}>Dashboard</Link>
+          <Link href="/tutor"     style={{ color:"var(--mint)", fontSize:"13px" }}>AI Tutor</Link>
+          <Link href="/login"     style={{ color:"var(--mint)", fontSize:"13px" }}>Sign In</Link>
+        </div>
+      </div>
+
+    </div>
   );
 }
