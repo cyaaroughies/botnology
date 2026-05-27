@@ -1,77 +1,78 @@
-
 "use client";
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
-export default function TutorPage() 
-export default function ChatPage() 
-
+export default function ChatPage() {
   const [messages, setMessages] = useState([
     { role: "assistant", content: "Hello, I’m Dr. Botonic. How can I help you study today?" }
   ]);
 
   const [input, setInput] = useState("");
 
-async function sendMessage() {
-  if (!input.trim()) return;
+  async function sendMessage() {
+    if (!input.trim()) return;
 
-  const newMessages = [...messages, { role: "user", content: input }];
-  setMessages(newMessages);
-  setInput("");
+    const newMessages = [...messages, { role: "user", content: input }];
+    setMessages(newMessages);
+    setInput("");
 
-  const res = await fetch("/api/chat", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ messages: newMessages }),
-  });
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messages: newMessages }),
+    });
 
-  const data = await res.json();
+    const data = await res.json();
 
-  setMessages([
-    ...newMessages,
-    { role: "assistant", content: data.reply },
-  ]);
-}
+    setMessages([
+      ...newMessages,
+      { role: "assistant", content: data.reply },
+    ]);
+  }
 
   return (
-    <div className="flex flex-col h-screen bg-background text-foreground">
+    <main className="flex flex-col h-screen bg-gray-100 text-gray-900">
+
       {/* Header */}
-      <header className="border-b p-4 text-xl font-semibold">
+      <header className="border-b p-4 text-xl font-semibold bg-white">
         Chat with Dr. Botonic
       </header>
 
       {/* Chat Window */}
-      <ScrollArea className="flex-1 p-6">
-        <div className="space-y-4">
-          {messages.map((msg, i) => (
-            <div
-              key={i}
-              className={`p-4 rounded-xl max-w-xl ${
-                msg.role === "assistant"
-                  ? "bg-card border"
-                  : "bg-primary text-primary-foreground ml-auto"
-              }`}
-            >
-              {msg.content}
-            </div>
-          ))}
-        </div>
-      </ScrollArea>
+      <div className="flex-1 p-6 overflow-y-auto space-y-4">
+        {messages.map((msg, i) => (
+          <div
+            key={i}
+            className={`p-4 rounded-xl max-w-xl ${
+              msg.role === "assistant"
+                ? "bg-white border shadow"
+                : "bg-blue-600 text-white ml-auto"
+            }`}
+          >
+            {msg.content}
+          </div>
+        ))}
+      </div>
 
       {/* Input Area */}
-      <div className="border-t p-4">
+      <div className="border-t p-4 bg-white">
         <div className="flex gap-3">
-          <Textarea
+          <input
+            type="text"
             placeholder="Ask Dr. Botonic anything..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            className="flex-1"
+            onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+            className="flex-1 border rounded-lg px-4 py-2"
           />
+
           <Button onClick={sendMessage} className="h-auto px-6">
             Send
           </Button>
         </div>
       </div>
-    </div>
+
+    </main>
   );
 }
