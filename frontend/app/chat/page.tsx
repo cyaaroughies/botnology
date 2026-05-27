@@ -1,11 +1,11 @@
-"use client";
 
+"use client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
-export default function ChatPage() {
+export default function TutorPage() 
+export default function ChatPage() 
+
   const [messages, setMessages] = useState([
     { role: "assistant", content: "Hello, I’m Dr. Botonic. How can I help you study today?" }
   ]);
