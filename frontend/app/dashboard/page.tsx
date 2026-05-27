@@ -51,4 +51,16 @@ export default function Dashboard() {
 
           <div className="p-6 bg-white rounded-xl shadow">
             <h3 className="text-xl font-semibold mb-2">Study Hours</h3>
+            <p className="text-4xl font-bold text-green-600">12</p>
+          </div>
+
+          <div className="p-6 bg-white rounded-xl shadow">
+            <h3 className="text-xl font-semibold mb-2">Completed Lessons</h3>
+            <p className="text-4xl font-bold text-purple-600">24</p>
+          </div>
+        </section>
+      </main>
+    </div>
+  );
+}
 
