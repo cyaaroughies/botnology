@@ -2,7 +2,12 @@
 # -*- coding: utf-8 -*-
 import re
 import sys
-from fastapi.cli import main
+from importlib import import_module
+
+try:
+    main = import_module('fastapi_cli.cli').main
+except ImportError:
+    main = import_module('fastapi.cli').main
 if __name__ == '__main__':
     sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])
     sys.exit(main())

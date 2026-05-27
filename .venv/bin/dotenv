@@ -1,8 +1,25 @@
 #!/workspaces/botnology/.venv/bin/python
 # -*- coding: utf-8 -*-
+from pathlib import Path
+import importlib
 import re
 import sys
-from dotenv.__main__ import cli
+
+
+def _load_cli():
+    venv_path = Path(__file__).resolve().parents[1]
+    site_packages = [
+        venv_path / 'Lib' / 'site-packages',
+        venv_path / 'lib' / f'python{sys.version_info.major}.{sys.version_info.minor}' / 'site-packages',
+    ]
+
+    for path in site_packages:
+        if path.exists():
+            sys.path.insert(0, str(path))
+
+    return importlib.import_module('dotenv.cli').cli
+
+
 if __name__ == '__main__':
     sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])
-    sys.exit(cli())
+    sys.exit(_load_cli()())
