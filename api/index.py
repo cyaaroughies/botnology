@@ -268,27 +268,48 @@ def _get_base_url(req: Request) -> str:
     scheme = (req.headers.get("x-forwarded-proto") or "http").split(",")[0]
     return f"{scheme}://{host}".rstrip("/")
 
-def _get_variant_id(plan: str, cadence: str) -> Optional[str]:
+def _variant_env_key(plan: str, cadence: str) -> Optional[str]:
     plan = (plan or "associates").strip().lower()
     cadence = (cadence or "monthly").strip().lower()
-
-    env_key = None
     if plan == "associates" and cadence == "monthly":
-        env_key = "LEMON_SQUEEZY_VARIANT_ASSOCIATES_MONTHLY"
-    elif plan == "associates" and cadence == "annual":
-        env_key = "LEMON_SQUEEZY_VARIANT_ASSOCIATES_ANNUAL"
-    elif plan == "bachelors" and cadence == "monthly":
-        env_key = "LEMON_SQUEEZY_VARIANT_BACHELORS_MONTHLY"
-    elif plan == "bachelors" and cadence == "annual":
-        env_key = "LEMON_SQUEEZY_VARIANT_BACHELORS_ANNUAL"
-    elif plan == "masters" and cadence == "monthly":
-        env_key = "LEMON_SQUEEZY_VARIANT_MASTERS_MONTHLY"
-    elif plan == "masters" and cadence == "annual":
-        env_key = "LEMON_SQUEEZY_VARIANT_MASTERS_ANNUAL"
+        return "LEMON_SQUEEZY_VARIANT_ASSOCIATES_MONTHLY"
+    if plan == "associates" and cadence == "annual":
+        return "LEMON_SQUEEZY_VARIANT_ASSOCIATES_ANNUAL"
+    if plan == "bachelors" and cadence == "monthly":
+        return "LEMON_SQUEEZY_VARIANT_BACHELORS_MONTHLY"
+    if plan == "bachelors" and cadence == "annual":
+        return "LEMON_SQUEEZY_VARIANT_BACHELORS_ANNUAL"
+    if plan == "masters" and cadence == "monthly":
+        return "LEMON_SQUEEZY_VARIANT_MASTERS_MONTHLY"
+    if plan == "masters" and cadence == "annual":
+        return "LEMON_SQUEEZY_VARIANT_MASTERS_ANNUAL"
+    return None
 
+def _get_variant_id(plan: str, cadence: str) -> Optional[str]:
+    env_key = _variant_env_key(plan, cadence)
     if not env_key:
         return None
     return os.getenv(env_key) or None
+
+@app.get("/api/lemonsqueezy/config", include_in_schema=False)
+def api_lemonsqueezy_config(req: Request):
+    variant_keys = [
+        "LEMON_SQUEEZY_VARIANT_ASSOCIATES_MONTHLY",
+        "LEMON_SQUEEZY_VARIANT_ASSOCIATES_ANNUAL",
+        "LEMON_SQUEEZY_VARIANT_BACHELORS_MONTHLY",
+        "LEMON_SQUEEZY_VARIANT_BACHELORS_ANNUAL",
+        "LEMON_SQUEEZY_VARIANT_MASTERS_MONTHLY",
+        "LEMON_SQUEEZY_VARIANT_MASTERS_ANNUAL",
+    ]
+    required_keys = ["LEMON_SQUEEZY_API_KEY", "LEMON_SQUEEZY_WEBHOOK_SECRET", *variant_keys]
+    missing = [key for key in required_keys if not os.getenv(key)]
+
+    return {
+        "configured": len(missing) == 0,
+        "missing": missing,
+        "present": [key for key in required_keys if key not in missing],
+        "webhook_url": f"{_get_base_url(req)}/api/lemonsqueezy/webhook",
+    }
 
 @app.post("/api/lemonsqueezy/create-checkout", include_in_schema=False)
 async def api_lemonsqueezy_checkout(req: Request):
@@ -300,13 +321,16 @@ async def api_lemonsqueezy_checkout(req: Request):
 
     api_key = os.getenv("LEMON_SQUEEZY_API_KEY")
     if not api_key:
-        raise HTTPException(status_code=400, detail="Lemon Squeezy not configured: set LEMON_SQUEEZY_API_KEY.")
+        raise HTTPException(status_code=400, detail="Lemon Squeezy not configured: missing LEMON_SQUEEZY_API_KEY.")
 
+    variant_env_key = _variant_env_key(plan, cadence)
+    if not variant_env_key:
+        raise HTTPException(status_code=400, detail="Invalid plan/cadence. Expected associates|bachelors|masters with monthly|annual.")
     variant_id = _get_variant_id(plan, cadence)
     if not variant_id:
         raise HTTPException(
             status_code=400,
-            detail="Missing Lemon Squeezy variant id env var for selected plan/cadence."
+            detail=f"Missing Lemon Squeezy variant id env var: {variant_env_key}."
         )
 
     base_url = _get_base_url(req)

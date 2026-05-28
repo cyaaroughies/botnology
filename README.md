@@ -52,6 +52,7 @@ See `.env.example` for the full list. For local dev, export vars or use a dotenv
 - `/api/history` (GET/POST): Persist chat history per `student_id`.
 - `/api/storage/*`: Simple per-student storage (list/read/write/delete).
 - `/api/lemonsqueezy/*`: Checkout + webhook -> writes `data/subscriptions/<student>.json`.
+  - `/api/lemonsqueezy/config`: Non-secret setup diagnostics (missing env vars + webhook URL).
 
 ## Vercel Deployment
 
