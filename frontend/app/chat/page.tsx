@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 
 export default function ChatPage() {
   const [messages, setMessages] = useState([
-    { role: "assistant", content: "Hello, I’m Dr. Botonic. How can I help you study today?" }
+    { role: "assistant", content: "Hello, I’m Dr. Botnotic. How can I help you study today?" }
   ]);
 
   const [input, setInput] = useState("");
@@ -36,7 +36,7 @@ export default function ChatPage() {
 
       {/* Header */}
       <header className="border-b p-4 text-xl font-semibold bg-white">
-        Chat with Dr. Botonic
+        Chat with Dr. Botnotic
       </header>
 
       {/* Chat Window */}
@@ -60,7 +60,7 @@ export default function ChatPage() {
         <div className="flex gap-3">
           <input
             type="text"
-            placeholder="Ask Dr. Botonic anything..."
+            placeholder="Ask Dr. Botnotic anything..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && sendMessage()}

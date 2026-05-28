@@ -32,6 +32,7 @@ Static files are served from `public/` at `/`.
 - `OPENAI_API_KEY`: Enable chat/TTS features.
 - `OPENAI_MODEL` (default: `gpt-4o-mini`)
 - `OPENAI_TTS_MODEL` (default: `gpt-4o-mini-tts`)
+- `BOTNOLOGY_API_BASE_URL`: External API origin used by the Next.js chat proxy in production.
 - `STRIPE_SECRET_KEY`: Required for checkout.
 - `STRIPE_WEBHOOK_SECRET`: Stripe webhook signature validation.
 - Price IDs:
@@ -73,10 +74,13 @@ Set env vars in Vercel:
 ```bash
 vercel env add APP_SECRET production
 vercel env add OPENAI_API_KEY production
+vercel env add BOTNOLOGY_API_BASE_URL production
 vercel env add STRIPE_SECRET_KEY production
 vercel env add STRIPE_WEBHOOK_SECRET production
 # add price ID envs per plan/cadence
 ```
+
+Set `BOTNOLOGY_API_BASE_URL` to the deployed API origin, for example `https://your-backend.vercel.app` or your FastAPI host. The frontend proxy will call `/api/chat` on that base.
 
 For local emulation:
 

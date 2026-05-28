@@ -4,7 +4,7 @@ import { useState } from "react";
 
 export default function TutorPage() {
   const [messages, setMessages] = useState([
-    { sender: "ai", text: "Hello, I’m Dr. Botonic. What topic are you studying today?" }
+    { sender: "ai", text: "Hello, I’m Dr. Botnotic. What topic are you studying today?" }
   ]);
 
   const [input, setInput] = useState("");
@@ -50,7 +50,7 @@ export default function TutorPage() {
       }
       <header className="p-6 bg-white shadow flex justify-between items-center">
         <h1 className="text-3xl font-bold">AI Tutor</h1>
-        <span className="text-gray-600">Dr. Botonic</span>
+        <span className="text-gray-600">Dr. Botnotic</span>
       <main className="min-h-screen bg-[radial-gradient(1000px_700px_at_20%_10%,rgba(191,230,208,.12),transparent_55%),radial-gradient(900px_600px_at_80%_0%,rgba(214,182,107,.12),transparent_60%),linear-gradient(180deg,#07140e_0%,#0b1a12_45%,#07140e_100%)] text-[#f8f3e7] flex flex-col">
 
         <header className="border-b border-[rgba(214,182,107,.18)] bg-[rgba(8,20,14,.82)] p-4 shadow-[0_20px_60px_rgba(0,0,0,.28)] backdrop-blur-md">
