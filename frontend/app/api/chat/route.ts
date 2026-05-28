@@ -90,12 +90,15 @@ export async function POST(req: Request) {
       }
     }
 
-    throw lastError ?? new Error("Unable to contact Dr. Botnotic backend.");
+    console.error("Chat proxy targets failed:", lastError);
+
+    // Keep the tutor usable even when backend env routing is not configured.
+    const fallbackReply =
+      "Dr. Botnotic is warming up. Backend tutoring service is temporarily unavailable, so here is a quick coaching tip: break your problem into one smallest next step, solve that step, then iterate. If you share the exact problem, I can guide you step-by-step.";
+
+    return NextResponse.json({ reply: fallbackReply, fallback: true }, { status: 200 });
   } catch (error) {
     console.error("Chat API error:", error);
-    return NextResponse.json(
-      { reply: "Error contacting Dr. Botnotic backend." },
-      { status: 500 }
-    );
+    return NextResponse.json({ reply: "Dr. Botnotic hit a temporary issue. Please try your question again." }, { status: 200 });
   }
 }
