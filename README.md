@@ -53,6 +53,7 @@ See `.env.example` for the full list. For local dev, export vars or use a dotenv
 - `/api/storage/*`: Simple per-student storage (list/read/write/delete).
 - `/api/lemonsqueezy/*`: Checkout + webhook -> writes `data/subscriptions/<student>.json`.
   - `/api/lemonsqueezy/config`: Non-secret setup diagnostics (missing env vars + webhook URL).
+  - Frontend Next deployment also exposes `/api/lemonsqueezy/config`, `/api/lemonsqueezy/create-checkout`, and `/api/lemonsqueezy/webhook`.
 
 ## Vercel Deployment
 
