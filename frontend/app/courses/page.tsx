@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import Link from "next/link";
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 
@@ -385,31 +386,56 @@ export default function CoursesPage() {
         </div>
       )}
 
-      {/* ── Header ── */}
-      <div style={styles.header}>
-        <div>
-          <h1 style={styles.headerTitle}>📚 Courses</h1>
-          <p style={styles.headerSub}>Welcome back, Jason · Spring 2026 · GPA {currentGPA}</p>
+      <div style={styles.shell}>
+        <div style={styles.topbar}>
+          <div style={styles.brand}>
+            <img src="/dr-botonic.jpeg" alt="Dr. Botnotic" style={styles.brandImage} />
+            <div style={styles.brandTitle}>
+              <b>Botnology101</b>
+              <span>Dr. Botnotic • Courses & Progress</span>
+            </div>
+          </div>
+          <nav style={styles.nav} aria-label="Primary">
+            <Link href="/" style={styles.navLink}>Home</Link>
+            <Link href="/dashboard" style={styles.navLink}>Dashboard</Link>
+            <Link href="/study-hall" style={styles.navLink}>Study Hall</Link>
+            <Link href="/tutor" style={styles.navLink}>AI Tutor</Link>
+            <Link href="/login" style={{ ...styles.navLink, ...styles.navLinkGold }}>Sign In</Link>
+          </nav>
         </div>
-        <div style={styles.headerStats}>
-          <div style={styles.statBox}><span style={styles.statNum}>{enrolledCourses.length}</span><span style={styles.statLabel}>Enrolled</span></div>
-          <div style={styles.statBox}><span style={styles.statNum}>{pendingCount}</span><span style={styles.statLabel}>Due Soon</span></div>
-          <div style={styles.statBox}><span style={styles.statNum}>{earnedCount}</span><span style={styles.statLabel}>Badges</span></div>
-          <div style={styles.statBox}><span style={styles.statNum}>{totalCredits}</span><span style={styles.statLabel}>Credits</span></div>
+
+        <div style={styles.hero}>
+          <div>
+            <div style={styles.eyebrow}>Premium student portal</div>
+            <h1 style={styles.heroTitle}>Courses that feel like the rest of Botnology101.</h1>
+            <p style={styles.heroSub}>
+              Track classes, grades, assignments, and achievements in a branded portal that matches the
+              original Botnology101 experience instead of a stock dashboard.
+            </p>
+            <div style={styles.heroActions}>
+              <Link href="/" style={{ ...styles.heroButton, ...styles.heroButtonGold }}>Back to Home</Link>
+              <Link href="/dashboard" style={styles.heroButton}>Open Dashboard</Link>
+            </div>
+          </div>
+          <div style={styles.headerStats}>
+            <div style={styles.statBox}><span style={styles.statNum}>{enrolledCourses.length}</span><span style={styles.statLabel}>Enrolled</span></div>
+            <div style={styles.statBox}><span style={styles.statNum}>{pendingCount}</span><span style={styles.statLabel}>Due Soon</span></div>
+            <div style={styles.statBox}><span style={styles.statNum}>{earnedCount}</span><span style={styles.statLabel}>Badges</span></div>
+            <div style={styles.statBox}><span style={styles.statNum}>{totalCredits}</span><span style={styles.statLabel}>Credits</span></div>
+          </div>
         </div>
-      </div>
 
-      {/* ── Tab Bar ── */}
-      <div style={styles.tabBar}>
-        {(Object.keys(TAB_LABELS) as Tab[]).map((t) => (
-          <button key={t} style={{ ...styles.tab, ...(activeTab === t ? styles.tabActive : {}) }} onClick={() => setActiveTab(t)}>
-            {TAB_LABELS[t]}
-            {t === "assignments" && pendingCount > 0 && <span style={styles.badge}>{pendingCount}</span>}
-          </button>
-        ))}
-      </div>
+        {/* ── Tab Bar ── */}
+        <div style={styles.tabBar}>
+          {(Object.keys(TAB_LABELS) as Tab[]).map((t) => (
+            <button key={t} style={{ ...styles.tab, ...(activeTab === t ? styles.tabActive : {}) }} onClick={() => setActiveTab(t)}>
+              {TAB_LABELS[t]}
+              {t === "assignments" && pendingCount > 0 && <span style={styles.badge}>{pendingCount}</span>}
+            </button>
+          ))}
+        </div>
 
-      <div style={styles.content}>
+        <div style={styles.content}>
 
         {/* ══ MY COURSES ══════════════════════════════════════════════════════ */}
         {activeTab === "my-courses" && (
@@ -587,8 +613,8 @@ export default function CoursesPage() {
             <div style={styles.idCardWrap} onClick={() => setIdCardFlipped((f) => !f)}>
               {!idCardFlipped ? (
                 <div style={styles.idCard}>
-                  <div style={styles.idCardHeader}>
-                    <span style={styles.idUniversity}>🎓 Copilot University</span>
+                    <div style={styles.idCardHeader}>
+                      <span style={styles.idUniversity}>🎓 Botnology101</span>
                     <span style={styles.idSemester}>Spring 2026</span>
                   </div>
                   <div style={styles.idCardBody}>
@@ -599,7 +625,7 @@ export default function CoursesPage() {
                     </div>
                     <div style={styles.idInfo}>
                       <p style={styles.idName}>Jason Fotta</p>
-                      <p style={styles.idDetail}>ID: CU-2026-4892</p>
+                      <p style={styles.idDetail}>ID: BN-2026-4892</p>
                       <p style={styles.idDetail}>Major: Computer Science</p>
                       <p style={styles.idDetail}>Year: Junior</p>
                       <p style={styles.idDetail}>GPA: {cumulativeGPA}</p>
@@ -610,14 +636,14 @@ export default function CoursesPage() {
                   </div>
                 </div>
               ) : (
-                <div style={{ ...styles.idCard, background: "#1e293b" }}>
+                  <div style={{ ...styles.idCard, background: "#1e2d22" }}>
                   <div style={styles.idCardBackStrip} />
                   <div style={styles.idCardBackContent}>
-                    <p style={{ color: "#94a3b8", fontSize: 12, marginBottom: 8 }}>
-                      This card is property of Copilot University. If found, please return to the registrar.
+                    <p style={{ color: "#d7e3dd", fontSize: 12, marginBottom: 8 }}>
+                      This card is property of Botnology101. If found, please return to the registrar.
                     </p>
                     <p style={{ color: "#fff", fontSize: 13, marginBottom: 4 }}>Emergency Contact: (484) 555-0192</p>
-                    <p style={{ color: "#94a3b8", fontSize: 11 }}>Valid for: 2025–2026 Academic Year</p>
+                    <p style={{ color: "#b8c6c0", fontSize: 11 }}>Valid for: 2025–2026 Academic Year</p>
                   </div>
                 </div>
               )}
@@ -632,6 +658,7 @@ export default function CoursesPage() {
             </div>
           </div>
         )}
+      </div>
       </div>
 
       {/* ══ COURSE DETAIL MODAL ═════════════════════════════════════════════ */}
@@ -707,96 +734,113 @@ export default function CoursesPage() {
 // ─── STYLES ───────────────────────────────────────────────────────────────────
 
 const styles: Record<string, React.CSSProperties> = {
-  page: { minHeight: "100vh", background: "#f8fafc", fontFamily: "'Inter', system-ui, sans-serif", color: "#1e293b" },
-  header: { background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)", color: "#fff", padding: "32px 32px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 },
-  headerTitle: { fontSize: 28, fontWeight: 800, margin: 0 },
-  headerSub: { fontSize: 14, opacity: 0.85, marginTop: 4 },
-  headerStats: { display: "flex", gap: 16 },
-  statBox: { background: "rgba(255,255,255,0.15)", borderRadius: 12, padding: "10px 20px", textAlign: "center", display: "flex", flexDirection: "column" },
-  statNum: { fontSize: 22, fontWeight: 800 },
-  statLabel: { fontSize: 11, opacity: 0.8, marginTop: 2 },
-  tabBar: { display: "flex", gap: 4, padding: "0 32px", background: "#fff", borderBottom: "1px solid #e2e8f0", overflowX: "auto" },
-  tab: { padding: "14px 20px", border: "none", background: "none", cursor: "pointer", fontSize: 14, fontWeight: 500, color: "#64748b", borderBottom: "3px solid transparent", whiteSpace: "nowrap", position: "relative", transition: "all .15s" },
-  tabActive: { color: "#6366f1", borderBottomColor: "#6366f1", fontWeight: 700 },
-  badge: { background: "#ef4444", color: "#fff", borderRadius: 99, fontSize: 10, fontWeight: 700, padding: "1px 6px", marginLeft: 6, verticalAlign: "middle" },
-  content: { padding: "28px 32px", maxWidth: 1200, margin: "0 auto" },
-  sectionTitle: { fontSize: 20, fontWeight: 700, marginBottom: 20, color: "#0f172a" },
+  page: {
+    minHeight: "100vh",
+    background: "radial-gradient(1000px 700px at 20% 10%, rgba(191,230,208,.12), transparent 55%), radial-gradient(900px 600px at 80% 0%, rgba(214,182,107,.12), transparent 60%), linear-gradient(180deg, #07140e 0%, #0b1a12 45%, #07140e 100%)",
+    color: "#f8f3e7",
+    fontFamily: "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif",
+  },
+  shell: { maxWidth: 1440, margin: "0 auto", padding: "24px 18px 72px" },
+  topbar: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, padding: 14, border: "1px solid rgba(214,182,107,.22)", background: "rgba(8,20,14,.82)", borderRadius: 18, boxShadow: "0 20px 60px rgba(0,0,0,.28)", backdropFilter: "blur(14px)" },
+  brand: { display: "flex", alignItems: "center", gap: 12 },
+  brandImage: { width: 48, height: 48, borderRadius: 999, border: "1px solid rgba(214,182,107,.32)", objectFit: "cover", background: "#0a1811" },
+  brandTitle: { display: "flex", flexDirection: "column", lineHeight: 1.05 },
+  nav: { display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" },
+  navLink: { padding: "9px 12px", borderRadius: 14, border: "1px solid rgba(214,182,107,.16)", color: "#e8f3ee", textDecoration: "none", fontSize: 13, fontWeight: 650, background: "rgba(255,255,255,.03)" },
+  navLinkGold: { background: "linear-gradient(135deg, #d6b667, #b99644)", color: "#08120d", borderColor: "rgba(214,182,107,.36)" },
+  hero: { display: "grid", gridTemplateColumns: "minmax(0, 1.4fr) minmax(280px, .9fr)", gap: 18, marginTop: 18, padding: 24, borderRadius: 22, border: "1px solid rgba(214,182,107,.18)", background: "linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03))", boxShadow: "0 20px 60px rgba(0,0,0,.24)" },
+  eyebrow: { color: "#d6b667", textTransform: "uppercase", letterSpacing: "0.18em", fontSize: 12, fontWeight: 700, marginBottom: 10 },
+  heroTitle: { margin: 0, fontSize: "clamp(34px, 4vw, 58px)", lineHeight: 1.04, letterSpacing: "-0.04em", maxWidth: "12ch" },
+  heroSub: { marginTop: 14, maxWidth: 760, color: "#d7e3dd", fontSize: 15, lineHeight: 1.7 },
+  heroActions: { display: "flex", gap: 10, flexWrap: "wrap", marginTop: 18 },
+  heroButton: { display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "11px 14px", borderRadius: 14, border: "1px solid rgba(214,182,107,.18)", background: "rgba(255,255,255,.04)", color: "#f8f3e7", fontWeight: 700, textDecoration: "none" },
+  heroButtonGold: { background: "linear-gradient(135deg, #d6b667, #b99644)", color: "#08120d" },
+  headerStats: { display: "grid", gridTemplateColumns: "repeat(2, minmax(120px, 1fr))", gap: 12, alignContent: "start" },
+  statBox: { background: "rgba(5, 13, 9, .65)", border: "1px solid rgba(214,182,107,.16)", borderRadius: 16, padding: "14px 16px", textAlign: "center", display: "flex", flexDirection: "column" },
+  statNum: { fontSize: 24, fontWeight: 800, color: "#f3d78a" },
+  statLabel: { fontSize: 11, opacity: 0.82, marginTop: 2, color: "#d7e3dd" },
+  tabBar: { display: "flex", gap: 6, padding: "14px 2px 0", overflowX: "auto", position: "sticky", top: 12, zIndex: 20, backdropFilter: "blur(12px)" },
+  tab: { padding: "13px 18px", border: "1px solid rgba(214,182,107,.14)", background: "rgba(7,20,14,.72)", cursor: "pointer", fontSize: 14, fontWeight: 650, color: "#c8d5ce", borderRadius: 999, whiteSpace: "nowrap", position: "relative", transition: "all .15s" },
+  tabActive: { color: "#08120d", background: "linear-gradient(135deg, #d6b667, #b99644)", borderColor: "rgba(214,182,107,.35)" },
+  badge: { background: "#8d4b3b", color: "#fff", borderRadius: 99, fontSize: 10, fontWeight: 700, padding: "1px 6px", marginLeft: 6, verticalAlign: "middle" },
+  content: { padding: "24px 2px 0", maxWidth: 1440, margin: "0 auto" },
+  sectionTitle: { fontSize: 20, fontWeight: 700, marginBottom: 20, color: "#f8f3e7" },
   grid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 20 },
-  card: { background: "#fff", borderRadius: 14, padding: 20, boxShadow: "0 1px 4px rgba(0,0,0,0.07)" },
+  card: { background: "rgba(8,20,14,.76)", border: "1px solid rgba(214,182,107,.15)", borderRadius: 18, padding: 20, boxShadow: "0 18px 40px rgba(0,0,0,.18)" },
   cardHead: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 },
   codeTag: { fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 99 },
-  categoryTag: { fontSize: 11, fontWeight: 600, background: "#f1f5f9", color: "#64748b", padding: "3px 10px", borderRadius: 99 },
+  categoryTag: { fontSize: 11, fontWeight: 600, background: "rgba(214,182,107,.12)", color: "#d7e3dd", padding: "3px 10px", borderRadius: 99 },
   gradeTag: { fontSize: 16, fontWeight: 800 },
-  cardTitle: { fontSize: 16, fontWeight: 700, marginBottom: 4, color: "#0f172a" },
-  cardSub: { fontSize: 13, color: "#64748b", marginBottom: 8 },
-  cardMeta: { fontSize: 12, color: "#94a3b8", marginBottom: 3 },
-  progressBar: { height: 6, background: "#f1f5f9", borderRadius: 99, margin: "12px 0 4px", overflow: "hidden" },
+  cardTitle: { fontSize: 16, fontWeight: 700, marginBottom: 4, color: "#f8f3e7" },
+  cardSub: { fontSize: 13, color: "#b8c6c0", marginBottom: 8 },
+  cardMeta: { fontSize: 12, color: "#8f9f98", marginBottom: 3 },
+  progressBar: { height: 6, background: "rgba(255,255,255,.08)", borderRadius: 99, margin: "12px 0 4px", overflow: "hidden" },
   progressFill: { height: "100%", borderRadius: 99, transition: "width .3s" },
-  progressLabel: { fontSize: 11, color: "#94a3b8", marginBottom: 12 },
-  btn: { border: "none", borderRadius: 8, padding: "9px 18px", color: "#fff", fontWeight: 600, cursor: "pointer", fontSize: 13, width: "100%" },
-  btnOutline: { border: "1.5px solid", borderRadius: 8, padding: "8px 14px", background: "#fff", fontWeight: 600, cursor: "pointer", fontSize: 13 },
+  progressLabel: { fontSize: 11, color: "#8f9f98", marginBottom: 12 },
+  btn: { border: "none", borderRadius: 10, padding: "9px 18px", color: "#08120d", fontWeight: 700, cursor: "pointer", fontSize: 13, width: "100%" },
+  btnOutline: { border: "1.5px solid", borderRadius: 10, padding: "8px 14px", background: "transparent", color: "#e8f3ee", fontWeight: 700, cursor: "pointer", fontSize: 13 },
   filterRow: { display: "flex", gap: 10, marginBottom: 20, flexWrap: "wrap", alignItems: "center" },
-  searchInput: { flex: 1, minWidth: 220, padding: "10px 14px", borderRadius: 8, border: "1.5px solid #e2e8f0", fontSize: 13, outline: "none" },
-  select: { padding: "9px 14px", borderRadius: 8, border: "1.5px solid #e2e8f0", fontSize: 13, background: "#fff", cursor: "pointer" },
-  filterBtn: { padding: "8px 16px", borderRadius: 8, border: "1.5px solid #e2e8f0", background: "#fff", color: "#64748b", fontWeight: 600, cursor: "pointer", fontSize: 13 },
-  filterBtnActive: { background: "#6366f1", color: "#fff", borderColor: "#6366f1" },
+  searchInput: { flex: 1, minWidth: 220, padding: "10px 14px", borderRadius: 12, border: "1.5px solid rgba(214,182,107,.16)", fontSize: 13, outline: "none", background: "rgba(5,13,9,.72)", color: "#f8f3e7" },
+  select: { padding: "9px 14px", borderRadius: 12, border: "1.5px solid rgba(214,182,107,.16)", fontSize: 13, background: "rgba(5,13,9,.72)", color: "#f8f3e7", cursor: "pointer" },
+  filterBtn: { padding: "8px 16px", borderRadius: 999, border: "1.5px solid rgba(214,182,107,.18)", background: "rgba(255,255,255,.03)", color: "#d7e3dd", fontWeight: 650, cursor: "pointer", fontSize: 13 },
+  filterBtnActive: { background: "linear-gradient(135deg, #d6b667, #b99644)", color: "#08120d", borderColor: "rgba(214,182,107,.35)" },
   list: { display: "flex", flexDirection: "column", gap: 10 },
-  listItem: { background: "#fff", borderRadius: 12, padding: "16px 20px", boxShadow: "0 1px 3px rgba(0,0,0,0.07)", cursor: "pointer", display: "flex", alignItems: "center", gap: 12 },
-  listTitle: { fontSize: 15, fontWeight: 700, color: "#0f172a", marginBottom: 4 },
-  listMeta: { fontSize: 12, color: "#94a3b8" },
+  listItem: { background: "rgba(8,20,14,.76)", border: "1px solid rgba(214,182,107,.14)", borderRadius: 16, padding: "16px 20px", boxShadow: "0 14px 34px rgba(0,0,0,.16)", cursor: "pointer", display: "flex", alignItems: "center", gap: 12 },
+  listTitle: { fontSize: 15, fontWeight: 700, color: "#f8f3e7", marginBottom: 4 },
+  listMeta: { fontSize: 12, color: "#8f9f98" },
   statusBadge: { fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 99 },
-  courseChip: { fontSize: 11, background: "#f1f5f9", color: "#475569", padding: "3px 10px", borderRadius: 99, fontWeight: 600 },
-  chevron: { fontSize: 22, color: "#cbd5e1", fontWeight: 300 },
+  courseChip: { fontSize: 11, background: "rgba(214,182,107,.12)", color: "#d7e3dd", padding: "3px 10px", borderRadius: 99, fontWeight: 600 },
+  chevron: { fontSize: 22, color: "#d6b667", fontWeight: 300 },
   gpaCards: { display: "flex", gap: 16, marginBottom: 24, flexWrap: "wrap" },
-  gpaCard: { background: "linear-gradient(135deg, #6366f1, #8b5cf6)", borderRadius: 14, padding: "20px 32px", color: "#fff", display: "flex", flexDirection: "column", alignItems: "center", flex: 1, minWidth: 140 },
+  gpaCard: { background: "linear-gradient(135deg, rgba(214,182,107,.95), rgba(185,150,68,.95))", borderRadius: 16, padding: "20px 32px", color: "#08120d", display: "flex", flexDirection: "column", alignItems: "center", flex: 1, minWidth: 140 },
   gpaNum: { fontSize: 36, fontWeight: 900 },
   gpaLabel: { fontSize: 12, opacity: 0.85, marginTop: 4 },
-  gpaSmall: { fontSize: 14, color: "#64748b" },
-  chartBox: { background: "#fff", borderRadius: 14, padding: 20, boxShadow: "0 1px 4px rgba(0,0,0,0.07)", marginBottom: 8 },
-  chartTitle: { fontSize: 15, fontWeight: 700, marginBottom: 12, color: "#0f172a" },
-  table: { width: "100%", borderCollapse: "collapse", background: "#fff", borderRadius: 14, overflow: "hidden", boxShadow: "0 1px 4px rgba(0,0,0,0.07)" },
-  th: { background: "#f8fafc", padding: "12px 16px", textAlign: "left", fontSize: 12, fontWeight: 700, color: "#64748b", borderBottom: "1px solid #e2e8f0" },
-  tr: { borderBottom: "1px solid #f1f5f9" },
-  td: { padding: "12px 16px", fontSize: 14, color: "#1e293b" },
-  codeTagSm: { fontSize: 11, fontWeight: 700, background: "#e0e7ff", color: "#6366f1", padding: "2px 8px", borderRadius: 99 },
-  label: { fontSize: 13, fontWeight: 600, color: "#475569" },
-  achieveCount: { fontSize: 14, fontWeight: 500, color: "#94a3b8", marginLeft: 8 },
+  gpaSmall: { fontSize: 14, color: "#d7e3dd" },
+  chartBox: { background: "rgba(8,20,14,.76)", borderRadius: 16, padding: 20, boxShadow: "0 14px 34px rgba(0,0,0,.16)", marginBottom: 8, border: "1px solid rgba(214,182,107,.14)" },
+  chartTitle: { fontSize: 15, fontWeight: 700, marginBottom: 12, color: "#f8f3e7" },
+  table: { width: "100%", borderCollapse: "collapse", background: "rgba(8,20,14,.76)", borderRadius: 16, overflow: "hidden", boxShadow: "0 14px 34px rgba(0,0,0,.16)", border: "1px solid rgba(214,182,107,.14)" },
+  th: { background: "rgba(255,255,255,.03)", padding: "12px 16px", textAlign: "left", fontSize: 12, fontWeight: 700, color: "#d7e3dd", borderBottom: "1px solid rgba(214,182,107,.12)" },
+  tr: { borderBottom: "1px solid rgba(214,182,107,.08)" },
+  td: { padding: "12px 16px", fontSize: 14, color: "#f8f3e7" },
+  codeTagSm: { fontSize: 11, fontWeight: 700, background: "rgba(214,182,107,.12)", color: "#d6b667", padding: "2px 8px", borderRadius: 99 },
+  label: { fontSize: 13, fontWeight: 600, color: "#d7e3dd" },
+  achieveCount: { fontSize: 14, fontWeight: 500, color: "#8f9f98", marginLeft: 8 },
   achGrid: { display: "flex", flexDirection: "column", gap: 12 },
-  achCard: { background: "#fff", borderRadius: 12, padding: "16px 20px", display: "flex", alignItems: "flex-start", gap: 14, boxShadow: "0 1px 3px rgba(0,0,0,0.06)", border: "1.5px solid" },
+  achCard: { background: "rgba(8,20,14,.76)", borderRadius: 16, padding: "16px 20px", display: "flex", alignItems: "flex-start", gap: 14, boxShadow: "0 14px 34px rgba(0,0,0,.14)", border: "1.5px solid" },
   achIcon: { width: 48, height: 48, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, flexShrink: 0 },
-  achTitle: { fontSize: 15, fontWeight: 700, color: "#0f172a", margin: 0 },
+  achTitle: { fontSize: 15, fontWeight: 700, color: "#f8f3e7", margin: 0 },
   rarityTag: { fontSize: 10, fontWeight: 700, textTransform: "uppercase" },
-  achDesc: { fontSize: 13, color: "#64748b", marginTop: 4 },
-  achDate: { fontSize: 11, color: "#94a3b8", marginTop: 4 },
+  achDesc: { fontSize: 13, color: "#b8c6c0", marginTop: 4 },
+  achDate: { fontSize: 11, color: "#8f9f98", marginTop: 4 },
   idSection: { display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 20 },
   idCardWrap: { cursor: "pointer", userSelect: "none", marginBottom: 16 },
-  idCard: { width: 340, borderRadius: 16, background: "#fff", boxShadow: "0 8px 32px rgba(99,102,241,0.18)", overflow: "hidden" },
-  idCardHeader: { background: "linear-gradient(135deg, #6366f1, #8b5cf6)", padding: "14px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" },
-  idUniversity: { color: "#fff", fontWeight: 800, fontSize: 14 },
-  idSemester: { color: "rgba(255,255,255,0.75)", fontSize: 12 },
+  idCard: { width: 340, borderRadius: 18, background: "rgba(8,20,14,.96)", boxShadow: "0 18px 42px rgba(0,0,0,.22)", overflow: "hidden", border: "1px solid rgba(214,182,107,.16)" },
+  idCardHeader: { background: "linear-gradient(135deg, #d6b667, #b99644)", padding: "14px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" },
+  idUniversity: { color: "#08120d", fontWeight: 800, fontSize: 14 },
+  idSemester: { color: "rgba(8,18,13,0.75)", fontSize: 12 },
   idCardBody: { padding: 20, display: "flex", gap: 16, alignItems: "center" },
-  idPhotoWrap: { width: 72, height: 90, borderRadius: 10, overflow: "hidden", border: "2px solid #e2e8f0", flexShrink: 0 },
+  idPhotoWrap: { width: 72, height: 90, borderRadius: 10, overflow: "hidden", border: "2px solid rgba(214,182,107,.2)", flexShrink: 0 },
   idPhoto: { width: "100%", height: "100%", objectFit: "cover" },
-  idPhotoPlaceholder: { width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 36, background: "#f1f5f9" },
+  idPhotoPlaceholder: { width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 36, background: "rgba(255,255,255,.03)" },
   idInfo: { flex: 1 },
-  idName: { fontSize: 17, fontWeight: 800, color: "#0f172a", marginBottom: 6 },
-  idDetail: { fontSize: 12, color: "#64748b", marginBottom: 3 },
-  idCardFooter: { padding: "10px 20px 14px", borderTop: "1px solid #f1f5f9" },
-  barcode: { fontSize: 14, letterSpacing: 2, color: "#1e293b", fontFamily: "monospace" },
-  idCardBackStrip: { height: 44, background: "#334155", marginTop: 20 },
+  idName: { fontSize: 17, fontWeight: 800, color: "#f8f3e7", marginBottom: 6 },
+  idDetail: { fontSize: 12, color: "#b8c6c0", marginBottom: 3 },
+  idCardFooter: { padding: "10px 20px 14px", borderTop: "1px solid rgba(214,182,107,.12)" },
+  barcode: { fontSize: 14, letterSpacing: 2, color: "#d6b667", fontFamily: "monospace" },
+  idCardBackStrip: { height: 44, background: "#2b3f32", marginTop: 20 },
   idCardBackContent: { padding: 20 },
-  idHint: { fontSize: 12, color: "#94a3b8", marginBottom: 16 },
+  idHint: { fontSize: 12, color: "#8f9f98", marginBottom: 16 },
   uploadRow: { display: "flex", gap: 10 },
-  uploadBtn: { background: "#6366f1", color: "#fff", border: "none", borderRadius: 8, padding: "10px 20px", fontWeight: 600, cursor: "pointer", fontSize: 13 },
-  overlay: { position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(3px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: 16 },
-  modal: { background: "#fff", borderRadius: 16, maxWidth: 520, width: "100%", maxHeight: "85vh", overflow: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" },
+  uploadBtn: { background: "#d6b667", color: "#08120d", border: "none", borderRadius: 10, padding: "10px 20px", fontWeight: 700, cursor: "pointer", fontSize: 13 },
+  overlay: { position: "fixed", inset: 0, background: "rgba(0,0,0,0.62)", backdropFilter: "blur(6px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: 16 },
+  modal: { background: "#08120d", borderRadius: 18, maxWidth: 520, width: "100%", maxHeight: "85vh", overflow: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.32)", border: "1px solid rgba(214,182,107,.16)" },
   modalHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "20px 24px 0" },
-  modalTitle: { fontSize: 18, fontWeight: 700, color: "#0f172a", margin: 0 },
-  closeBtn: { background: "#f1f5f9", border: "none", borderRadius: 99, width: 32, height: 32, cursor: "pointer", fontSize: 14, color: "#64748b" },
+  modalTitle: { fontSize: 18, fontWeight: 700, color: "#f8f3e7", margin: 0 },
+  closeBtn: { background: "rgba(255,255,255,.06)", border: "1px solid rgba(214,182,107,.14)", borderRadius: 99, width: 32, height: 32, cursor: "pointer", fontSize: 14, color: "#d7e3dd" },
   modalBody: { padding: "16px 24px 24px" },
-  modalDesc: { fontSize: 14, color: "#475569", lineHeight: 1.6, marginBottom: 16 },
+  modalDesc: { fontSize: 14, color: "#d7e3dd", lineHeight: 1.6, marginBottom: 16 },
   detailGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 },
-  detailItem: { background: "#f8fafc", borderRadius: 8, padding: "10px 12px", display: "flex", flexDirection: "column", gap: 2 },
-  detailLabel: { fontSize: 11, fontWeight: 600, color: "#94a3b8", textTransform: "uppercase" },
-  toast: { position: "fixed", bottom: 24, right: 24, color: "#fff", padding: "12px 20px", borderRadius: 10, fontWeight: 600, fontSize: 14, boxShadow: "0 4px 20px rgba(0,0,0,0.15)", zIndex: 2000 },
+  detailItem: { background: "rgba(255,255,255,.04)", borderRadius: 10, padding: "10px 12px", display: "flex", flexDirection: "column", gap: 2, border: "1px solid rgba(214,182,107,.12)" },
+  detailLabel: { fontSize: 11, fontWeight: 600, color: "#8f9f98", textTransform: "uppercase" },
+  toast: { position: "fixed", bottom: 24, right: 24, color: "#08120d", padding: "12px 20px", borderRadius: 12, fontWeight: 700, fontSize: 14, boxShadow: "0 14px 40px rgba(0,0,0,0.22)", zIndex: 2000 },
 };
