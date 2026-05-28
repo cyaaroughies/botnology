@@ -9,4 +9,4 @@ class ChatRequest(BaseModel):
 @app.post("/chat")
 async def chat_endpoint(request: ChatRequest):
     # TODO: Replace with real AI model call
-    return {"reply": "This is Dr. Botonic responding from FastAPI."}
+    return {"reply": "This is Dr. Botnotic responding from FastAPI."}

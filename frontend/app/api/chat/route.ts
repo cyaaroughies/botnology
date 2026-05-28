@@ -19,7 +19,7 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("Chat API error:", error);
     return NextResponse.json(
-      { reply: "Error contacting Dr. Botonic backend." },
+      { reply: "Error contacting Dr. Botnotic backend." },
       { status: 500 }
     );
   }
