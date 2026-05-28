@@ -10,15 +10,11 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
+import httpx
 try:
     from openai import OpenAI
 except Exception:
     OpenAI = None
-
-try:
-    import stripe
-except Exception:
-    stripe = None
 
 try:
     from mangum import Mangum
@@ -114,7 +110,7 @@ def api_health():
             "status": "ok",
             "openai": OPENAI_ENABLED,
             "openai_model": OPENAI_MODEL,
-            "stripe": bool(os.getenv("STRIPE_SECRET_KEY")),
+            "lemonsqueezy": bool(os.getenv("LEMON_SQUEEZY_API_KEY")),
             "public_dir_exists": PUBLIC_DIR.exists(),
             "public_dir": str(PUBLIC_DIR),
         }
@@ -272,67 +268,118 @@ def _get_base_url(req: Request) -> str:
     scheme = (req.headers.get("x-forwarded-proto") or "http").split(",")[0]
     return f"{scheme}://{host}".rstrip("/")
 
-def _get_price_id(plan: str, cadence: str) -> Optional[str]:
+def _get_variant_id(plan: str, cadence: str) -> Optional[str]:
     plan = (plan or "associates").strip().lower()
     cadence = (cadence or "monthly").strip().lower()
-    default_price_ids = {
-        "STRIPE_PRICE_ASSOCIATES_MONTHLY": "price_1Sq35RK6UhzkJnxUOJOqVUxU",
-        "STRIPE_PRICE_ASSOCIATES_ANNUAL": "price_1Sq35RK6UhzkJnxUDrjqCFmD",
-        "STRIPE_PRICE_BACHELORS_MONTHLY": "price_1Sq38sK6UhzkJnxUOajgkvKV",
-        "STRIPE_PRICE_BACHELORS_ANNUAL": "price_1Sq3BGK6UhzkJnxUEUOZwOgc",
-        "STRIPE_PRICE_MASTERS_MONTHLY": "price_1Sq3FhK6UhzkJnxUFZEYdlQD",
-        "STRIPE_PRICE_MASTERS_ANNUAL": "price_1Sq3HwK6UhzkJnxUGZ0Gr02O",
-    }
+
     env_key = None
-    if plan == "associates" and cadence == "monthly": env_key = "STRIPE_PRICE_ASSOCIATES_MONTHLY"
-    elif plan == "associates" and cadence == "annual": env_key = "STRIPE_PRICE_ASSOCIATES_ANNUAL"
-    elif plan == "bachelors" and cadence == "monthly": env_key = "STRIPE_PRICE_BACHELORS_MONTHLY"
-    elif plan == "bachelors" and cadence == "annual": env_key = "STRIPE_PRICE_BACHELORS_ANNUAL"
-    elif plan == "masters" and cadence == "monthly": env_key = "STRIPE_PRICE_MASTERS_MONTHLY"
-    elif plan == "masters" and cadence == "annual": env_key = "STRIPE_PRICE_MASTERS_ANNUAL"
+    if plan == "associates" and cadence == "monthly":
+        env_key = "LEMON_SQUEEZY_VARIANT_ASSOCIATES_MONTHLY"
+    elif plan == "associates" and cadence == "annual":
+        env_key = "LEMON_SQUEEZY_VARIANT_ASSOCIATES_ANNUAL"
+    elif plan == "bachelors" and cadence == "monthly":
+        env_key = "LEMON_SQUEEZY_VARIANT_BACHELORS_MONTHLY"
+    elif plan == "bachelors" and cadence == "annual":
+        env_key = "LEMON_SQUEEZY_VARIANT_BACHELORS_ANNUAL"
+    elif plan == "masters" and cadence == "monthly":
+        env_key = "LEMON_SQUEEZY_VARIANT_MASTERS_MONTHLY"
+    elif plan == "masters" and cadence == "annual":
+        env_key = "LEMON_SQUEEZY_VARIANT_MASTERS_ANNUAL"
+
     if not env_key:
         return None
-    return os.getenv(env_key) or default_price_ids.get(env_key)
+    return os.getenv(env_key) or None
 
-@app.post("/api/stripe/create-checkout-session", include_in_schema=False)
-async def api_stripe_checkout(req: Request):
+@app.post("/api/lemonsqueezy/create-checkout", include_in_schema=False)
+async def api_lemonsqueezy_checkout(req: Request):
     body = await req.json()
     plan = (body.get("plan") or "associates").strip().lower()
     cadence = (body.get("cadence") or "monthly").strip().lower()
     student_id = (body.get("student_id") or "BN-UNKNOWN").strip()
     email = (body.get("email") or "").strip() or None
 
-    if stripe is None:
-        raise HTTPException(status_code=500, detail="Stripe library not available in this deployment.")
+    api_key = os.getenv("LEMON_SQUEEZY_API_KEY")
+    if not api_key:
+        raise HTTPException(status_code=400, detail="Lemon Squeezy not configured: set LEMON_SQUEEZY_API_KEY.")
 
-    secret = os.getenv("STRIPE_SECRET_KEY")
-    if not secret:
-        raise HTTPException(status_code=400, detail="Stripe not configured: set STRIPE_SECRET_KEY and price IDs env vars.")
-
-    price_id = _get_price_id(plan, cadence)
-    if not price_id:
+    variant_id = _get_variant_id(plan, cadence)
+    if not variant_id:
         raise HTTPException(
             status_code=400,
-            detail="Missing Stripe price id env var for selected plan/cadence."
+            detail="Missing Lemon Squeezy variant id env var for selected plan/cadence."
         )
 
-    stripe.api_key = secret
     base_url = _get_base_url(req)
     success_url = f"{base_url}/pricing.html?checkout=success&plan={plan}"
     cancel_url = f"{base_url}/pricing.html?checkout=cancel"
 
+    payload = {
+        "data": {
+            "type": "checkouts",
+            "attributes": {
+                "checkout_options": {
+                    "embed": False,
+                    "media": False,
+                    "logo": True,
+                },
+                "checkout_data": {
+                    "email": email,
+                    "custom": {
+                        "student_id": student_id,
+                        "plan": plan,
+                        "cadence": cadence,
+                    },
+                },
+                "product_options": {
+                    "redirect_url": success_url,
+                    "receipt_button_text": "Return to Botnology101",
+                    "receipt_link_url": success_url,
+                    "receipt_thank_you_note": "Welcome to Botnology101.",
+                },
+                "expires_at": None,
+                "preview": False,
+                "test_mode": bool(os.getenv("LEMON_SQUEEZY_TEST_MODE", "").strip().lower() in ("1", "true", "yes")),
+            },
+            "relationships": {
+                "variant": {
+                    "data": {
+                        "type": "variants",
+                        "id": str(variant_id),
+                    }
+                }
+            },
+        }
+    }
+
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Accept": "application/vnd.api+json",
+        "Content-Type": "application/vnd.api+json",
+    }
+
     try:
-        return {"url": (stripe.checkout.Session.create(
-            mode="subscription",
-            line_items=[{"price": price_id, "quantity": 1}],
-            success_url=success_url,
-            cancel_url=cancel_url,
-            customer_email=email,
-            client_reference_id=student_id,
-            metadata={"student_id": student_id, "plan": plan, "cadence": cadence},
-        )).url}
-    except stripe.error.StripeError as e:
-        raise HTTPException(status_code=400, detail=f"Stripe error: {getattr(e, 'user_message', str(e))}")
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(
+                "https://api.lemonsqueezy.com/v1/checkouts",
+                headers=headers,
+                json=payload,
+            )
+        if response.status_code >= 400:
+            detail = response.text or "Lemon Squeezy checkout creation failed."
+            raise HTTPException(status_code=400, detail=detail)
+        data = response.json()
+        checkout_url = (
+            data.get("data", {})
+            .get("attributes", {})
+            .get("url")
+        )
+        if not checkout_url:
+            raise HTTPException(status_code=400, detail="Lemon Squeezy did not return a checkout URL.")
+        return {"url": checkout_url, "cancel_url": cancel_url}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Lemon Squeezy error: {str(e)}")
 
 @app.exception_handler(404)
 async def not_found(_, __):
@@ -477,64 +524,70 @@ def api_subscription(req: Request):
     except Exception:
         return {"status": "none"}
 
-@app.post("/api/stripe/webhook", include_in_schema=False)
-async def api_stripe_webhook(req: Request):
+@app.post("/api/lemonsqueezy/webhook", include_in_schema=False)
+async def api_lemonsqueezy_webhook(req: Request):
     _ensure_dirs()
-    if stripe is None:
-        raise HTTPException(status_code=500, detail="Stripe library not available in this deployment.")
-
-    secret = os.getenv("STRIPE_WEBHOOK_SECRET")
+    secret = os.getenv("LEMON_SQUEEZY_WEBHOOK_SECRET")
     if not secret:
-        raise HTTPException(status_code=400, detail="Missing STRIPE_WEBHOOK_SECRET")
+        raise HTTPException(status_code=400, detail="Missing LEMON_SQUEEZY_WEBHOOK_SECRET")
+
     payload = await req.body()
-    sig = req.headers.get("stripe-signature", "")
+    sig = req.headers.get("x-signature", "").strip()
+    expected_sig = hmac.new(secret.encode("utf-8"), payload, hashlib.sha256).hexdigest()
+    if not sig or not hmac.compare_digest(sig, expected_sig):
+        raise HTTPException(status_code=400, detail="Invalid webhook signature")
+
     try:
-        event = stripe.Webhook.construct_event(payload=payload, sig_header=sig, secret=secret)
+        event = json.loads(payload.decode("utf-8"))
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Invalid webhook: {e}")
+        raise HTTPException(status_code=400, detail=f"Invalid webhook payload: {e}")
 
-    etype = str(event.get("type") or "")
-    obj = event.get("data", {}).get("object", {})
+    etype = str(event.get("meta", {}).get("event_name") or "").strip().lower()
+    attrs = event.get("data", {}).get("attributes", {})
+    custom = attrs.get("custom_data") or event.get("meta", {}).get("custom_data") or {}
 
-    if etype == "checkout.session.completed":
+    student_id = str(
+        custom.get("student_id")
+        or attrs.get("user_email")
+        or "BN-UNKNOWN"
+    )
+    plan = str(custom.get("plan") or "associates").strip().lower()
+    cadence = str(custom.get("cadence") or "monthly").strip().lower()
+
+    status = "active"
+    if etype in ("subscription_cancelled", "subscription_expired", "subscription_paused"):
+        status = "cancelled"
+    elif etype == "subscription_payment_failed":
+        status = "past_due"
+    elif etype in ("subscription_created", "subscription_updated", "subscription_resumed", "order_created"):
+        status = "active"
+
+    if etype:
         try:
-            mode = str(obj.get("mode") or "")
-            client_ref = obj.get("client_reference_id") or "BN-UNKNOWN"
-            meta = obj.get("metadata") or {}
-            plan = (meta.get("plan") or "associates").strip().lower()
-            cadence = (meta.get("cadence") or "monthly").strip().lower()
-            status = "active" if mode == "subscription" else "completed"
-            fp = _subs_path(client_ref)
-            fp.write_text(json.dumps({
-                "status": status,
-                "plan": plan,
-                "cadence": cadence,
-                "client_reference_id": client_ref,
-                "checkout_session": obj.get("id")
-            }, ensure_ascii=False, separators=(",", ":")), "utf-8")
-        except Exception:
-            pass
-
-    if etype.startswith("customer.subscription."):
-        try:
-            status = str(obj.get("status") or "").lower()
-            meta = obj.get("metadata") or {}
-            client_ref = meta.get("student_id") or "BN-UNKNOWN"
-            plan = (meta.get("plan") or "").strip().lower()
-            cadence = (meta.get("cadence") or "").strip().lower()
-            fp = _subs_path(client_ref)
-            current = {}
+            fp = _subs_path(student_id)
+            current: Dict[str, Any] = {}
             if fp.exists():
                 try:
                     current = json.loads(fp.read_text("utf-8"))
                 except Exception:
                     current = {}
-            current.update({"status": status or current.get("status") or "active"})
-            if plan:
-                current["plan"] = plan
-            if cadence:
-                current["cadence"] = cadence
-            fp.write_text(json.dumps(current, ensure_ascii=False, separators=(",", ":")), "utf-8")
+
+            current.update({
+                "status": status,
+                "plan": plan,
+                "cadence": cadence,
+                "provider": "lemonsqueezy",
+                "event": etype,
+                "updated_at": datetime.utcnow().isoformat() + "Z",
+            })
+            if attrs.get("order_id"):
+                current["order_id"] = attrs.get("order_id")
+            if attrs.get("subscription_id"):
+                current["subscription_id"] = attrs.get("subscription_id")
+
+            fp.write_text(json.dumps({
+                **current,
+            }, ensure_ascii=False, separators=(",", ":")), "utf-8")
         except Exception:
             pass
 

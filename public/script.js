@@ -630,7 +630,7 @@ function initVoiceButton() {
 }
 
 // ==========================================
-// STRIPE CHECKOUT
+// LEMON SQUEEZY CHECKOUT
 // ==========================================
 async function startCheckout(plan, cadence) {
   console.log(`Starting checkout for plan: ${plan}, cadence: ${cadence}`);
@@ -666,10 +666,10 @@ async function startCheckout(plan, cadence) {
     student_id: student_id,
     email: email
   };
-  console.log("Sending request to /api/stripe/create-checkout-session:", requestBody);
+  console.log("Sending request to /api/lemonsqueezy/create-checkout:", requestBody);
 
   try {
-    const data = await apiFetchJson("/api/stripe/create-checkout-session", {
+    const data = await apiFetchJson("/api/lemonsqueezy/create-checkout", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -679,7 +679,7 @@ async function startCheckout(plan, cadence) {
 
     console.log("Checkout session response:", data);
     if (data.url) {
-      console.log("Redirecting to Stripe checkout:", data.url);
+      console.log("Redirecting to Lemon Squeezy checkout:", data.url);
       window.location.href = data.url;
     } else {
       alert("Failed to create checkout session. " + (data.detail || "No URL returned"));

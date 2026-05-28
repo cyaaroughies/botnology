@@ -11,14 +11,14 @@
 
 Vercel installs function dependencies from `api/requirements.txt`. Keep it aligned with the root `requirements.txt` to avoid import errors in serverless functions.
 
-## Mock Stripe API
+## Mock Lemon Squeezy API
 1. Install dependencies:
    ```bash
    npm install
    ```
-2. Start the mock Stripe API server:
+2. Start the mock Lemon Squeezy API server:
    ```bash
-   node api/mock-stripe.js
+   node api/mock-lemonsqueezy.js
    ```
    The server will run at `http://localhost:3001`.
 

@@ -33,12 +33,12 @@ Static files are served from `public/` at `/`.
 - `OPENAI_MODEL` (default: `gpt-4o-mini`)
 - `OPENAI_TTS_MODEL` (default: `gpt-4o-mini-tts`)
 - `BOTNOLOGY_API_BASE_URL`: External API origin used by the Next.js chat proxy in production.
-- `STRIPE_SECRET_KEY`: Required for checkout.
-- `STRIPE_WEBHOOK_SECRET`: Stripe webhook signature validation.
-- Price IDs:
-  - `STRIPE_PRICE_ASSOCIATES_MONTHLY`, `STRIPE_PRICE_ASSOCIATES_ANNUAL`
-  - `STRIPE_PRICE_BACHELORS_MONTHLY`, `STRIPE_PRICE_BACHELORS_ANNUAL`
-  - `STRIPE_PRICE_MASTERS_MONTHLY`, `STRIPE_PRICE_MASTERS_ANNUAL`
+- `LEMON_SQUEEZY_API_KEY`: Required for checkout creation.
+- `LEMON_SQUEEZY_WEBHOOK_SECRET`: Lemon Squeezy webhook signature validation.
+- Variant IDs:
+  - `LEMON_SQUEEZY_VARIANT_ASSOCIATES_MONTHLY`, `LEMON_SQUEEZY_VARIANT_ASSOCIATES_ANNUAL`
+  - `LEMON_SQUEEZY_VARIANT_BACHELORS_MONTHLY`, `LEMON_SQUEEZY_VARIANT_BACHELORS_ANNUAL`
+  - `LEMON_SQUEEZY_VARIANT_MASTERS_MONTHLY`, `LEMON_SQUEEZY_VARIANT_MASTERS_ANNUAL`
 
 See `.env.example` for the full list. For local dev, export vars or use a dotenv loader.
 
@@ -51,7 +51,7 @@ See `.env.example` for the full list. For local dev, export vars or use a dotenv
 - `/api/announcements` (GET/POST): Masters-only write; read for all.
 - `/api/history` (GET/POST): Persist chat history per `student_id`.
 - `/api/storage/*`: Simple per-student storage (list/read/write/delete).
-- `/api/stripe/*`: Checkout + webhook → writes `data/subscriptions/<student>.json`.
+- `/api/lemonsqueezy/*`: Checkout + webhook -> writes `data/subscriptions/<student>.json`.
 
 ## Vercel Deployment
 
@@ -75,9 +75,9 @@ Set env vars in Vercel:
 vercel env add APP_SECRET production
 vercel env add OPENAI_API_KEY production
 vercel env add BOTNOLOGY_API_BASE_URL production
-vercel env add STRIPE_SECRET_KEY production
-vercel env add STRIPE_WEBHOOK_SECRET production
-# add price ID envs per plan/cadence
+vercel env add LEMON_SQUEEZY_API_KEY production
+vercel env add LEMON_SQUEEZY_WEBHOOK_SECRET production
+# add variant ID envs per plan/cadence
 ```
 
 Set `BOTNOLOGY_API_BASE_URL` to the deployed API origin, for example `https://your-backend.vercel.app` or your FastAPI host. The frontend proxy will call `/api/chat` on that base.
@@ -92,9 +92,9 @@ vercel dev
 
 Vercel's Python builder installs dependencies from `api/requirements.txt` for serverless functions. Keep this file in sync with the root `requirements.txt`.
 
-## Stripe Webhooks
+## Lemon Squeezy Webhooks
 
-Configure your Stripe webhook endpoint to `/api/stripe/webhook` and use the signing secret in `STRIPE_WEBHOOK_SECRET`.
+Configure your Lemon Squeezy webhook endpoint to `/api/lemonsqueezy/webhook` and use the signing secret in `LEMON_SQUEEZY_WEBHOOK_SECRET`.
 
 ## Notes
 
